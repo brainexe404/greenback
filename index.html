@@ -15,24 +15,20 @@
     --yellow:#c8ff2f;
     --green:#2dff6a;
   }
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:Arial, Helvetica, sans-serif;
-  }
 
-  /* CRT (simple) */
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial, Helvetica, sans-serif;}
+
+  /* CRT */
   body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:2;
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
-    opacity:.08; mix-blend-mode:overlay;
+    opacity:.08;mix-blend-mode:overlay;
   }
   body::after{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
     background:rgba(255,255,255,.02);
-    animation:crtFlicker 7s steps(1,end) infinite;
     opacity:0;
+    animation:crtFlicker 7s steps(1,end) infinite;
   }
   @keyframes crtFlicker{
     0%,52%,100%{opacity:0}
@@ -54,11 +50,11 @@
 
   .logo{
     width:240px;height:240px;max-width:100%;
-    border:4px solid #000;
-    background:#0b0b0b;
+    border:4px solid #000;background:#0b0b0b;
     image-rendering:pixelated;
     display:block;margin:0 auto;
     animation:bob 2.4s steps(2,end) infinite;
+    will-change:transform;
   }
   @keyframes bob{0%,50%,100%{transform:translateY(0)}25%,75%{transform:translateY(-2px)}}
 
@@ -83,6 +79,7 @@
     font-size:12px;line-height:1.45;
     color:#cfcfcf;user-select:none;
   }
+
   .prompt{color:var(--yellow);font-weight:900}
   .dim{color:#9a9a9a}
   .ok{color:var(--green);font-weight:900}
@@ -128,6 +125,7 @@
     user-select:none;
   }
 
+  .ca-wrap{position:relative}
   .tooltip{
     position:absolute;top:-36px;left:50%;transform:translateX(-50%);
     background:#0b0b0b;color:var(--yellow);
@@ -141,9 +139,6 @@
   }
   .tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
 
-  .ca-wrap{position:relative}
-
-  /* Baron line + glitch wipe */
   .baron-line{
     margin-top:8px;width:100%;
     text-align:left;position:relative;
@@ -151,6 +146,8 @@
     font-size:12px;line-height:1.45;
     user-select:none;
   }
+
+  /* Glitch wipe */
   .glitchwipe{
     position:absolute;left:-10%;top:2px;width:120%;height:16px;
     pointer-events:none;opacity:0;
@@ -163,9 +160,7 @@
       rgba(45,255,106,0) 100%);
     mix-blend-mode:screen;filter:contrast(1.15);
   }
-  .baron-line.glitch .glitchwipe{
-    opacity:1;animation:glitchWipe 220ms steps(6,end) 1;
-  }
+  .baron-line.glitch .glitchwipe{opacity:1;animation:glitchWipe 220ms steps(6,end) 1;}
   @keyframes glitchWipe{
     0%{transform:translateX(-40%) skewX(-18deg)}
     35%{transform:translateX(5%) skewX(22deg)}
@@ -183,7 +178,7 @@
     .btn{margin:10px 0;padding:14px 12px;min-height:52px}
   }
 
-  /* Reduced motion */
+  /* Reduced motion safety (only affects users who enabled it) */
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important}
     body::before, body::after{display:none !important}
@@ -213,11 +208,12 @@
     </a>
 
     <a class="btn btn-green js-click" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
-      <img class="icon" src="dex-owl-64.png" alt="" aria-hidden="true">
+      <img class="icon" id="dexIcon" src="dex-owl-64.png" alt="" aria-hidden="true">
       DEXSCREENER
     </a>
 
-    <a class="btn btn-green js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
+    <!-- Twitter should be YELLOW -->
+    <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
       X / TWITTER
     </a>
 
@@ -243,15 +239,19 @@
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
-  const DEX_ICON = "dex-owl-64.png"; // file in same folder
+  const DEX_ICON = "dex-owl-64.png"; // make sure this file exists next to index.html
 
   // links
   document.getElementById("insertBtn").href = INSERT_URL;
   document.getElementById("dexBtn").href = DEX_URL;
 
+  // ensure icon path + fallback if missing
+  const dexIconEl = document.getElementById("dexIcon");
+  dexIconEl.src = DEX_ICON;
+  dexIconEl.onerror = () => { dexIconEl.style.display = "none"; }; // avoids broken-image box
+
   // CA short display, full copy
-  const shortCA = CA.slice(0,6) + "..." + CA.slice(-6);
-  document.getElementById("caText").textContent = "CA: " + shortCA;
+  document.getElementById("caText").textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
   // copy
   const tip = document.getElementById("tip");
@@ -268,12 +268,23 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
-  // terminal typing
-  const steps = [
-    { el: document.getElementById("termLine1"), text: "initializing degen terminal..." , speed:18 },
-    { el: document.getElementById("termLine2"), text: "loading greenback protocol v0.0.1", speed:14 },
-    { el: document.getElementById("termLine3"), text: "status: READY", speed:16 }
-  ];
+  // ===== FULL LOOP (terminal lines + baron) =====
+  const line1 = document.getElementById("termLine1");
+  const line2 = document.getElementById("termLine2");
+  const line3 = document.getElementById("termLine3");
+
+  const LOOP_MS = 10000;
+  const baronText = "THE BARON ALWAYS EXITS FIRST";
+  const baronEl = document.getElementById("baronTyped");
+  const baronCursor = document.getElementById("baronCursor");
+  const baronLine = document.getElementById("baronLine");
+
+  let activeTimers = [];
+
+  function killTimers(){
+    activeTimers.forEach(t => clearInterval(t));
+    activeTimers = [];
+  }
 
   function typeText(el, text, speed, done){
     let i=0; el.textContent="";
@@ -281,32 +292,11 @@
       el.textContent += text[i++] || "";
       if(i>=text.length){ clearInterval(timer); done && done(); }
     }, speed);
+    activeTimers.push(timer);
   }
-
-  function runTerminal(){
-    typeText(steps[0].el, steps[0].text, steps[0].speed, ()=>{
-      setTimeout(()=> typeText(steps[1].el, steps[1].text, steps[1].speed, ()=>{
-        setTimeout(()=> typeText(steps[2].el, steps[2].text, steps[2].speed, ()=>{
-          steps[2].el.innerHTML = steps[2].el.textContent.replace(
-            "READY",
-            `<span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`
-          );
-          setTimeout(startBaronLoop, 220);
-        }), 140);
-      }), 140);
-    });
-  }
-
-  // baron loop + glitch wipe
-  const baronText = "THE BARON ALWAYS EXITS FIRST";
-  const baronEl = document.getElementById("baronTyped");
-  const baronCursor = document.getElementById("baronCursor");
-  const baronLine = document.getElementById("baronLine");
-  let baronLoopTimer=null, baronTypeTimer=null;
 
   function typeBaronOnce(){
-    if(baronTypeTimer) clearInterval(baronTypeTimer);
-
+    // glitch wipe
     baronLine.classList.remove("glitch");
     void baronLine.offsetWidth;
     baronLine.classList.add("glitch");
@@ -316,24 +306,39 @@
 
     setTimeout(()=>{
       let i=0;
-      baronTypeTimer=setInterval(()=>{
+      const t=setInterval(()=>{
         baronEl.textContent += baronText[i++] || "";
         if(i>=baronText.length){
-          clearInterval(baronTypeTimer);
-          baronTypeTimer=null;
+          clearInterval(t);
           setTimeout(()=>{ baronCursor.style.display="none"; }, 550);
         }
       }, 14);
+      activeTimers.push(t);
     }, 90);
   }
 
-  function startBaronLoop(){
-    typeBaronOnce();
-    if(baronLoopTimer) clearInterval(baronLoopTimer);
-    baronLoopTimer=setInterval(typeBaronOnce, 10000);
+  function runCycle(){
+    killTimers();
+
+    // reset terminal + baron line
+    line1.textContent=""; line2.textContent=""; line3.textContent="";
+    baronEl.textContent=""; baronCursor.style.display="none";
+
+    typeText(line1, "initializing degen terminal...", 18, ()=>{
+      setTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
+        setTimeout(()=> typeText(line3, "status: READY", 16, ()=>{
+          line3.innerHTML = line3.textContent.replace(
+            "READY",
+            `<span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`
+          );
+          setTimeout(typeBaronOnce, 220);
+        }), 140);
+      }), 140);
+    });
   }
 
-  runTerminal();
+  runCycle();
+  setInterval(runCycle, LOOP_MS);
 </script>
 </body>
 </html>
