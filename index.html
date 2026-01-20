@@ -93,6 +93,7 @@
     margin:0 auto;
     transform: translateY(0);
     animation: mascotBob 2.4s steps(2,end) infinite;
+    will-change: transform;
   }
   @keyframes mascotBob{
     0%, 50%, 100% { transform: translateY(0); }
@@ -291,7 +292,7 @@
     }
   }
 
-  /* Terminal-style line under CA + footer */
+  /* ONE terminal-style line under CA */
   .baron-line{
     margin-top: 10px;
     text-align: left;
@@ -306,11 +307,6 @@
   .baron-line .prompt{ color: var(--accent); font-weight: 900; }
   .baron-line .ok{ color: var(--buy); font-weight: 900; }
 
-  .footer-baron{
-    margin-top: 12px;
-    text-align: center;
-  }
-
   /* Mobile tweaks */
   @media (max-width:420px){
     .wrap{ padding:14px; }
@@ -318,16 +314,6 @@
     .logo{ width:220px; height:220px; }
     h1{ font-size:32px; }
     .btn{ margin:12px 0; padding:15px 12px; }
-  }
-
-  /* Reduce motion */
-  @media (prefers-reduced-motion: reduce){
-    body::after{ animation: none; }
-    .logo{ animation:none; }
-    .logo-wrap::after{ animation:none; }
-    .btn-buy{ animation:none; }
-    .cursor{ animation:none; }
-    .degen{ animation:none; }
   }
 </style>
 </head>
@@ -344,15 +330,13 @@
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <!-- Fake terminal -->
+    <!-- Terminal: REMOVE Baron line from inside terminal -->
     <div class="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
-      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span></div>
-      <div><span class="prompt">&gt;</span> <span id="termLine4" class="dim"></span><span class="cursor"></span></div>
+      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- X -->
     <a class="btn btn-x js-click"
        href="https://x.com/GannicusXRP"
        target="_blank"
@@ -360,7 +344,6 @@
       X / Twitter
     </a>
 
-    <!-- BUY -->
     <a class="btn btn-buy js-click"
        href="https://pump.fun"
        target="_blank"
@@ -373,20 +356,13 @@
       Buy $GBACK
     </a>
 
-    <!-- CA copy -->
     <button class="btn btn-ca js-click" id="caBtn" type="button">
       <span class="tooltip" id="tip">COPIED!</span>
       <span class="mono" id="caText"></span>
     </button>
 
-    <!-- NEW: terminal-style line under CA -->
+    <!-- EXACTLY ONE Baron line under CA -->
     <div class="baron-line">
-      <span class="prompt">&gt;</span>
-      <span class="ok">THE BARON ALWAYS EXITS FIRST</span>
-    </div>
-
-    <!-- Footer replaced with the same terminal-style line -->
-    <div class="baron-line footer-baron">
       <span class="prompt">&gt;</span>
       <span class="ok">THE BARON ALWAYS EXITS FIRST</span>
     </div>
@@ -451,17 +427,15 @@
   }
   caBtn.addEventListener("click", copyCA);
 
-  // ===== FAKE TERMINAL TYPE-OUT (4 lines) =====
+  // ===== TERMINAL TYPE-OUT (ONLY 3 LINES) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
-  const line4 = document.getElementById("termLine4");
 
   const steps = [
     { el: line1, text: "initializing degen terminal..." },
     { el: line2, text: "loading greenback protocol v0.0.1" },
-    { el: line3, text: "status: READY" },
-    { el: line4, text: "THE BARON ALWAYS EXITS FIRST" }
+    { el: line3, text: "status: READY" }
   ];
 
   function typeText(el, text, speedMs, done){
@@ -482,12 +456,8 @@
         typeText(steps[1].el, steps[1].text, 16, ()=>{
           setTimeout(()=>{
             typeText(steps[2].el, steps[2].text, 18, ()=>{
-              steps[2].el.innerHTML = steps[2].el.textContent.replace("READY", "<span class='ok'>READY</span>");
-              setTimeout(()=>{
-                typeText(steps[3].el, steps[3].text, 10, ()=>{
-                  steps[3].el.innerHTML = "<span class='ok'>" + steps[3].el.textContent + "</span>";
-                });
-              }, 180);
+              steps[2].el.innerHTML =
+                steps[2].el.textContent.replace("READY", "<span class='ok'>READY</span>");
             });
           }, 180);
         });
