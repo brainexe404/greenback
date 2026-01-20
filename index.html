@@ -6,165 +6,322 @@
 <title>Greenback ($GBACK)</title>
 
 <style>
-/* ===== BASE ===== */
-* { box-sizing: border-box; }
+  /* ===== GLOBAL ===== */
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --bg: #0b0b0b;
+    --card: #101010;
+    --ink: #eaeaea;
+    --muted: #bdbdbd;
+    --accent: #c8ff2f;
+    --buy: #2dff6a;
+  }
 
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: #eaeaea;
-  font-family: Arial, Helvetica, sans-serif;
-}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-.wrap {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
+  /* ===== CRT OVERLAY (subtle scanlines + tiny flicker) ===== */
+  body::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
 
-/* ===== FRAME ===== */
-.card {
-  max-width: 520px;
-  width: 100%;
-  background: #101010;
-  border: 4px solid #1f1f1f;
-  outline: 4px solid #000;
-  border-radius: 16px;
-  padding: 22px;
-  text-align: center;
-}
+    /* scanlines */
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.06) 0px,
+        rgba(255,255,255,0.06) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+    opacity: 0.08; /* keep subtle */
+    mix-blend-mode: overlay;
+  }
+  body::after{
+    content:"";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    background: rgba(255,255,255,0.02);
+    opacity: 0.0;
+    animation: crtFlicker 7s steps(1,end) infinite;
+  }
+  @keyframes crtFlicker{
+    0%, 52%, 100% { opacity: 0.00; }
+    53% { opacity: 0.05; }
+    54% { opacity: 0.00; }
+    78% { opacity: 0.03; }
+    79% { opacity: 0.00; }
+  }
 
-/* ===== IMAGE ===== */
-img.logo {
-  width: 240px;
-  height: 240px;
-  image-rendering: pixelated;
-  border: 4px solid #000;
-  background: #fff;
-}
+  @media (prefers-reduced-motion: reduce){
+    body::after{ animation: none; }
+  }
 
-/* ===== TEXT ===== */
-h1 {
-  margin: 16px 0 4px;
-  font-size: 34px;
-}
+  /* ===== LAYOUT ===== */
+  .wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
 
-.ticker {
-  color: #bdbdbd;
-  margin-bottom: 10px;
-}
+  .card{
+    width:100%;
+    max-width:520px;
+    background: var(--card);
+    border:4px solid #000;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 0 0 4px #1a1a1a;
+    overflow:hidden;
+    position: relative;
+  }
 
-.lore {
-  line-height: 1.5;
-  margin-bottom: 18px;
-  color: #d6d6d6;
-}
+  /* ===== MASCOT (idle animation on the logo image) ===== */
+  .logo{
+    width:240px;
+    height:240px;
+    max-width:100%;
+    image-rendering:pixelated;
+    border:4px solid #000;
+    background:#0b0b0b;
+    display:block;
+    margin:0 auto;
+    transform: translateY(0);
+    animation: mascotBob 2.4s steps(2,end) infinite;
+  }
+  @keyframes mascotBob{
+    0%, 50%, 100% { transform: translateY(0); }
+    25%, 75% { transform: translateY(-2px); }
+  }
 
-/* ===== BLINKING DEGEN ===== */
-.ready {
-  font-weight: 900;
-  letter-spacing: 2px;
-  margin-bottom: 14px;
-  animation: blink 1s steps(2, start) infinite;
-}
+  /* “blink” feel: a tiny overlay that briefly darkens the logo */
+  .logo-wrap{
+    display:inline-block;
+    position:relative;
+  }
+  .logo-wrap::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: rgba(0,0,0,0.18);
+    opacity:0;
+    pointer-events:none;
+    animation: mascotBlink 5.5s steps(1,end) infinite;
+  }
+  @keyframes mascotBlink{
+    0%, 82%, 100% { opacity:0; }
+    83% { opacity:1; }
+    84% { opacity:0; }
+  }
 
-@keyframes blink {
-  50% { opacity: 0; }
-}
+  @media (prefers-reduced-motion: reduce){
+    .logo{ animation: none; }
+    .logo-wrap::after{ animation:none; }
+  }
 
-/* ===== PIXEL BUTTON BASE ===== */
-.btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px 0;
-  padding: 14px 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 4px solid #000;
-  outline: 3px solid #000;
-  cursor: pointer;
-  image-rendering: pixelated;
-  transition: transform 0.05s ease;
-}
+  /* ===== TEXT ===== */
+  h1{ margin:14px 0 4px; font-size:34px; }
+  .ticker{ color: var(--muted); margin-bottom: 8px; }
 
-.btn:active {
-  transform: translateY(2px);
-}
+  /* Blinking DEGEN */
+  .degen{
+    display:inline-block;
+    margin:6px 0 12px;
+    padding:6px 10px;
+    border:3px solid #000;
+    background: #0b0b0b;
+    box-shadow:3px 3px 0 #000;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    animation: degenBlink 1s steps(2,end) infinite !important;
+    will-change: opacity;
+  }
+  @keyframes degenBlink{
+    0%, 49% { opacity:1; }
+    50%, 100% { opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .degen{ animation: none !important; }
+  }
 
-/* ===== BUTTON COLORS ===== */
-.btn-x {
-  background: #caff2f;
-  color: #000;
-}
+  .lore{
+    line-height:1.5;
+    margin-bottom:14px;
+    color:#d6d6d6;
+  }
 
-.btn-buy {
-  background: #2bff6a;
-  color: #000;
-}
+  /* ===== FAKE TERMINAL ===== */
+  .terminal{
+    margin: 0 auto 16px;
+    width: 100%;
+    border: 3px solid #000;
+    box-shadow: 3px 3px 0 #000;
+    background: #0b0b0b;
+    padding: 10px 12px;
+    text-align:left;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #cfcfcf;
+    user-select: none;
+  }
+  .terminal .prompt{ color: var(--accent); font-weight: 900; }
+  .terminal .dim{ color: #9a9a9a; }
+  .terminal .ok{ color: var(--buy); font-weight: 900; }
 
-.btn-ca {
-  background: #ffffff;
-  color: #000;
-  font-size: 14px;
-  text-transform: none;
-  word-break: break-all;
-}
+  /* blinking cursor */
+  .cursor{
+    display:inline-block;
+    width: 8px;
+    height: 12px;
+    background: var(--accent);
+    margin-left: 6px;
+    transform: translateY(2px);
+    animation: cursorBlink 0.8s steps(1,end) infinite;
+  }
+  @keyframes cursorBlink{
+    0%, 49% { opacity:1; }
+    50%, 100% { opacity:0; }
+  }
 
-/* ===== HOVER PIXEL GLOW ===== */
-.btn:hover {
-  box-shadow:
-    4px 4px 0 #000,
-    0 0 0 4px #000,
-    0 0 14px rgba(180,255,120,0.6);
-}
+  /* ===== BUTTONS ===== */
+  .btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin:14px 0;
+    padding:16px 14px;
+    min-height:56px;
+    font-weight:900;
+    text-transform:uppercase;
+    text-decoration:none;
+    border:4px solid #000;
+    box-shadow:4px 4px 0 #000;
+    image-rendering:pixelated;
+    cursor:pointer;
+    user-select:none;
+    position:relative;
+    max-width:100%;
+  }
+  button.btn{
+    font:inherit;
+    background: inherit; /* IMPORTANT: keeps CA button white */
+  }
+  .btn:active{
+    transform: translate(2px,2px);
+    box-shadow:2px 2px 0 #000;
+  }
 
-/* ===== CA SPECIAL VIBE ===== */
-.btn-ca:hover {
-  box-shadow:
-    4px 4px 0 #000,
-    0 0 0 4px #000,
-    0 0 16px rgba(255,255,255,0.45);
-}
+  /* Hover pixel glow */
+  @media (hover:hover){
+    .btn:hover{
+      box-shadow:
+        4px 4px 0 #000,
+        0 0 0 3px #000,
+        0 0 0 7px rgba(200,255,47,0.30);
+    }
+  }
 
-/* ===== ICON ===== */
-.icon {
-  width: 16px;
-  height: 16px;
-  image-rendering: pixelated;
-}
+  .btn-x{ background: var(--accent); color:#0b0b0b; }
+  .btn-buy{ background: var(--buy); color:#0b0b0b; }
+  .btn-ca{ background:#ffffff; color:#0b0b0b; }
 
-/* ===== TOOLTIP ===== */
-.tooltip {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  color: #fff;
-  padding: 8px 14px;
-  border: 3px solid #fff;
-  font-weight: 800;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
+  /* Animated BUY pulse */
+  .btn-buy{
+    animation: buyPulse 2.2s steps(2,end) infinite;
+  }
+  @keyframes buyPulse{
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.14); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .btn-buy{ animation: none; }
+    .cursor{ animation:none; }
+  }
 
-.tooltip.show {
-  opacity: 1;
-}
+  .icon{
+    width:18px;
+    height:18px;
+    image-rendering:pixelated;
+    flex:0 0 auto;
+  }
 
-/* ===== FOOTER ===== */
-.small {
-  margin-top: 14px;
-  font-size: 12px;
-  color: #7f7f7f;
-}
+  .mono{
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:14px;
+    font-weight:900;
+    text-transform:none;
+    max-width:100%;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+
+  /* Auto-copy tooltip animation */
+  .tooltip{
+    position:absolute;
+    top:-36px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#0b0b0b;
+    color: var(--accent);
+    border:3px solid #000;
+    box-shadow:3px 3px 0 #000;
+    padding:6px 10px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.12s steps(1,end), transform 0.12s steps(1,end);
+    white-space:nowrap;
+  }
+  .tooltip.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(-4px);
+  }
+
+  /* CA “vibe tweak” (white glow) */
+  @media (hover:hover){
+    .btn-ca:hover{
+      box-shadow:
+        4px 4px 0 #000,
+        0 0 0 3px #000,
+        0 0 0 7px rgba(255,255,255,0.35);
+    }
+  }
+
+  .small{
+    margin-top:12px;
+    font-size:12px;
+    color:#7f7f7f;
+  }
+
+  /* Mobile tweaks */
+  @media (max-width:420px){
+    .wrap{ padding:14px; }
+    .card{ padding:14px; }
+    .logo{ width:220px; height:220px; }
+    h1{ font-size:32px; }
+    .btn{ margin:12px 0; padding:15px 12px; }
+  }
 </style>
 </head>
 
@@ -172,66 +329,154 @@ h1 {
 <div class="wrap">
   <div class="card">
 
-    <img src="logo.png" alt="Greenback logo" class="logo">
+    <div class="logo-wrap">
+      <img class="logo" src="logo.png" alt="Greenback logo" />
+    </div>
 
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
+    <div class="degen">DEGEN</div>
 
     <div class="lore">
       Old money. New chain.<br>
       Insert coin. Lose wisely.
     </div>
 
-    <div class="ready">DEGEN</div>
+    <!-- Fake terminal -->
+    <div class="terminal" aria-label="status terminal">
+      <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
+      <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
+      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
+    </div>
 
-    <!-- X BUTTON -->
-    <a href="https://x.com/GannicusXRP" target="_blank" class="btn btn-x sound">
+    <!-- X -->
+    <a class="btn btn-x js-click"
+       href="https://x.com/GannicusXRP"
+       target="_blank"
+       rel="noopener">
       X / Twitter
     </a>
 
-    <!-- BUY BUTTON -->
-    <a href="https://pump.fun" target="_blank" class="btn btn-buy sound">
-      <img src="pill.png" class="icon" alt="">
+    <!-- BUY (pulse + icon) -->
+    <a class="btn btn-buy js-click"
+       href="https://pump.fun"
+       target="_blank"
+       rel="noopener">
+      <!-- Pixel pill icon -->
+      <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="5" width="12" height="6" fill="#000"/>
+        <rect x="3" y="6" width="5" height="4" fill="#2dff6a"/>
+        <rect x="8" y="6" width="5" height="4" fill="#ffffff"/>
+      </svg>
       Buy $GBACK
     </a>
 
-    <!-- CA COPY BUTTON -->
-    <button class="btn btn-ca sound" onclick="copyCA()">
-      CA: AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump
+    <!-- CA copy -->
+    <button class="btn btn-ca js-click" id="caBtn" type="button">
+      <span class="tooltip" id="tip">COPIED!</span>
+      <span class="mono" id="caText"></span>
     </button>
 
-    <div class="small">
-      The Baron always exits first.
-    </div>
+    <div class="small">The Baron always exits first.</div>
+
   </div>
 </div>
 
-<div class="tooltip" id="tooltip">COPIED</div>
-
-<!-- CLICK SOUND -->
-<audio id="click">
-  <source src="click.mp3" type="audio/mpeg">
-</audio>
-
 <script>
-/* CLICK SOUND */
-document.querySelectorAll('.sound').forEach(el => {
-  el.addEventListener('click', () => {
-    const s = document.getElementById('click');
-    s.currentTime = 0;
-    s.play();
+  // ===== CONFIG =====
+  const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+  document.getElementById("caText").textContent = "CA: " + CA;
+
+  // ===== CLICK SOUND (WebAudio) =====
+  let audioCtx;
+  function clickBeep(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(900, t0);
+      osc.frequency.exponentialRampToValueAtTime(450, t0 + 0.04);
+
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.08, t0 + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(t0);
+      osc.stop(t0 + 0.07);
+    }catch(e){}
+  }
+
+  document.querySelectorAll(".js-click").forEach(el=>{
+    el.addEventListener("click", ()=>clickBeep(), {passive:true});
   });
-});
 
-/* COPY CA */
-function copyCA() {
-  const ca = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-  navigator.clipboard.writeText(ca);
+  // ===== COPY + TOOLTIP =====
+  const caBtn = document.getElementById("caBtn");
+  const tip = document.getElementById("tip");
+  let tipTimer;
 
-  const t = document.getElementById('tooltip');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1200);
-}
+  async function copyCA(){
+    try{
+      await navigator.clipboard.writeText(CA);
+    }catch{
+      const t = document.createElement("textarea");
+      t.value = CA;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      document.body.removeChild(t);
+    }
+    tip.classList.add("show");
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(()=>tip.classList.remove("show"), 900);
+  }
+  caBtn.addEventListener("click", copyCA);
+
+  // ===== FAKE TERMINAL TYPE-OUT =====
+  const line1 = document.getElementById("termLine1");
+  const line2 = document.getElementById("termLine2");
+  const line3 = document.getElementById("termLine3");
+
+  const steps = [
+    { el: line1, text: "initializing degen terminal..." },
+    { el: line2, text: "loading greenback protocol v0.0.1" },
+    { el: line3, text: "status: READY", okAtEnd: true }
+  ];
+
+  function typeText(el, text, speedMs, done){
+    let i = 0;
+    el.textContent = "";
+    const timer = setInterval(()=>{
+      el.textContent += text[i++];
+      if(i >= text.length){
+        clearInterval(timer);
+        done && done();
+      }
+    }, speedMs);
+  }
+
+  // Run sequence
+  (function runTerminal(){
+    typeText(steps[0].el, steps[0].text, 22, ()=>{
+      setTimeout(()=>{
+        typeText(steps[1].el, steps[1].text, 18, ()=>{
+          setTimeout(()=>{
+            typeText(steps[2].el, steps[2].text, 20, ()=>{
+              // colorize READY word to green after typing
+              steps[2].el.innerHTML = steps[2].el.textContent.replace("READY", "<span class='ok'>READY</span>");
+            });
+          }, 220);
+        });
+      }, 200);
+    });
+  })();
 </script>
 </body>
 </html>
