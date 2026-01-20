@@ -31,8 +31,6 @@
     inset: 0;
     pointer-events: none;
     z-index: 9999;
-
-    /* scanlines */
     background:
       repeating-linear-gradient(
         to bottom,
@@ -41,7 +39,7 @@
         rgba(0,0,0,0) 3px,
         rgba(0,0,0,0) 6px
       );
-    opacity: 0.08; /* keep subtle */
+    opacity: 0.08;
     mix-blend-mode: overlay;
   }
   body::after{
@@ -60,10 +58,6 @@
     54% { opacity: 0.00; }
     78% { opacity: 0.03; }
     79% { opacity: 0.00; }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    body::after{ animation: none; }
   }
 
   /* ===== LAYOUT ===== */
@@ -105,7 +99,6 @@
     25%, 75% { transform: translateY(-2px); }
   }
 
-  /* “blink” feel: a tiny overlay that briefly darkens the logo */
   .logo-wrap{
     display:inline-block;
     position:relative;
@@ -125,16 +118,11 @@
     84% { opacity:0; }
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .logo{ animation: none; }
-    .logo-wrap::after{ animation:none; }
-  }
-
   /* ===== TEXT ===== */
   h1{ margin:14px 0 4px; font-size:34px; }
   .ticker{ color: var(--muted); margin-bottom: 8px; }
 
-  /* Blinking DEGEN */
+  /* DEGEN flicker: use VISIBILITY (works on PC reliably) */
   .degen{
     display:inline-block;
     margin:6px 0 12px;
@@ -147,21 +135,21 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--accent);
-    animation: degenBlink 1s steps(2,end) infinite !important;
-    will-change: opacity;
+    animation: degenVisBlink 1s steps(1,end) infinite;
   }
-  @keyframes degenBlink{
-    0%, 49% { opacity:1; }
-    50%, 100% { opacity:0; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .degen{ animation: none !important; }
+  @keyframes degenVisBlink{
+    0%, 49% { visibility: visible; }
+    50%, 100% { visibility: hidden; }
   }
 
-  .lore{
-    line-height:1.5;
-    margin-bottom:14px;
-    color:#d6d6d6;
+  /* NEW: main tagline in caps */
+  .tagline{
+    margin: 6px 0 16px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #d6d6d6;
   }
 
   /* ===== FAKE TERMINAL ===== */
@@ -183,7 +171,6 @@
   .terminal .dim{ color: #9a9a9a; }
   .terminal .ok{ color: var(--buy); font-weight: 900; }
 
-  /* blinking cursor */
   .cursor{
     display:inline-block;
     width: 8px;
@@ -219,10 +206,17 @@
     position:relative;
     max-width:100%;
   }
+
+  /* IMPORTANT: normalize button rendering across browsers */
   button.btn{
     font:inherit;
-    background: inherit; /* IMPORTANT: keeps CA button white */
+    border:4px solid #000;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
   }
+
   .btn:active{
     transform: translate(2px,2px);
     box-shadow:2px 2px 0 #000;
@@ -240,7 +234,16 @@
 
   .btn-x{ background: var(--accent); color:#0b0b0b; }
   .btn-buy{ background: var(--buy); color:#0b0b0b; }
-  .btn-ca{ background:#ffffff; color:#0b0b0b; }
+
+  /* FORCE CA to be white always (this fixes the blacked-out issue) */
+  .btn-ca{
+    background-color:#ffffff !important;
+    color:#0b0b0b !important;
+  }
+  button.btn-ca{
+    background-color:#ffffff !important;
+    color:#0b0b0b !important;
+  }
 
   /* Animated BUY pulse */
   .btn-buy{
@@ -249,10 +252,6 @@
   @keyframes buyPulse{
     0%, 100% { filter: brightness(1); }
     50% { filter: brightness(1.14); }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .btn-buy{ animation: none; }
-    .cursor{ animation:none; }
   }
 
   .icon{
@@ -273,7 +272,6 @@
     text-overflow:ellipsis;
   }
 
-  /* Auto-copy tooltip animation */
   .tooltip{
     position:absolute;
     top:-36px;
@@ -312,6 +310,8 @@
     margin-top:12px;
     font-size:12px;
     color:#7f7f7f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   /* Mobile tweaks */
@@ -337,16 +337,15 @@
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <div class="lore">
-      Old money. New chain.<br>
-      Insert coin. Lose wisely.
-    </div>
+    <!-- REPLACED LORE WITH TAGLINE -->
+    <div class="tagline">THE BARON ALWAYS EXITS FIRST</div>
 
-    <!-- Fake terminal -->
+    <!-- Fake terminal (now includes BARON line) -->
     <div class="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
-      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
+      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span></div>
+      <div><span class="prompt">&gt;</span> <span id="termLine4" class="dim"></span><span class="cursor"></span></div>
     </div>
 
     <!-- X -->
@@ -357,12 +356,11 @@
       X / Twitter
     </a>
 
-    <!-- BUY (pulse + icon) -->
+    <!-- BUY -->
     <a class="btn btn-buy js-click"
        href="https://pump.fun"
        target="_blank"
        rel="noopener">
-      <!-- Pixel pill icon -->
       <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="2" y="5" width="12" height="6" fill="#000"/>
         <rect x="3" y="6" width="5" height="4" fill="#2dff6a"/>
@@ -377,7 +375,7 @@
       <span class="mono" id="caText"></span>
     </button>
 
-    <div class="small">The Baron always exits first.</div>
+    <div class="small">THE BARON ALWAYS EXITS FIRST</div>
 
   </div>
 </div>
@@ -439,15 +437,17 @@
   }
   caBtn.addEventListener("click", copyCA);
 
-  // ===== FAKE TERMINAL TYPE-OUT =====
+  // ===== FAKE TERMINAL TYPE-OUT (now 4 lines) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
+  const line4 = document.getElementById("termLine4");
 
   const steps = [
     { el: line1, text: "initializing degen terminal..." },
     { el: line2, text: "loading greenback protocol v0.0.1" },
-    { el: line3, text: "status: READY", okAtEnd: true }
+    { el: line3, text: "status: READY" },
+    { el: line4, text: "THE BARON ALWAYS EXITS FIRST" }
   ];
 
   function typeText(el, text, speedMs, done){
@@ -462,19 +462,24 @@
     }, speedMs);
   }
 
-  // Run sequence
   (function runTerminal(){
-    typeText(steps[0].el, steps[0].text, 22, ()=>{
+    typeText(steps[0].el, steps[0].text, 20, ()=>{
       setTimeout(()=>{
-        typeText(steps[1].el, steps[1].text, 18, ()=>{
+        typeText(steps[1].el, steps[1].text, 16, ()=>{
           setTimeout(()=>{
-            typeText(steps[2].el, steps[2].text, 20, ()=>{
-              // colorize READY word to green after typing
+            typeText(steps[2].el, steps[2].text, 18, ()=>{
+              // colorize READY
               steps[2].el.innerHTML = steps[2].el.textContent.replace("READY", "<span class='ok'>READY</span>");
+              setTimeout(()=>{
+                typeText(steps[3].el, steps[3].text, 10, ()=>{
+                  // make the BARON line green too (optional vibe)
+                  steps[3].el.innerHTML = "<span class='ok'>" + steps[3].el.textContent + "</span>";
+                });
+              }, 180);
             });
-          }, 220);
+          }, 180);
         });
-      }, 200);
+      }, 180);
     });
   })();
 </script>
