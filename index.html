@@ -6,306 +6,149 @@
 <title>Greenback ($GBACK)</title>
 
 <style>
-  /* ===== GLOBAL ===== */
   *, *::before, *::after { box-sizing: border-box; }
   :root{
-    --bg: #0b0b0b;
-    --card: #101010;
-    --ink: #eaeaea;
-    --muted: #bdbdbd;
-    --accent: #c8ff2f;
-    --buy: #2dff6a;
+    --bg:#0b0b0b;
+    --card:#101010;
+    --ink:#eaeaea;
+    --muted:#bdbdbd;
+    --accent:#c8ff2f;
+    --buy:#2dff6a;
   }
 
-  body{
-    margin:0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: Arial, Helvetica, sans-serif;
-  }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:Arial, Helvetica, sans-serif; }
 
-  /* ===== CRT OVERLAY (subtle scanlines + tiny flicker) ===== */
+  /* CRT */
   body::before{
-    content:"";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.06) 0px,
-        rgba(255,255,255,0.06) 1px,
-        rgba(0,0,0,0) 3px,
-        rgba(0,0,0,0) 6px
-      );
-    opacity: 0.08;
-    mix-blend-mode: overlay;
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:9999;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 6px);
+    opacity:.08; mix-blend-mode:overlay;
   }
   body::after{
-    content:"";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9998;
-    background: rgba(255,255,255,0.02);
-    opacity: 0.0;
-    animation: crtFlicker 7s steps(1,end) infinite;
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:9998;
+    background:rgba(255,255,255,0.02); opacity:0; animation:crtFlicker 7s steps(1,end) infinite;
   }
   @keyframes crtFlicker{
-    0%, 52%, 100% { opacity: 0.00; }
-    53% { opacity: 0.05; }
-    54% { opacity: 0.00; }
-    78% { opacity: 0.03; }
-    79% { opacity: 0.00; }
+    0%,52%,100%{opacity:0}
+    53%{opacity:.05}
+    54%{opacity:0}
+    78%{opacity:.03}
+    79%{opacity:0}
   }
 
-  /* ===== LAYOUT ===== */
-  .wrap{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-  }
-
+  .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px; }
   .card{
-    width:100%;
-    max-width:520px;
-    background: var(--card);
-    border:4px solid #000;
-    padding:18px;
-    text-align:center;
-    box-shadow:0 0 0 4px #1a1a1a;
-    overflow:hidden;
-    position: relative;
+    width:100%; max-width:520px; background:var(--card);
+    border:4px solid #000; padding:18px; text-align:center;
+    box-shadow:0 0 0 4px #1a1a1a; overflow:hidden; position:relative;
   }
 
-  /* ===== MASCOT (idle animation on the logo image) ===== */
-  .logo{
-    width:240px;
-    height:240px;
-    max-width:100%;
-    image-rendering:pixelated;
-    border:4px solid #000;
-    background:#0b0b0b;
-    display:block;
-    margin:0 auto;
-    transform: translateY(0);
-    animation: mascotBob 2.4s steps(2,end) infinite;
-    will-change: transform;
+  /* logo idle */
+  .logo{ width:240px; height:240px; max-width:100%; image-rendering:pixelated; border:4px solid #000; background:#0b0b0b; display:block; margin:0 auto;
+    animation:mascotBob 2.4s steps(2,end) infinite; will-change:transform;
   }
-  @keyframes mascotBob{
-    0%, 50%, 100% { transform: translateY(0); }
-    25%, 75% { transform: translateY(-2px); }
-  }
-
-  .logo-wrap{
-    display:inline-block;
-    position:relative;
-  }
+  @keyframes mascotBob{ 0%,50%,100%{transform:translateY(0)} 25%,75%{transform:translateY(-2px)} }
+  .logo-wrap{ display:inline-block; position:relative; }
   .logo-wrap::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background: rgba(0,0,0,0.18);
-    opacity:0;
-    pointer-events:none;
-    animation: mascotBlink 5.5s steps(1,end) infinite;
+    content:""; position:absolute; inset:0; background:rgba(0,0,0,0.18); opacity:0; pointer-events:none;
+    animation:mascotBlink 5.5s steps(1,end) infinite;
   }
-  @keyframes mascotBlink{
-    0%, 82%, 100% { opacity:0; }
-    83% { opacity:1; }
-    84% { opacity:0; }
-  }
+  @keyframes mascotBlink{ 0%,82%,100%{opacity:0} 83%{opacity:1} 84%{opacity:0} }
 
-  /* ===== TEXT ===== */
   h1{ margin:14px 0 4px; font-size:34px; }
-  .ticker{ color: var(--muted); margin-bottom: 8px; }
+  .ticker{ color:var(--muted); margin-bottom:8px; }
 
-  /* DEGEN flicker (PC-safe using visibility) */
+  /* DEGEN flicker */
   .degen{
-    display:inline-block;
-    margin:6px 0 14px;
-    padding:6px 10px;
-    border:3px solid #000;
-    background: #0b0b0b;
-    box-shadow:3px 3px 0 #000;
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--accent);
-    animation: degenVisBlink 1s steps(1,end) infinite;
+    display:inline-block; margin:6px 0 14px; padding:6px 10px;
+    border:3px solid #000; background:#0b0b0b; box-shadow:3px 3px 0 #000;
+    font-family:ui-monospace, Menlo, Consolas, monospace; font-weight:900; letter-spacing:1px; text-transform:uppercase;
+    color:var(--accent); animation:degenVisBlink 1s steps(1,end) infinite;
   }
-  @keyframes degenVisBlink{
-    0%, 49% { visibility: visible; }
-    50%, 100% { visibility: hidden; }
-  }
+  @keyframes degenVisBlink{ 0%,49%{visibility:visible} 50%,100%{visibility:hidden} }
 
-  /* ===== FAKE TERMINAL ===== */
+  /* terminal block */
   .terminal{
-    margin: 0 auto 16px;
-    width: 100%;
-    border: 3px solid #000;
-    box-shadow: 3px 3px 0 #000;
-    background: #0b0b0b;
-    padding: 10px 12px;
-    text-align:left;
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 12px;
-    line-height: 1.45;
-    color: #cfcfcf;
-    user-select: none;
+    margin:0 auto 16px; width:100%;
+    border:3px solid #000; box-shadow:3px 3px 0 #000; background:#0b0b0b;
+    padding:10px 12px; text-align:left;
+    font-family:ui-monospace, Menlo, Consolas, monospace; font-size:12px; line-height:1.45;
+    color:#cfcfcf; user-select:none;
   }
-  .terminal .prompt{ color: var(--accent); font-weight: 900; }
-  .terminal .dim{ color: #9a9a9a; }
-  .terminal .ok{ color: var(--buy); font-weight: 900; }
+  .terminal .prompt{ color:var(--accent); font-weight:900; }
+  .terminal .dim{ color:#9a9a9a; }
+  .terminal .ok{ color:var(--buy); font-weight:900; }
 
   .cursor{
-    display:inline-block;
-    width: 8px;
-    height: 12px;
-    background: var(--accent);
-    margin-left: 6px;
-    transform: translateY(2px);
-    animation: cursorBlink 0.8s steps(1,end) infinite;
+    display:inline-block; width:8px; height:12px; background:var(--accent);
+    margin-left:6px; transform:translateY(2px);
+    animation:cursorBlink .8s steps(1,end) infinite;
   }
-  @keyframes cursorBlink{
-    0%, 49% { opacity:1; }
-    50%, 100% { opacity:0; }
-  }
+  @keyframes cursorBlink{ 0%,49%{opacity:1} 50%,100%{opacity:0} }
 
-  /* ===== BUTTONS ===== */
+  /* buttons */
   .btn{
-    width:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    margin:14px 0;
-    padding:16px 14px;
-    min-height:56px;
-    font-weight:900;
-    text-transform:uppercase;
-    text-decoration:none;
-    border:4px solid #000;
-    box-shadow:4px 4px 0 #000;
-    image-rendering:pixelated;
-    cursor:pointer;
-    user-select:none;
-    position:relative;
-    max-width:100%;
+    width:100%; display:flex; align-items:center; justify-content:center; gap:12px;
+    margin:14px 0; padding:16px 14px; min-height:56px;
+    font-weight:900; text-transform:uppercase; text-decoration:none;
+    border:4px solid #000; box-shadow:4px 4px 0 #000; image-rendering:pixelated;
+    cursor:pointer; user-select:none; position:relative; max-width:100%;
   }
-
-  button.btn{
-    font:inherit;
-    border:4px solid #000;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    background: none;
-  }
-
-  .btn:active{
-    transform: translate(2px,2px);
-    box-shadow:2px 2px 0 #000;
-  }
+  button.btn{ font:inherit; outline:none; -webkit-appearance:none; appearance:none; background:none; }
+  .btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 #000; }
 
   @media (hover:hover){
     .btn:hover{
-      box-shadow:
-        4px 4px 0 #000,
-        0 0 0 3px #000,
-        0 0 0 7px rgba(200,255,47,0.30);
+      box-shadow:4px 4px 0 #000, 0 0 0 3px #000, 0 0 0 7px rgba(200,255,47,0.30);
     }
   }
 
-  .btn-x{ background: var(--accent); color:#0b0b0b; }
-  .btn-buy{ background: var(--buy); color:#0b0b0b; }
+  .btn-x{ background:var(--accent); color:#0b0b0b; }
+  .btn-buy{ background:var(--buy); color:#0b0b0b; animation:buyPulse 2.2s steps(2,end) infinite; }
+  @keyframes buyPulse{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.14)} }
 
-  /* FORCE CA to be white always */
-  .btn-ca,
-  button.btn-ca{
-    background-color:#ffffff !important;
-    color:#0b0b0b !important;
-  }
+  .btn-ca, button.btn-ca{ background-color:#fff !important; color:#0b0b0b !important; }
 
-  /* BUY pulse */
-  .btn-buy{
-    animation: buyPulse 2.2s steps(2,end) infinite;
-  }
-  @keyframes buyPulse{
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.14); }
-  }
-
-  .icon{
-    width:18px;
-    height:18px;
-    image-rendering:pixelated;
-    flex:0 0 auto;
-  }
+  .icon{ width:18px; height:18px; image-rendering:pixelated; flex:0 0 auto; }
 
   .mono{
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size:14px;
-    font-weight:900;
-    text-transform:none;
-    max-width:100%;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:14px; font-weight:900; text-transform:none;
+    max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+  }
+
+  .hint{
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:11px;
+    color:#8d8d8d;
+    margin-top:-6px;
+    margin-bottom:10px;
+    user-select:none;
   }
 
   .tooltip{
-    position:absolute;
-    top:-36px;
-    left:50%;
-    transform:translateX(-50%);
-    background:#0b0b0b;
-    color: var(--accent);
-    border:3px solid #000;
-    box-shadow:3px 3px 0 #000;
-    padding:6px 10px;
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-weight:900;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    opacity:0;
-    pointer-events:none;
-    transition: opacity 0.12s steps(1,end), transform 0.12s steps(1,end);
+    position:absolute; top:-36px; left:50%; transform:translateX(-50%);
+    background:#0b0b0b; color:var(--accent);
+    border:3px solid #000; box-shadow:3px 3px 0 #000;
+    padding:6px 10px; font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:900; letter-spacing:1px; text-transform:uppercase;
+    opacity:0; pointer-events:none;
+    transition:opacity .12s steps(1,end), transform .12s steps(1,end);
     white-space:nowrap;
   }
-  .tooltip.show{
-    opacity:1;
-    transform:translateX(-50%) translateY(-4px);
-  }
+  .tooltip.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
 
-  /* CA vibe tweak */
-  @media (hover:hover){
-    .btn-ca:hover{
-      box-shadow:
-        4px 4px 0 #000,
-        0 0 0 3px #000,
-        0 0 0 7px rgba(255,255,255,0.35);
-    }
-  }
-
-  /* ONE terminal-style line under CA */
+  /* baron terminal line under CA */
   .baron-line{
-    margin-top: 10px;
-    text-align: left;
-    font-family: ui-monospace, Menlo, Consolas, monospace;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #cfcfcf;
+    margin-top:10px;
+    width:100%;
+    text-align:left;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:12px; line-height:1.45;
     user-select:none;
   }
-  .baron-line .prompt{ color: var(--accent); font-weight: 900; }
-  .baron-line .ok{ color: var(--buy); font-weight: 900; }
+  .baron-line .prompt{ color:var(--accent); font-weight:900; }
+  .baron-line .ok{ color:var(--buy); font-weight:900; }
 
   /* Mobile tweaks */
   @media (max-width:420px){
@@ -314,6 +157,13 @@
     .logo{ width:220px; height:220px; }
     h1{ font-size:32px; }
     .btn{ margin:12px 0; padding:15px 12px; }
+  }
+
+  /* Reduced motion safety */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    body::before, body::after{ display:none !important; }
+    .cursor{ display:none !important; }
   }
 </style>
 </head>
@@ -330,24 +180,30 @@
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <!-- Terminal: REMOVE Baron line from inside terminal -->
     <div class="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <a class="btn btn-x js-click"
-       href="https://x.com/GannicusXRP"
-       target="_blank"
-       rel="noopener">
+    <a class="btn btn-x js-click" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
       X / Twitter
     </a>
 
-    <a class="btn btn-buy js-click"
-       href="https://pump.fun"
-       target="_blank"
-       rel="noopener">
+    <!-- CHART button under twitter with pixel-ish Dexscreener icon -->
+    <a class="btn btn-x js-click" id="chartBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener chart">
+      <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- pixel-style green chart blocks -->
+        <rect x="1" y="9" width="3" height="6" fill="#2dff6a"/>
+        <rect x="6" y="6" width="3" height="9" fill="#2dff6a"/>
+        <rect x="11" y="3" width="3" height="12" fill="#2dff6a"/>
+        <!-- outline -->
+        <rect x="0.5" y="0.5" width="15" height="15" fill="none" stroke="#000" stroke-width="1"/>
+      </svg>
+      Dexscreener Chart
+    </a>
+
+    <a class="btn btn-buy js-click" id="buyBtn" href="#" target="_blank" rel="noopener" aria-label="Buy Greenback">
       <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="2" y="5" width="12" height="6" fill="#000"/>
         <rect x="3" y="6" width="5" height="4" fill="#2dff6a"/>
@@ -356,15 +212,16 @@
       Buy $GBACK
     </a>
 
-    <button class="btn btn-ca js-click" id="caBtn" type="button">
+    <button class="btn btn-ca js-click" id="caBtn" type="button" aria-label="Copy contract address">
       <span class="tooltip" id="tip">COPIED!</span>
       <span class="mono" id="caText"></span>
     </button>
+    <div class="hint">tap to copy (copies full CA)</div>
 
-    <!-- EXACTLY ONE Baron line under CA -->
-    <div class="baron-line">
+    <!-- Baron terminal (reloops) -->
+    <div class="baron-line" aria-label="baron terminal line">
       <span class="prompt">&gt;</span>
-      <span class="ok">THE BARON ALWAYS EXITS FIRST</span>
+      <span id="baronTyped" class="ok"></span><span id="baronCursor" class="cursor"></span>
     </div>
 
   </div>
@@ -373,15 +230,25 @@
 <script>
   // ===== CONFIG =====
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-  document.getElementById("caText").textContent = "CA: " + CA;
 
-  // ===== CLICK SOUND (WebAudio) =====
+  // Replace these when ready:
+  const BUY_URL  = "https://pump.fun";
+  const DEX_URL  = "https://dexscreener.com";
+
+  // Short display for UI, full copy on click
+  const shortCA = CA.slice(0, 6) + "..." + CA.slice(-6);
+  document.getElementById("caText").textContent = "CA: " + shortCA;
+
+  // set button links
+  document.getElementById("buyBtn").href = BUY_URL;
+  document.getElementById("chartBtn").href = DEX_URL;
+
+  // ===== CLICK SOUND =====
   let audioCtx;
   function clickBeep(){
     try{
       if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const t0 = audioCtx.currentTime;
-
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
 
@@ -395,7 +262,6 @@
 
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       osc.start(t0);
       osc.stop(t0 + 0.07);
     }catch(e){}
@@ -405,7 +271,7 @@
     el.addEventListener("click", ()=>clickBeep(), {passive:true});
   });
 
-  // ===== COPY + TOOLTIP =====
+  // ===== COPY + TOOLTIP (copies FULL CA) =====
   const caBtn = document.getElementById("caBtn");
   const tip = document.getElementById("tip");
   let tipTimer;
@@ -427,7 +293,7 @@
   }
   caBtn.addEventListener("click", copyCA);
 
-  // ===== TERMINAL TYPE-OUT (ONLY 3 LINES) =====
+  // ===== TERMINAL TYPE-OUT (3 LINES) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
@@ -450,7 +316,7 @@
     }, speedMs);
   }
 
-  (function runTerminal(){
+  function runTerminal(){
     typeText(steps[0].el, steps[0].text, 20, ()=>{
       setTimeout(()=>{
         typeText(steps[1].el, steps[1].text, 16, ()=>{
@@ -458,12 +324,48 @@
             typeText(steps[2].el, steps[2].text, 18, ()=>{
               steps[2].el.innerHTML =
                 steps[2].el.textContent.replace("READY", "<span class='ok'>READY</span>");
+              setTimeout(()=>{ startBaronLoop(); }, 250);
             });
           }, 180);
         });
       }, 180);
     });
-  })();
+  }
+
+  // ===== BARON LINE TYPE-OUT (reloops every 10s) =====
+  const baronText = "THE BARON ALWAYS EXITS FIRST";
+  const baronEl = document.getElementById("baronTyped");
+  const baronCursor = document.getElementById("baronCursor");
+
+  let baronLoopTimer = null;
+
+  function typeBaronOnce(){
+    let i = 0;
+    baronEl.textContent = "";
+    baronCursor.style.display = "inline-block";
+
+    const timer = setInterval(()=>{
+      baronEl.textContent += baronText[i++];
+      if(i >= baronText.length){
+        clearInterval(timer);
+        // keep cursor for a moment then hide it
+        setTimeout(()=>{ baronCursor.style.display = "none"; }, 600);
+      }
+    }, 14);
+  }
+
+  function startBaronLoop(){
+    // start immediately
+    typeBaronOnce();
+
+    // then loop every 10 seconds
+    if(baronLoopTimer) clearInterval(baronLoopTimer);
+    baronLoopTimer = setInterval(()=>{
+      typeBaronOnce();
+    }, 10000);
+  }
+
+  runTerminal();
 </script>
 </body>
 </html>
