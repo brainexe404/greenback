@@ -6,211 +6,288 @@
 <title>Greenback ($GBACK)</title>
 
 <style>
-/* ===== BASE ===== */
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: #eaeaea;
-  font-family: Arial, Helvetica, sans-serif;
-}
+  body {
+    margin: 0;
+    background: #0b0b0b;
+    color: #eaeaea;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-.wrap {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
+  .wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
 
-.card {
-  width: 100%;
-  max-width: 520px;
-  background: #101010;
-  border: 4px solid #000;
-  padding: 22px;
-  text-align: center;
-  box-shadow: 0 0 0 4px #1a1a1a;
-}
+  .card {
+    max-width: 520px;
+    width: 100%;
+    background: #101010;
+    border: 4px solid #000;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 0 0 4px #1a1a1a;
+  }
 
-/* ===== IMAGE ===== */
-img {
-  width: 240px;
-  height: 240px;
-  image-rendering: pixelated;
-  border: 4px solid #000;
-  background: #0b0b0b;
-}
+  img {
+    width: 240px;
+    height: 240px;
+    image-rendering: pixelated;
+    border: 4px solid #000;
+    background: #0b0b0b;
+  }
 
-/* ===== TEXT ===== */
-h1 {
-  margin: 14px 0 4px;
-  font-size: 34px;
-}
+  h1 {
+    margin: 14px 0 4px;
+    font-size: 34px;
+  }
 
-.ticker {
-  color: #bdbdbd;
-  margin-bottom: 14px;
-}
+  .ticker {
+    color: #bdbdbd;
+    margin-bottom: 8px;
+  }
 
-.lore {
-  line-height: 1.5;
-  margin-bottom: 18px;
-  color: #d6d6d6;
-}
+  /* BLINKING READY */
+  .ready {
+    display: inline-block;
+    margin: 4px 0 14px;
+    padding: 6px 10px;
+    border: 3px solid #000;
+    background: #0b0b0b;
+    box-shadow: 3px 3px 0 #000;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #c8ff2f;
+    animation: blink 1s steps(1, end) infinite;
+  }
 
-/* ===== PIXEL BUTTONS ===== */
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 14px 0;
-  padding: 14px;
-  font-weight: 900;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 4px solid #000;
-  box-shadow:
-    4px 4px 0 #000;
-  image-rendering: pixelated;
-  cursor: pointer;
-  user-select: none;
-}
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
 
-.btn:active {
-  transform: translate(2px,2px);
-  box-shadow: 2px 2px 0 #000;
-}
+  .lore {
+    line-height: 1.5;
+    margin-bottom: 18px;
+    color: #d6d6d6;
+  }
 
-/* COLORS */
-.btn-x {
-  background: #c8ff2f;
-  color: #0b0b0b;
-}
+  /* PIXEL BUTTONS */
+  .btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 14px 0;
+    padding: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0 #000;
+    image-rendering: pixelated;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: transform 0.05s steps(1, end);
+  }
 
-.btn-buy {
-  background: #2dff6a;
-  color: #0b0b0b;
-}
+  .btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+  }
 
-.btn-ca {
-  background: #ffffff;
-  color: #0b0b0b;
-}
+  /* HOVER PIXEL GLOW (chunky) */
+  .btn:hover {
+    box-shadow:
+      4px 4px 0 #000,
+      0 0 0 3px #000,
+      0 0 0 6px rgba(200, 255, 47, 0.35);
+    outline: none;
+  }
 
-/* ===== ICON ===== */
-.pf-icon {
-  width: 18px;
-  height: 18px;
-  image-rendering: pixelated;
-}
+  .btn-x { background: #c8ff2f; color: #0b0b0b; }
+  .btn-buy { background: #2dff6a; color: #0b0b0b; }
+  .btn-ca { background: #ffffff; color: #0b0b0b; }
 
-/* ===== CA TEXT ===== */
-.mono {
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-  text-transform: none;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
+  .icon {
+    width: 18px;
+    height: 18px;
+    image-rendering: pixelated;
+  }
 
-/* ===== FOOTER ===== */
-.small {
-  margin-top: 12px;
-  font-size: 12px;
-  color: #7f7f7f;
-}
+  .mono {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: none;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
 
-/* ===== COPY FEEDBACK ===== */
-.toast {
-  height: 14px;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #bdbdbd;
-}
+  .small {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #7f7f7f;
+  }
+
+  /* AUTO-COPY TOOLTIP */
+  .tooltip {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0b0b0b;
+    color: #c8ff2f;
+    border: 3px solid #000;
+    box-shadow: 3px 3px 0 #000;
+    padding: 6px 10px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s steps(1, end), transform 0.15s steps(1, end);
+    white-space: nowrap;
+  }
+
+  .tooltip.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  /* reduce motion if user prefers */
+  @media (prefers-reduced-motion: reduce) {
+    .ready { animation: none; }
+    .tooltip { transition: none; }
+    .btn { transition: none; }
+  }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-<div class="card">
+  <div class="card">
 
-<img src="logo.png" alt="Greenback logo" />
+    <img src="logo.png" alt="Greenback logo" />
 
-<h1>Greenback</h1>
-<div class="ticker">$GBACK</div>
+    <h1>Greenback</h1>
+    <div class="ticker">$GBACK</div>
+    <div class="ready">READY</div>
 
-<div class="lore">
-Old money. New chain.<br>
-Insert coin. Lose wisely.
-</div>
+    <div class="lore">
+      Old money. New chain.<br>
+      Insert coin. Lose wisely.
+    </div>
 
-<!-- X BUTTON -->
-<a class="btn btn-x"
-   href="https://x.com/GannicusXRP"
-   target="_blank"
-   rel="noopener">
-X / Twitter
-</a>
+    <!-- X BUTTON -->
+    <a class="btn btn-x js-click"
+       href="https://x.com/GannicusXRP"
+       target="_blank"
+       rel="noopener">
+      X / Twitter
+    </a>
 
-<!-- BUY BUTTON (LIVE) -->
-<a class="btn btn-buy"
-   href="https://pump.fun"
-   target="_blank"
-   rel="noopener">
+    <!-- BUY BUTTON -->
+    <a class="btn btn-buy js-click"
+       href="https://pump.fun"
+       target="_blank"
+       rel="noopener">
+      <!-- PIXEL PILL ICON -->
+      <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="5" width="12" height="6" fill="#000"/>
+        <rect x="3" y="6" width="5" height="4" fill="#2dff6a"/>
+        <rect x="8" y="6" width="5" height="4" fill="#ffffff"/>
+      </svg>
+      Buy $GBACK
+    </a>
 
-<!-- pixel Pump.fun icon -->
-<svg class="pf-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1" y="1" width="14" height="14" fill="#0b0b0b"/>
-  <rect x="4" y="5" width="8" height="6" fill="#2dff6a"/>
-  <rect x="5" y="6" width="2" height="2" fill="#000"/>
-  <rect x="9" y="6" width="2" height="2" fill="#000"/>
-  <rect x="6" y="9" width="4" height="1" fill="#000"/>
-</svg>
+    <!-- CA COPY BUTTON -->
+    <button class="btn btn-ca js-click" id="caBtn" type="button">
+      <span class="tooltip" id="tip">COPIED!</span>
+      <span class="mono" id="caText"></span>
+    </button>
 
-Buy $GBACK
-</a>
+    <div class="small">
+      The Baron always exits first.
+    </div>
 
-<!-- CA COPY BUTTON -->
-<button class="btn btn-ca" id="caBtn">
-<span class="mono" id="caText"></span>
-</button>
-
-<div class="toast" id="toast"></div>
-
-<div class="small">
-The Baron always exits first.
-</div>
-
-</div>
+  </div>
 </div>
 
 <script>
-/* ===== TEST CA ===== */
-const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+  // ====== CONFIG ======
+  const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+  document.getElementById("caText").textContent = "CA: " + CA;
 
-/* inject CA */
-document.getElementById("caText").textContent = "CA: " + CA;
+  // ====== CLICK SOUND (WebAudio, no file needed) ======
+  let audioCtx;
+  function clickBeep() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = audioCtx.currentTime;
 
-/* copy on click */
-document.getElementById("caBtn").onclick = async () => {
-  try {
-    await navigator.clipboard.writeText(CA);
-  } catch {
-    const t = document.createElement("textarea");
-    t.value = CA;
-    document.body.appendChild(t);
-    t.select();
-    document.execCommand("copy");
-    document.body.removeChild(t);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      // short retro "tick"
+      osc.type = "square";
+      osc.frequency.setValueAtTime(900, t0);
+      osc.frequency.exponentialRampToValueAtTime(450, t0 + 0.04);
+
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.08, t0 + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(t0);
+      osc.stop(t0 + 0.07);
+    } catch (e) {
+      // if blocked, silently ignore
+    }
   }
-  const toast = document.getElementById("toast");
-  toast.textContent = "Copied!";
-  setTimeout(() => toast.textContent = "", 1200);
-};
-</script>
 
+  // attach sound to all elements with js-click
+  document.querySelectorAll(".js-click").forEach(el => {
+    el.addEventListener("click", () => clickBeep(), { passive: true });
+  });
+
+  // ====== COPY CA + TOOLTIP ANIMATION ======
+  const caBtn = document.getElementById("caBtn");
+  const tip = document.getElementById("tip");
+  let tipTimer;
+
+  async function copyCA() {
+    // try modern clipboard
+    try {
+      await navigator.clipboard.writeText(CA);
+    } catch {
+      // fallback
+      const t = document.createElement("textarea");
+      t.value = CA;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      document.body.removeChild(t);
+    }
+
+    // show tooltip
+    tip.classList.add("show");
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(() => tip.classList.remove("show"), 900);
+  }
+
+  caBtn.addEventListener("click", copyCA);
+</script>
 </body>
 </html>
