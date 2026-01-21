@@ -92,7 +92,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* ACTIVATE DEGEN! */
+  /* ACTIVATE DEGEN! (KEEP FLICKER) */
   .degen{
     display:inline-block;
     margin:6px 0 12px;
@@ -157,33 +157,6 @@
   }
   @keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
-  /* Coin insert animation */
-  .coin{
-    position:absolute;
-    left:14px; top:-26px;
-    width:18px;height:18px;
-    border:3px solid #000;
-    box-shadow:3px 3px 0 #000;
-    background:var(--yellow);
-    opacity:0;
-    pointer-events:none;
-  }
-  .coin.drop{
-    opacity:1;
-    animation:coinDrop 520ms steps(8,end) 1;
-  }
-  @keyframes coinDrop{
-    0%{transform:translateY(-8px)}
-    70%{transform:translateY(78px)}
-    100%{transform:translateY(72px)}
-  }
-  .terminal.flash{animation:termFlash 140ms steps(2,end) 2;}
-  @keyframes termFlash{
-    0%{filter:brightness(1)}
-    50%{filter:brightness(1.3)}
-    100%{filter:brightness(1)}
-  }
-
   .btn{
     width:100%;
     display:flex;align-items:center;justify-content:center;gap:14px;
@@ -234,16 +207,38 @@
     100%{opacity:0}
   }
 
-  .btn-ca{background:#fff !important;color:#0b0b0b !important;}
-  .btn-ca .mono{color:#0b0b0b !important;}
+  /* ✅ CA BUTTON: full address + bigger + subtle arcade pop */
+  .btn-ca{
+    background:#fff !important;
+    color:#0b0b0b !important;
+    border:4px solid #000 !important;
+    box-shadow:
+      4px 4px 0 #000,
+      0 0 16px rgba(200,255,47,.14) !important;
+  }
+  .btn-ca:hover{
+    box-shadow:
+      4px 4px 0 #000,
+      0 0 22px rgba(200,255,47,.22) !important;
+  }
+  .btn-ca .mono{
+    color:#0b0b0b !important;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:16px;           /* bigger */
+    font-weight:900;
+    letter-spacing:.2px;
+    text-transform:none;
+
+    /* show FULL CA nicely */
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    overflow-wrap:anywhere;
+    line-height:1.22;
+    text-align:center;
+  }
 
   .icon{width:36px;height:36px;image-rendering:pixelated;flex:0 0 auto}
-
-  .mono{
-    font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:14px;font-weight:900;text-transform:none;
-    overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-  }
 
   .hint{
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -294,7 +289,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* ===== MOBILE ===== */
+  /* ===== MOBILE: bigger again, still no scroll ===== */
   @media (max-width:420px){
     .wrap{
       align-items:flex-start;
@@ -302,7 +297,10 @@
       padding-bottom:calc(12px + env(safe-area-inset-bottom));
     }
 
-    .card{padding:12px;margin-top:6px}
+    .card{
+      padding:12px;
+      margin-top:6px;
+    }
 
     .logo{
       width:clamp(128px, 22dvh, 165px);
@@ -312,7 +310,11 @@
     h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
     .ticker{margin-bottom:7px}
 
-    .degen{margin:7px 0 11px;padding:7px 11px;font-size:13px}
+    .degen{
+      margin:7px 0 11px;
+      padding:7px 11px;
+      font-size:13px;
+    }
 
     .terminal{
       font-size:clamp(10.5px, 1.65dvh, 11.5px);
@@ -331,7 +333,11 @@
 
     .icon{width:27px;height:27px}
 
-    .hint{margin-top:-4px;margin-bottom:7px;font-size:10.5px}
+    .hint{
+      margin-top:-4px;
+      margin-bottom:7px;
+      font-size:10.5px;
+    }
 
     .baron-line{
       font-size:clamp(10.5px, 1.6dvh, 11.5px);
@@ -340,6 +346,8 @@
     }
 
     .mute{top:8px;right:8px}
+
+    .btn-ca .mono{font-size:14px}
   }
 
   @media (max-width:420px) and (max-height:700px){
@@ -349,11 +357,14 @@
     .baron-line{margin-top:3px}
   }
 
-  /* ✅ REAL reduced-motion: stop movement/blink */
+  /* keep your original reduced motion behavior (do NOT kill degen blink unexpectedly) */
   @media (prefers-reduced-motion: reduce){
-    * { animation: none !important; transition: none !important; }
-    body::after{ animation:none !important; opacity:0 !important; }
-    .cursor{ display:none !important; }
+    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
+    .degen{animation:blink 1s steps(1,end) infinite !important;}
+    .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
+    .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
+    .btn.pulse{animation:none !important;}
+    .btn.pulse::after{animation:none !important;opacity:.85;}
   }
 </style>
 </head>
@@ -369,18 +380,15 @@
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
 
-    <!-- ✅ keyboard accessible -->
     <div class="degen" id="degenBtn" role="button" tabindex="0" aria-label="Activate degen">ACTIVATE DEGEN!</div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
-      <span class="coin" id="coin" aria-hidden="true"></span>
-
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- ✅ real href fallback so no "#" jump if JS fails -->
+    <!-- (fallback real hrefs) -->
     <a class="btn btn-yellow" id="insertBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
@@ -402,7 +410,7 @@
         <span class="mono" id="caText"></span>
       </button>
     </div>
-    <div class="hint">tap to copy</div>
+    <div class="hint">click to copy</div>
 
     <div class="baron-line" id="baronLine" aria-label="baron terminal line">
       <span class="glitchwipe" aria-hidden="true"></span>
@@ -436,8 +444,9 @@
   insertBtn.href = INSERT_URL;
   dexBtn.href = DEX_URL;
 
+  // FULL CA shown on button
   const caTextEl = document.getElementById("caText");
-  caTextEl.textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
+  caTextEl.textContent = CA;
 
   // ===== AUDIO =====
   const muteBtn = document.getElementById("muteBtn");
@@ -466,6 +475,7 @@
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
+    // silent prime so mobile allows later plays
     [preloadClick, preloadBaron].forEach(a=>{
       if(!a) return;
       try{
@@ -536,16 +546,16 @@
     }
   }
 
-  // ✅ reuse preloaded baron audio (no new Audio() each click)
+  // IMPORTANT: make baron.mp3 reliably play on the very FIRST "ACTIVATE DEGEN!" press.
+  // Using a fresh Audio instance is the most consistent cross-browser for this case.
   function playBaron(){
-    if(isMuted || !preloadBaron) return;
+    if(isMuted) return;
     unlockAudio();
     try{
-      preloadBaron.pause();
-      preloadBaron.currentTime = 0;
-      preloadBaron.volume = 0.75;
-      const p = preloadBaron.play();
-      if(p && typeof p.catch === "function") p.catch(()=>{});
+      const a = new Audio("baron.mp3");
+      a.preload = "auto";
+      a.volume = 0.75;
+      a.play().catch(()=>{});
     }catch(e){}
   }
 
@@ -558,19 +568,17 @@
   // ===== COPY CA =====
   const tip = document.getElementById("tip");
   let tipTimer;
-
-  function setTooltip(text){
+  function showTip(text){
     tip.textContent = text;
     tip.classList.add("show");
     clearTimeout(tipTimer);
-    tipTimer = setTimeout(()=> tip.classList.remove("show"), 1100);
+    tipTimer = setTimeout(()=> tip.classList.remove("show"), 900);
   }
 
   const canClipboard = !!(navigator.clipboard && window.isSecureContext);
 
   document.getElementById("caBtn").addEventListener("click", async ()=>{
     playClick();
-
     try{
       if(canClipboard){
         await navigator.clipboard.writeText(CA);
@@ -587,9 +595,7 @@
         window.prompt("Copy CA:", CA);
       }
     }
-
-    // ✅ “trust” tooltip with truncated CA
-    setTooltip(`COPIED: ${CA.slice(0,4)}…${CA.slice(-4)}`);
+    showTip("COPIED!");
   });
 
   // ===== ACTIVATE DEGEN tweaks =====
@@ -598,11 +604,12 @@
   let degenResetTimer = null;
   let pulseTimer = null;
 
-  // ✅ MORE ROBUST pulse restart (fixes desktop cases where reflow trick sometimes fails)
+  // FIX: pulse should restart reliably on desktop AND mobile
   function pulseInsertCoins(){
     insertBtn.classList.remove("pulse");
     clearTimeout(pulseTimer);
 
+    // double-rAF is the most reliable way to restart CSS animation across browsers
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         insertBtn.classList.add("pulse");
@@ -622,15 +629,16 @@
   }
 
   function handleDegenActivate(e){
-    // ensure audio is unlocked BEFORE we try to play on mobile
     unlockAudio();
 
     if(handleDegenActivate._lock) return;
     handleDegenActivate._lock = true;
     setTimeout(()=>{ handleDegenActivate._lock = false; }, 350);
 
+    // Play BOTH on first press
     playClick();
     playBaron();
+
     setDegenActivatedTemp();
     pulseInsertCoins();
 
@@ -641,11 +649,12 @@
     if(e && e.preventDefault) e.preventDefault();
   }
 
+  // keep your original multi-event approach
   degenBtn.addEventListener("pointerdown", handleDegenActivate);
   degenBtn.addEventListener("mousedown", handleDegenActivate);
   degenBtn.addEventListener("click", handleDegenActivate);
 
-  // ✅ keyboard activation (Enter/Space)
+  // keyboard activate (doesn't break anything)
   degenBtn.addEventListener("keydown", (e)=>{
     if(e.key === "Enter" || e.key === " "){
       e.preventDefault();
@@ -707,7 +716,6 @@
   }
 
   function setReadyLine(){
-    // ✅ avoid innerHTML
     line3.textContent = "status: ";
     const s = document.createElement("span");
     s.className = "ready";
