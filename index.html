@@ -92,7 +92,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* ACTIVATE DEGEN! */
+  /* ACTIVATE DEGEN! (KEEP FLICKER) */
   .degen{
     display:inline-block;
     margin:6px 0 12px;
@@ -157,33 +157,6 @@
   }
   @keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
-  /* ✅ Coin insert animation (terminal) */
-  .coin{
-    position:absolute;
-    left:14px; top:-26px;
-    width:18px;height:18px;
-    border:3px solid #000;
-    box-shadow:3px 3px 0 #000;
-    background:var(--yellow);
-    opacity:0;
-    pointer-events:none;
-  }
-  .coin.drop{
-    opacity:1;
-    animation:coinDrop 520ms steps(8,end) 1;
-  }
-  @keyframes coinDrop{
-    0%{transform:translateY(-8px)}
-    70%{transform:translateY(78px)}
-    100%{transform:translateY(72px)}
-  }
-  .terminal.flash{animation:termFlash 140ms steps(2,end) 2;}
-  @keyframes termFlash{
-    0%{filter:brightness(1)}
-    50%{filter:brightness(1.3)}
-    100%{filter:brightness(1)}
-  }
-
   .btn{
     width:100%;
     display:flex;align-items:center;justify-content:center;gap:14px;
@@ -234,41 +207,29 @@
     100%{opacity:0}
   }
 
-  /* ✅ CA button: FULL address, bigger, subtle arcade pop (not loud) */
+  /* ✅ CA BUTTON: full address + bigger + subtle arcade pop */
   .btn-ca{
     background:#fff !important;
     color:#0b0b0b !important;
     border:4px solid #000 !important;
     box-shadow:
       4px 4px 0 #000,
-      0 0 14px rgba(200,255,47,.16) !important;
-    position:relative;
-  }
-  .btn-ca::after{
-    content:"";
-    position:absolute;
-    inset:3px;
-    border:2px solid rgba(0,0,0,.12);
-    pointer-events:none;
+      0 0 16px rgba(200,255,47,.14) !important;
   }
   .btn-ca:hover{
     box-shadow:
       4px 4px 0 #000,
-      0 0 20px rgba(200,255,47,.22) !important;
-  }
-  .btn-ca:active{
-    box-shadow:
-      2px 2px 0 #000,
-      0 0 18px rgba(200,255,47,.22) !important;
+      0 0 22px rgba(200,255,47,.22) !important;
   }
   .btn-ca .mono{
     color:#0b0b0b !important;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:16px;
+    font-size:16px;           /* bigger */
     font-weight:900;
     letter-spacing:.2px;
     text-transform:none;
 
+    /* show FULL CA nicely */
     white-space:normal;
     overflow:visible;
     text-overflow:clip;
@@ -328,7 +289,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* ===== MOBILE ===== */
+  /* ===== MOBILE: bigger again, still no scroll ===== */
   @media (max-width:420px){
     .wrap{
       align-items:flex-start;
@@ -336,7 +297,10 @@
       padding-bottom:calc(12px + env(safe-area-inset-bottom));
     }
 
-    .card{padding:12px;margin-top:6px}
+    .card{
+      padding:12px;
+      margin-top:6px;
+    }
 
     .logo{
       width:clamp(128px, 22dvh, 165px);
@@ -346,7 +310,11 @@
     h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
     .ticker{margin-bottom:7px}
 
-    .degen{margin:7px 0 11px;padding:7px 11px;font-size:13px}
+    .degen{
+      margin:7px 0 11px;
+      padding:7px 11px;
+      font-size:13px;
+    }
 
     .terminal{
       font-size:clamp(10.5px, 1.65dvh, 11.5px);
@@ -365,7 +333,11 @@
 
     .icon{width:27px;height:27px}
 
-    .hint{margin-top:-4px;margin-bottom:7px;font-size:10.5px}
+    .hint{
+      margin-top:-4px;
+      margin-bottom:7px;
+      font-size:10.5px;
+    }
 
     .baron-line{
       font-size:clamp(10.5px, 1.6dvh, 11.5px);
@@ -385,7 +357,7 @@
     .baron-line{margin-top:3px}
   }
 
-  /* keep original style for reduced-motion: don't accidentally kill the vibe */
+  /* keep your original reduced motion behavior (do NOT kill degen blink unexpectedly) */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
@@ -411,13 +383,12 @@
     <div class="degen" id="degenBtn" role="button" tabindex="0" aria-label="Activate degen">ACTIVATE DEGEN!</div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
-      <span class="coin" id="coin" aria-hidden="true"></span>
-
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
+    <!-- (fallback real hrefs) -->
     <a class="btn btn-yellow" id="insertBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
@@ -575,7 +546,8 @@
     }
   }
 
-  // make baron.mp3 reliably play on the FIRST ACTIVATE DEGEN press
+  // IMPORTANT: make baron.mp3 reliably play on the very FIRST "ACTIVATE DEGEN!" press.
+  // Using a fresh Audio instance is the most consistent cross-browser for this case.
   function playBaron(){
     if(isMuted) return;
     unlockAudio();
@@ -626,45 +598,24 @@
     showTip("COPIED!");
   });
 
-  // ✅ Coin drop + terminal flash (arcade feel)
-  const coinEl = document.getElementById("coin");
-  const terminalEl = document.getElementById("terminal");
-  let coinTimer = null;
-
-  function dropCoin(){
-    if(!coinEl || !terminalEl) return;
-
-    coinEl.classList.remove("drop");
-    terminalEl.classList.remove("flash");
-
-    // force restart animations reliably
-    void coinEl.offsetHeight;
-    void terminalEl.offsetHeight;
-
-    coinEl.classList.add("drop");
-    terminalEl.classList.add("flash");
-
-    clearTimeout(coinTimer);
-    coinTimer = setTimeout(()=>{
-      coinEl.classList.remove("drop");
-      terminalEl.classList.remove("flash");
-    }, 650);
-  }
-
   // ===== ACTIVATE DEGEN tweaks =====
   const degenBtn = document.getElementById("degenBtn");
   let easterMode = false;
   let degenResetTimer = null;
   let pulseTimer = null;
 
-  // ✅ PULSE FIX (desktop + mobile): force layout flush with offsetHeight
+  // FIX: pulse should restart reliably on desktop AND mobile
   function pulseInsertCoins(){
     insertBtn.classList.remove("pulse");
-    void insertBtn.offsetHeight;     // <-- the reliable desktop restart
-    insertBtn.classList.add("pulse");
-
     clearTimeout(pulseTimer);
-    pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+
+    // double-rAF is the most reliable way to restart CSS animation across browsers
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        insertBtn.classList.add("pulse");
+        pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+      });
+    });
   }
 
   function setDegenActivatedTemp(){
@@ -684,12 +635,12 @@
     handleDegenActivate._lock = true;
     setTimeout(()=>{ handleDegenActivate._lock = false; }, 350);
 
+    // Play BOTH on first press
     playClick();
     playBaron();
 
     setDegenActivatedTemp();
     pulseInsertCoins();
-    dropCoin(); // ✅ coin drop when degen triggers
 
     easterMode = true;
     runCycle(true);
@@ -698,12 +649,12 @@
     if(e && e.preventDefault) e.preventDefault();
   }
 
-  // keep multi-event approach (as your original)
+  // keep your original multi-event approach
   degenBtn.addEventListener("pointerdown", handleDegenActivate);
   degenBtn.addEventListener("mousedown", handleDegenActivate);
   degenBtn.addEventListener("click", handleDegenActivate);
 
-  // keyboard activate (safe)
+  // keyboard activate (doesn't break anything)
   degenBtn.addEventListener("keydown", (e)=>{
     if(e.key === "Enter" || e.key === " "){
       e.preventDefault();
