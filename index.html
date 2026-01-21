@@ -294,7 +294,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* ===== MOBILE: bigger again, still no scroll ===== */
+  /* ===== MOBILE ===== */
   @media (max-width:420px){
     .wrap{
       align-items:flex-start;
@@ -302,12 +302,8 @@
       padding-bottom:calc(12px + env(safe-area-inset-bottom));
     }
 
-    .card{
-      padding:12px;
-      margin-top:6px;
-    }
+    .card{padding:12px;margin-top:6px}
 
-    /* slightly bigger than previous version */
     .logo{
       width:clamp(128px, 22dvh, 165px);
       height:clamp(128px, 22dvh, 165px);
@@ -316,11 +312,7 @@
     h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
     .ticker{margin-bottom:7px}
 
-    .degen{
-      margin:7px 0 11px;
-      padding:7px 11px;
-      font-size:13px;
-    }
+    .degen{margin:7px 0 11px;padding:7px 11px;font-size:13px}
 
     .terminal{
       font-size:clamp(10.5px, 1.65dvh, 11.5px);
@@ -339,11 +331,7 @@
 
     .icon{width:27px;height:27px}
 
-    .hint{
-      margin-top:-4px;
-      margin-bottom:7px;
-      font-size:10.5px;
-    }
+    .hint{margin-top:-4px;margin-bottom:7px;font-size:10.5px}
 
     .baron-line{
       font-size:clamp(10.5px, 1.6dvh, 11.5px);
@@ -361,13 +349,11 @@
     .baron-line{margin-top:3px}
   }
 
+  /* ✅ REAL reduced-motion: stop movement/blink */
   @media (prefers-reduced-motion: reduce){
-    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
-    .degen{animation:blink 1s steps(1,end) infinite !important;}
-    .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
-    .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
-    .btn.pulse{animation:none !important;}
-    .btn.pulse::after{animation:none !important;opacity:.85;}
+    * { animation: none !important; transition: none !important; }
+    body::after{ animation:none !important; opacity:0 !important; }
+    .cursor{ display:none !important; }
   }
 </style>
 </head>
@@ -383,7 +369,8 @@
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
 
-    <div class="degen" id="degenBtn" role="button" aria-label="Activate degen">ACTIVATE DEGEN!</div>
+    <!-- ✅ keyboard accessible -->
+    <div class="degen" id="degenBtn" role="button" tabindex="0" aria-label="Activate degen">ACTIVATE DEGEN!</div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
       <span class="coin" id="coin" aria-hidden="true"></span>
@@ -393,17 +380,18 @@
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <a class="btn btn-yellow" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
+    <!-- ✅ real href fallback so no "#" jump if JS fails -->
+    <a class="btn btn-yellow" id="insertBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
     </a>
 
-    <a class="btn btn-green" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
+    <a class="btn btn-green" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer" aria-label="Open Dexscreener">
       <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
       DEXSCREENER
     </a>
 
-    <a class="btn btn-yellow" id="xBtn" href="https://x.com/" target="_blank" rel="noopener" aria-label="Open X profile">
+    <a class="btn btn-yellow" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="Open X profile">
       <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
       TWITTER
     </a>
@@ -419,7 +407,7 @@
     <div class="baron-line" id="baronLine" aria-label="baron terminal line">
       <span class="glitchwipe" aria-hidden="true"></span>
       <span class="prompt">&gt;</span>
-      <span id="baronTyped" class="ok"></span><span id="baronCursor" class="cursor"></span>
+      <span id="baronTyped"></span><span id="baronCursor" class="cursor"></span>
     </div>
 
   </div>
@@ -496,7 +484,7 @@
     initClickPool();
   }
 
-  // ✅ IMPORTANT FIX: capture phase so audio unlock happens BEFORE element handlers on mobile
+  // capture phase so audio unlock happens BEFORE element handlers on mobile
   window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
   window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
 
@@ -548,14 +536,16 @@
     }
   }
 
+  // ✅ reuse preloaded baron audio (no new Audio() each click)
   function playBaron(){
-    if(isMuted) return;
+    if(isMuted || !preloadBaron) return;
     unlockAudio();
     try{
-      const a = new Audio("baron.mp3");
-      a.preload = "auto";
-      a.volume = 0.75;
-      a.play().catch(()=>{});
+      preloadBaron.pause();
+      preloadBaron.currentTime = 0;
+      preloadBaron.volume = 0.75;
+      const p = preloadBaron.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
     }catch(e){}
   }
 
@@ -568,10 +558,26 @@
   // ===== COPY CA =====
   const tip = document.getElementById("tip");
   let tipTimer;
+
+  function setTooltip(text){
+    tip.textContent = text;
+    tip.classList.add("show");
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(()=> tip.classList.remove("show"), 1100);
+  }
+
+  const canClipboard = !!(navigator.clipboard && window.isSecureContext);
+
   document.getElementById("caBtn").addEventListener("click", async ()=>{
     playClick();
-    try{ await navigator.clipboard.writeText(CA); }
-    catch{
+
+    try{
+      if(canClipboard){
+        await navigator.clipboard.writeText(CA);
+      }else{
+        throw new Error("clipboard not available");
+      }
+    }catch{
       try{
         const t=document.createElement("textarea");
         t.value=CA; document.body.appendChild(t);
@@ -581,9 +587,9 @@
         window.prompt("Copy CA:", CA);
       }
     }
-    tip.classList.add("show");
-    clearTimeout(tipTimer);
-    tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
+
+    // ✅ “trust” tooltip with truncated CA
+    setTooltip(`COPIED: ${CA.slice(0,4)}…${CA.slice(-4)}`);
   });
 
   // ===== ACTIVATE DEGEN tweaks =====
@@ -592,12 +598,17 @@
   let degenResetTimer = null;
   let pulseTimer = null;
 
+  // ✅ MORE ROBUST pulse restart (fixes desktop cases where reflow trick sometimes fails)
   function pulseInsertCoins(){
     insertBtn.classList.remove("pulse");
-    void insertBtn.offsetWidth;
-    insertBtn.classList.add("pulse");
     clearTimeout(pulseTimer);
-    pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        insertBtn.classList.add("pulse");
+        pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+      });
+    });
   }
 
   function setDegenActivatedTemp(){
@@ -611,7 +622,7 @@
   }
 
   function handleDegenActivate(e){
-    // ✅ ensure audio is unlocked BEFORE we try to play on mobile
+    // ensure audio is unlocked BEFORE we try to play on mobile
     unlockAudio();
 
     if(handleDegenActivate._lock) return;
@@ -627,12 +638,20 @@
     runCycle(true);
     setTimeout(()=>{ easterMode = false; }, 14000);
 
-    e && e.preventDefault && e.preventDefault();
+    if(e && e.preventDefault) e.preventDefault();
   }
 
   degenBtn.addEventListener("pointerdown", handleDegenActivate);
   degenBtn.addEventListener("mousedown", handleDegenActivate);
   degenBtn.addEventListener("click", handleDegenActivate);
+
+  // ✅ keyboard activation (Enter/Space)
+  degenBtn.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      handleDegenActivate(e);
+    }
+  });
 
   // ===== LOOP =====
   const line1 = document.getElementById("termLine1");
@@ -687,6 +706,15 @@
     }, 90);
   }
 
+  function setReadyLine(){
+    // ✅ avoid innerHTML
+    line3.textContent = "status: ";
+    const s = document.createElement("span");
+    s.className = "ready";
+    s.textContent = "READY";
+    line3.appendChild(s);
+  }
+
   function runCycle(){
     cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
     cycleTimers = [];
@@ -706,7 +734,7 @@
     typeText(line1, l1, 18, ()=>{
       addTimeout(()=> typeText(line2, l2, 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          line3.innerHTML = `status: <span class="ready">READY</span>`;
+          setReadyLine();
           addTimeout(()=> typeBaronOnce(easterMode ? baronTextDegen : baronTextNormal), 220);
         }), 140);
       }), 140);
