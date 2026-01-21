@@ -16,16 +16,32 @@
     --green:#2dff6a;
   }
 
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial, Helvetica, sans-serif;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Arial, Helvetica, sans-serif;
+  }
 
   /* CRT overlay */
   body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
-    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
-    opacity:.08;mix-blend-mode:overlay;
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:2;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.06) 0 1px,
+      rgba(0,0,0,0) 3px 6px
+    );
+    opacity:.08;
+    mix-blend-mode:overlay;
   }
   body::after{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:1;
     background:rgba(255,255,255,.02);
     opacity:0;
     animation:crtFlicker 7s steps(1,end) infinite;
@@ -38,12 +54,21 @@
     79%{opacity:0}
   }
 
-  /* FIX: keep content above CRT overlays */
-  .wrap, .card{position:relative; z-index:5;}
+  /* keep content above CRT */
+  .wrap,.card{position:relative;z-index:5}
 
-  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+  .wrap{
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+  }
+
   .card{
-    width:100%;max-width:520px;
+    width:100%;
+    max-width:520px;
     background:var(--card);
     border:4px solid #000;
     box-shadow:0 0 0 4px #1a1a1a;
@@ -52,36 +77,56 @@
   }
 
   .logo{
-    width:240px;height:240px;max-width:100%;
-    border:4px solid #000;background:#0b0b0b;
+    width:240px;height:240px;
+    max-width:100%;
+    border:4px solid #000;
+    background:#0b0b0b;
     image-rendering:pixelated;
-    display:block;margin:0 auto;
+    display:block;
+    margin:0 auto;
     animation:bob 2.4s steps(2,end) infinite;
     will-change:transform;
   }
-  @keyframes bob{0%,50%,100%{transform:translateY(0)}25%,75%{transform:translateY(-2px)}}
+  @keyframes bob{
+    0%,50%,100%{transform:translateY(0)}
+    25%,75%{transform:translateY(-2px)}
+  }
 
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* DEGEN flicker (PC-safe: opacity, not visibility) */
   .degen{
-    display:inline-block;margin:6px 0 12px;padding:6px 10px;
-    border:3px solid #000;background:#0b0b0b;box-shadow:3px 3px 0 #000;
+    display:inline-block;
+    margin:6px 0 12px;
+    padding:6px 10px;
+    border:3px solid #000;
+    background:#0b0b0b;
+    box-shadow:3px 3px 0 #000;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-weight:900;letter-spacing:1px;text-transform:uppercase;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
     color:var(--yellow);
     animation:blink 1s steps(1,end) infinite;
   }
-  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes blink{
+    0%,49%{opacity:1}
+    50%,100%{opacity:0}
+  }
 
   .terminal{
-    margin:0 auto 12px;width:100%;
-    border:3px solid #000;box-shadow:3px 3px 0 #000;background:#0b0b0b;
-    padding:10px 12px;text-align:left;
+    margin:0 auto 12px;
+    width:100%;
+    border:3px solid #000;
+    box-shadow:3px 3px 0 #000;
+    background:#0b0b0b;
+    padding:10px 12px;
+    text-align:left;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:12px;line-height:1.45;
-    color:#cfcfcf;user-select:none;
+    font-size:12px;
+    line-height:1.45;
+    color:#cfcfcf;
+    user-select:none;
   }
 
   .prompt{color:var(--yellow);font-weight:900}
@@ -89,32 +134,57 @@
   .ok{color:var(--green);font-weight:900}
 
   .cursor{
-    display:inline-block;width:8px;height:12px;background:var(--yellow);
-    margin-left:6px;transform:translateY(2px);
+    display:inline-block;
+    width:8px;height:12px;
+    background:var(--yellow);
+    margin-left:6px;
+    transform:translateY(2px);
     animation:cursor .8s steps(1,end) infinite;
   }
-  @keyframes cursor{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes cursor{
+    0%,49%{opacity:1}
+    50%,100%{opacity:0}
+  }
 
   .term-icon{
-    width:14px;height:14px;margin-left:6px;
-    image-rendering:pixelated;vertical-align:-2px;
+    width:14px;height:14px;
+    margin-left:6px;
+    image-rendering:pixelated;
+    vertical-align:-2px;
   }
 
   .btn{
     width:100%;
-    display:flex;align-items:center;justify-content:center;gap:14px;
-    margin:12px 0;padding:16px 14px;min-height:56px;
-    font-weight:900;text-transform:uppercase;text-decoration:none;
-    border:4px solid #000;box-shadow:4px 4px 0 #000;
-    user-select:none;cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin:12px 0;
+    padding:16px 14px;
+    min-height:56px;
+    font-weight:900;
+    text-transform:uppercase;
+    text-decoration:none;
+    border:4px solid #000;
+    box-shadow:4px 4px 0 #000;
+    user-select:none;
+    cursor:pointer;
   }
-  .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-  button.btn{background:none;font:inherit;outline:none;appearance:none}
+  .btn:active{
+    transform:translate(2px,2px);
+    box-shadow:2px 2px 0 #000
+  }
+  button.btn{
+    background:none;
+    font:inherit;
+    outline:none;
+    appearance:none;
+  }
 
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
 
-  /* FIX: CA button forced white + readable */
+  /* CA button forced white */
   .btn-ca{
     background:#fff !important;
     color:#0b0b0b !important;
@@ -123,48 +193,70 @@
     color:#0b0b0b !important;
   }
 
-  /* FIX: icons 2x bigger */
-  .icon{width:36px;height:36px;image-rendering:pixelated;flex:0 0 auto}
+  .icon{
+    width:36px;height:36px;
+    image-rendering:pixelated;
+    flex:0 0 auto;
+  }
 
   .mono{
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:14px;font-weight:900;text-transform:none;
-    overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-    color:#0b0b0b;
+    font-size:14px;
+    font-weight:900;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
   }
+
   .hint{
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:11px;color:#8d8d8d;
-    margin-top:-6px;margin-bottom:8px;
+    font-size:11px;
+    color:#8d8d8d;
+    margin-top:-6px;
+    margin-bottom:8px;
     user-select:none;
   }
 
   .ca-wrap{position:relative}
+
   .tooltip{
-    position:absolute;top:-36px;left:50%;transform:translateX(-50%);
-    background:#0b0b0b;color:var(--yellow);
-    border:3px solid #000;box-shadow:3px 3px 0 #000;
+    position:absolute;
+    top:-36px;left:50%;
+    transform:translateX(-50%);
+    background:#0b0b0b;
+    color:var(--yellow);
+    border:3px solid #000;
+    box-shadow:3px 3px 0 #000;
     padding:6px 10px;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-weight:900;letter-spacing:1px;text-transform:uppercase;
-    opacity:0;pointer-events:none;
-    transition:opacity .12s steps(1,end), transform .12s steps(1,end);
+    font-weight:900;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s steps(1,end),
+               transform .12s steps(1,end);
     white-space:nowrap;
   }
-  .tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .tooltip.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(-4px);
+  }
 
   .baron-line{
-    margin-top:8px;width:100%;
-    text-align:left;position:relative;
+    margin-top:8px;
+    width:100%;
+    text-align:left;
+    position:relative;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:12px;line-height:1.45;
+    font-size:12px;
     user-select:none;
   }
 
-  /* Glitch wipe */
   .glitchwipe{
-    position:absolute;left:-10%;top:2px;width:120%;height:16px;
-    pointer-events:none;opacity:0;
+    position:absolute;
+    left:-10%;top:2px;
+    width:120%;height:16px;
+    pointer-events:none;
+    opacity:0;
     background:linear-gradient(90deg,
       rgba(45,255,106,0) 0%,
       rgba(45,255,106,.35) 10%,
@@ -172,46 +264,47 @@
       rgba(255,255,255,.35) 55%,
       rgba(45,255,106,.25) 75%,
       rgba(45,255,106,0) 100%);
-    mix-blend-mode:screen;filter:contrast(1.15);
+    mix-blend-mode:screen;
   }
-  .baron-line.glitch .glitchwipe{opacity:1;animation:glitchWipe 220ms steps(6,end) 1;}
+  .baron-line.glitch .glitchwipe{
+    opacity:1;
+    animation:glitchWipe 220ms steps(6,end) 1;
+  }
   @keyframes glitchWipe{
     0%{transform:translateX(-40%) skewX(-18deg)}
-    35%{transform:translateX(5%) skewX(22deg)}
-    70%{transform:translateX(35%) skewX(-12deg)}
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* FIX: better mobile so CA + everything is immediately visible */
-  @media (max-width:520px){
-    .wrap{
-      padding:12px;
-      align-items:flex-start;
-      justify-content:center;
-    }
+  /* ---- MOBILE FIT FIXES ---- */
+  @media (max-width:420px){
+    .wrap{align-items:flex-start}
+    .card{padding:10px;margin-top:6px}
+    .logo{width:150px;height:150px}
+    h1{font-size:26px;margin:6px 0 2px}
+    .terminal{font-size:11px;padding:8px 10px}
+    .btn{margin:8px 0;padding:12px 10px;min-height:48px}
+    .icon{width:28px;height:28px}
+    .baron-line{font-size:11px}
+  }
+
+  @media (max-width:420px) and (max-height:740px){
+    .logo{width:135px;height:135px}
+    .btn{min-height:44px}
+    .icon{width:26px;height:26px}
+  }
+
+  @media (max-width:420px) and (max-height:690px){
     .card{
-      padding:12px;
-      margin-top:8px;
+      max-height:calc(100dvh - 18px - env(safe-area-inset-bottom));
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
     }
-    .logo{width:180px;height:180px}
-    h1{font-size:28px;margin:8px 0 2px}
-    .terminal{padding:9px 10px}
-    .btn{margin:10px 0;padding:14px 12px;min-height:52px}
-    .hint{margin-bottom:4px}
-    .baron-line{margin-top:6px}
-    .icon{width:30px;height:30px}
   }
 
-  @media (max-width:380px){
-    .terminal{font-size:11px}
-    .logo{width:165px;height:165px}
-  }
-
-  /* Force arcade motion even if Windows "Reduce motion" enabled */
   @media (prefers-reduced-motion: reduce){
-    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
-    .degen{animation:blink 1s steps(1,end) infinite !important;}
-    .cursor{animation:cursor .8s steps(1,end) infinite !important;}
+    .logo,.degen,.cursor{
+      animation-duration:inherit !important;
+    }
   }
 </style>
 </head>
@@ -220,44 +313,43 @@
 <div class="wrap">
   <div class="card">
 
-    <img class="logo" src="logo.png" alt="Greenback logo" />
+    <img class="logo" src="logo.png" alt="Greenback logo">
 
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <div class="terminal" aria-label="status terminal">
+    <div class="terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- Icons on the LEFT of each button (transparent PNGs supported) -->
-    <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
-      <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
+    <a class="btn btn-yellow js-click" id="insertBtn">
+      <img class="icon" src="pump.png" alt="">
       INSERT COINS
     </a>
 
-    <a class="btn btn-green js-click" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
-      <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
+    <a class="btn btn-green js-click" id="dexBtn">
+      <img class="icon" src="dex.png" alt="">
       DEXSCREENER
     </a>
 
-    <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
-      <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
+    <a class="btn btn-yellow js-click" href="https://x.com/GannicusXRP" target="_blank">
+      <img class="icon" src="x.png" alt="">
       TWITTER
     </a>
 
     <div class="ca-wrap">
-      <button class="btn btn-ca js-click" id="caBtn" type="button" aria-label="Copy contract address">
+      <button class="btn btn-ca js-click" id="caBtn">
         <span class="tooltip" id="tip">COPIED!</span>
         <span class="mono" id="caText"></span>
       </button>
     </div>
     <div class="hint">tap to copy (copies full CA)</div>
 
-    <div class="baron-line" id="baronLine" aria-label="baron terminal line">
-      <span class="glitchwipe" aria-hidden="true"></span>
+    <div class="baron-line" id="baronLine">
+      <span class="glitchwipe"></span>
       <span class="prompt">&gt;</span>
       <span id="baronTyped" class="ok"></span><span id="baronCursor" class="cursor"></span>
     </div>
@@ -265,169 +357,74 @@
   </div>
 </div>
 
-<!-- Optional: place arcade.mp3 next to index.html -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 
 <script>
-  // ===== CONFIG =====
-  const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-  const INSERT_URL = "https://pump.fun";
-  const DEX_URL = "https://dexscreener.com";
-  const DEX_ICON = "dex.png"; // used in terminal READY line
+const CA="AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+document.getElementById("caText").textContent="CA: "+CA.slice(0,6)+"..."+CA.slice(-6);
+document.getElementById("insertBtn").href="https://pump.fun";
+document.getElementById("dexBtn").href="https://dexscreener.com";
 
-  // links
-  document.getElementById("insertBtn").href = INSERT_URL;
-  document.getElementById("dexBtn").href = DEX_URL;
+const tip=document.getElementById("tip");
+document.getElementById("caBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(CA);}
+  catch{window.prompt("Copy CA:",CA);}
+  tip.classList.add("show");
+  setTimeout(()=>tip.classList.remove("show"),900);
+};
 
-  // hide broken images (prevents broken-image squares)
-  function safeImg(id){
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.onerror = () => { el.style.display = "none"; };
-  }
-  safeImg("pumpIcon");
-  safeImg("dexIcon");
-  safeImg("xIcon");
-
-  // CA short display, full copy
-  document.getElementById("caText").textContent =
-    "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
-
-  // ===== CLICK SFX (PC + mobile) =====
-  const sfxEl = document.getElementById("clickSfx");
-  let audioCtx = null;
-
-  function beepFallback(){
-    try{
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = "square";
-      o.frequency.value = 740;
-      g.gain.value = 0.045;
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start();
-      setTimeout(()=> o.stop(), 70);
-    }catch(e){}
-  }
-
-  async function playClick(){
-    try{
-      if(!sfxEl) return beepFallback();
-      sfxEl.currentTime = 0;
-      const p = sfxEl.play();
-      if(p && typeof p.then === "function") await p;
-    }catch{
-      beepFallback();
-    }
-  }
-
-  // Play sound on any button/link with .js-click
-  document.querySelectorAll(".js-click").forEach(el=>{
-    el.addEventListener("click", ()=>{ playClick(); }, {passive:true});
+const sfx=document.getElementById("clickSfx");
+document.querySelectorAll(".js-click").forEach(b=>{
+  b.addEventListener("click",()=>{
+    try{sfx.currentTime=0;sfx.play();}catch{}
   });
+});
 
-  // ===== COPY CA =====
-  const tip = document.getElementById("tip");
-  let tipTimer;
-  document.getElementById("caBtn").addEventListener("click", async ()=>{
-    try{
-      await navigator.clipboard.writeText(CA);
-    }catch{
-      // robust fallback
-      try{
-        const t=document.createElement("textarea");
-        t.value=CA; document.body.appendChild(t);
-        t.select(); document.execCommand("copy");
-        document.body.removeChild(t);
-      }catch{
-        window.prompt("Copy CA:", CA);
-      }
-    }
-    tip.classList.add("show");
-    clearTimeout(tipTimer);
-    tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
+const l1=termLine1,l2=termLine2,l3=termLine3;
+const baronText="THE BARON ALWAYS EXITS FIRST";
+const baronEl=document.getElementById("baronTyped");
+const baronLine=document.getElementById("baronLine");
+let timers=[];
+
+function t(fn,ms){const x=setTimeout(fn,ms);timers.push(x);}
+function clearAll(){timers.forEach(x=>{clearTimeout(x);clearInterval(x)});timers=[];}
+
+function type(el,txt,s,cb){
+  let i=0;
+  const x=setInterval(()=>{
+    el.textContent+=txt[i++]||"";
+    if(i>=txt.length){clearInterval(x);cb&&cb();}
+  },s);
+  timers.push(x);
+}
+
+function baron(){
+  baronLine.classList.remove("glitch");
+  void baronLine.offsetWidth;
+  baronLine.classList.add("glitch");
+  baronEl.textContent="";
+  t(()=>{
+    let i=0;
+    const x=setInterval(()=>{
+      baronEl.textContent+=baronText[i++]||"";
+      if(i>=baronText.length)clearInterval(x);
+    },14);
+    timers.push(x);
+  },90);
+}
+
+function cycle(){
+  clearAll();
+  l1.textContent=l2.textContent=l3.textContent=baronEl.textContent="";
+  type(l1,"initializing degen terminal...",18,()=>{
+    t(()=>type(l2,"loading greenback protocol v0.0.1",14,()=>{
+      t(()=>type(l3,"status: READY",16,baron),140);
+    }),140);
   });
+}
 
-  // ===== LOOP (terminal lines + baron) =====
-  const line1 = document.getElementById("termLine1");
-  const line2 = document.getElementById("termLine2");
-  const line3 = document.getElementById("termLine3");
-
-  const LOOP_MS = 10000;
-
-  const baronText = "THE BARON ALWAYS EXITS FIRST";
-  const baronEl = document.getElementById("baronTyped");
-  const baronCursor = document.getElementById("baronCursor");
-  const baronLine = document.getElementById("baronLine");
-
-  let cycleTimers = [];
-
-  function addTimeout(fn, ms){
-    const t = setTimeout(fn, ms);
-    cycleTimers.push(t);
-    return t;
-  }
-
-  function typeText(el, text, speed, done){
-    let i = 0;
-    el.textContent = "";
-    const t = setInterval(()=>{
-      el.textContent += text[i++] || "";
-      if(i >= text.length){
-        clearInterval(t);
-        done && done();
-      }
-    }, speed);
-    cycleTimers.push(t);
-  }
-
-  function typeBaronOnce(){
-    baronLine.classList.remove("glitch");
-    void baronLine.offsetWidth;
-    baronLine.classList.add("glitch");
-
-    baronEl.textContent = "";
-    baronCursor.style.display = "inline-block";
-
-    addTimeout(()=>{
-      let i = 0;
-      const t = setInterval(()=>{
-        baronEl.textContent += baronText[i++] || "";
-        if(i >= baronText.length){
-          clearInterval(t);
-          addTimeout(()=>{ baronCursor.style.display = "none"; }, 550);
-        }
-      }, 14);
-      cycleTimers.push(t);
-    }, 90);
-  }
-
-  function runCycle(){
-    // clear both timeouts + intervals from previous cycle
-    cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
-    cycleTimers = [];
-
-    // reset
-    line1.textContent = "";
-    line2.textContent = "";
-    line3.textContent = "";
-    baronEl.textContent = "";
-    baronCursor.style.display = "none";
-
-    typeText(line1, "initializing degen terminal...", 18, ()=>{
-      addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
-        addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          line3.innerHTML =
-            `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
-          addTimeout(typeBaronOnce, 220);
-        }), 140);
-      }), 140);
-    });
-  }
-
-  runCycle();
-  setInterval(runCycle, LOOP_MS);
+cycle();
+setInterval(cycle,10000);
 </script>
 </body>
 </html>
