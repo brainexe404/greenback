@@ -58,7 +58,7 @@
     box-shadow:0 0 0 4px #1a1a1a;
     padding:18px;
     text-align:center;
-    position:relative; /* for mute button */
+    position:relative;
   }
 
   /* Mute toggle */
@@ -92,7 +92,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* ACTIVATE DEGEN! (same size vibe as before, but more arcade buttony) */
+  /* ACTIVATE DEGEN! (arcade flicker tag) */
   .degen{
     display:inline-block;
     margin:6px 0 12px;
@@ -111,6 +111,14 @@
   }
   .degen:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000, 0 0 14px rgba(200,255,47,.12)}
   @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  /* When temporarily "ACTIVATED" we stop flicker and make it solid */
+  .degen.activated{
+    animation:none !important;
+    background:var(--yellow);
+    color:#0b0b0b;
+    box-shadow:4px 4px 0 #000, 0 0 18px rgba(200,255,47,.25);
+  }
 
   .terminal{
     margin:0 auto 12px;width:100%;
@@ -181,12 +189,26 @@
     font-weight:900;text-transform:uppercase;text-decoration:none;
     border:4px solid #000;box-shadow:4px 4px 0 #000;
     user-select:none;cursor:pointer;
+    position:relative;
   }
   .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
   button.btn{background:none;font:inherit;outline:none;appearance:none}
 
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
+
+  /* INSERT COINS highlight pulse after activation */
+  .btn.pulse{
+    animation:btnPulse 950ms steps(6,end) 6;
+    box-shadow:4px 4px 0 #000, 0 0 20px rgba(200,255,47,.28);
+  }
+  @keyframes btnPulse{
+    0%{filter:brightness(1); transform:translate(0,0)}
+    25%{filter:brightness(1.25); transform:translate(-1px,-1px)}
+    50%{filter:brightness(1.05); transform:translate(0,0)}
+    75%{filter:brightness(1.3); transform:translate(-1px,-1px)}
+    100%{filter:brightness(1); transform:translate(0,0)}
+  }
 
   /* CA button forced white + readable */
   .btn-ca{background:#fff !important;color:#0b0b0b !important;}
@@ -251,7 +273,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* ---- MOBILE FIT (your perfect phone sizing) ---- */
+  /* ---- MOBILE FIT ---- */
   @media (max-width:420px){
     .wrap{align-items:flex-start}
     .card{padding:10px;margin-top:6px}
@@ -280,12 +302,13 @@
     }
   }
 
-  /* IMPORTANT: keep arcade animations even if reduce-motion is enabled */
+  /* keep arcade animations even if reduce-motion is enabled */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
     .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
+    .btn.pulse{animation:none !important;}
   }
 </style>
 </head>
@@ -301,7 +324,6 @@
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
 
-    <!-- Arcade-style flicker button -->
     <div class="degen" id="degenBtn" role="button" aria-label="Activate degen">ACTIVATE DEGEN!</div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
@@ -344,7 +366,7 @@
   </div>
 </div>
 
-<!-- kept for preload + compatibility -->
+<!-- Preload (kept for faster first hit) -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 <audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
 
@@ -354,7 +376,6 @@
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
 
-  // terminal live status rotation
   const STATUS_LINES = [
     "loading greenback protocol v0.0.1",
     "syncing liquidity routes... OK",
@@ -378,19 +399,17 @@
     el.onerror=()=>{ el.style.display="none"; };
   });
 
-  // CA short display, full copy
+  // CA short display
   const caTextEl = document.getElementById("caText");
   caTextEl.textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // ===== AUDIO (fixed: plays EVERY click reliably) =====
+  // ===== AUDIO (click + fallback beep) =====
   const muteBtn = document.getElementById("muteBtn");
   const preloadClick = document.getElementById("clickSfx");
   const preloadBaron = document.getElementById("baronVoice");
 
   let isMuted = (localStorage.getItem("gb_muted") === "1");
-  function renderMute(){
-    muteBtn.textContent = isMuted ? "🔇" : "🔊";
-  }
+  function renderMute(){ muteBtn.textContent = isMuted ? "🔇" : "🔊"; }
   renderMute();
 
   muteBtn.addEventListener("click", ()=>{
@@ -399,13 +418,18 @@
     renderMute();
   });
 
-  // Mobile browsers require a gesture to "unlock" audio.
-  // We unlock using a tiny silent play attempt on the first user interaction.
   let audioUnlocked = false;
+  let audioCtx = null;
+
   function unlockAudio(){
     if(audioUnlocked) return;
     audioUnlocked = true;
-    // attempt to prime both preloaded elements
+
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+    }catch(e){}
+
     [preloadClick, preloadBaron].forEach(a=>{
       if(!a) return;
       try{
@@ -413,38 +437,79 @@
         a.muted = true;
         const p = a.play();
         if(p && p.then){
-          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; }).catch(()=>{ a.muted = wasMuted; });
+          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; })
+           .catch(()=>{ a.muted = wasMuted; });
         }else{
           a.pause(); a.currentTime = 0; a.muted = wasMuted;
         }
       }catch(e){}
     });
+
+    initClickPool();
   }
+
   window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true});
   window.addEventListener("touchstart", unlockAudio, {once:true, passive:true});
 
-  // Reliable per-click sound: create a fresh Audio instance each time and keep it alive briefly.
-  const liveAudio = [];
-  function playSound(src, volume){
+  function beepFallback(){
     if(isMuted) return;
-    unlockAudio();
     try{
-      const a = new Audio(src);
-      a.preload = "auto";
-      a.volume = volume;
-      liveAudio.push(a);
-      const cleanup = () => {
-        const i = liveAudio.indexOf(a);
-        if(i !== -1) liveAudio.splice(i,1);
-      };
-      a.addEventListener("ended", cleanup);
-      a.addEventListener("error", cleanup);
-      a.play().catch(()=>{ cleanup(); });
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 740;
+      g.gain.value = 0.05;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
     }catch(e){}
   }
 
-  function playClick(){ playSound("arcade.mp3", 0.85); }
-  function playBaron(){ playSound("baron.mp3", 0.75); }
+  const CLICK_POOL_SIZE = 6;
+  const clickPool = [];
+  let clickPoolIdx = 0;
+
+  function initClickPool(){
+    if(clickPool.length) return;
+    for(let i=0;i<CLICK_POOL_SIZE;i++){
+      const a = new Audio("arcade.mp3");
+      a.preload = "auto";
+      a.volume = 0.85;
+      clickPool.push(a);
+    }
+  }
+
+  function playClick(){
+    if(isMuted) return;
+    unlockAudio();
+
+    try{
+      initClickPool();
+      const a = clickPool[clickPoolIdx % clickPool.length];
+      clickPoolIdx++;
+      a.pause();
+      a.currentTime = 0;
+      const p = a.play();
+      if(p && typeof p.catch === "function"){
+        p.catch(()=>{ beepFallback(); });
+      }
+    }catch{
+      beepFallback();
+    }
+  }
+
+  function playBaron(){
+    if(isMuted) return;
+    unlockAudio();
+    try{
+      const a = new Audio("baron.mp3");
+      a.preload = "auto";
+      a.volume = 0.75;
+      a.play().catch(()=>{});
+    }catch(e){}
+  }
 
   // ===== COPY CA =====
   const tip = document.getElementById("tip");
@@ -467,7 +532,7 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
-  // Click sounds for the main buttons/links
+  // Click sounds for main elements
   ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -489,13 +554,37 @@
   }
   insertBtn.addEventListener("click", ()=>{ coinDrop(); }, {passive:true});
 
-  // ===== ACTIVATE DEGEN (1 click triggers terminal + plays baron mp3 EVERY click) =====
+  // ===== ACTIVATE DEGEN tweaks =====
   const degenBtn = document.getElementById("degenBtn");
   let easterMode = false;
+  let degenResetTimer = null;
+  let pulseTimer = null;
+
+  function pulseInsertCoins(){
+    insertBtn.classList.remove("pulse");
+    void insertBtn.offsetWidth; // reflow
+    insertBtn.classList.add("pulse");
+    clearTimeout(pulseTimer);
+    pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+  }
+
+  function setDegenActivatedTemp(){
+    degenBtn.classList.add("activated");
+    degenBtn.textContent = "ACTIVATED";
+    clearTimeout(degenResetTimer);
+    degenResetTimer = setTimeout(()=>{
+      degenBtn.classList.remove("activated");
+      degenBtn.textContent = "ACTIVATE DEGEN!";
+    }, 10000);
+  }
 
   degenBtn.addEventListener("click", ()=>{
-    playClick();     // button click sound
-    playBaron();     // baron mp3 every time you press ACTIVATE DEGEN!
+    playClick();
+    playBaron();
+
+    setDegenActivatedTemp();
+    pulseInsertCoins();
+
     easterMode = true;
     runCycle(true);
     setTimeout(()=>{ easterMode = false; }, 14000);
@@ -567,13 +656,13 @@
     baronTyped.textContent = "";
     baronCursor.style.display = "none";
 
-    const l1 = easterMode ? "ACCESS GRANTED..." : "initializing degen terminal...";
+    // (tweak) add "on solana..."
+    const l1 = easterMode ? "ACCESS GRANTED..." : "initializing degen terminal on solana...";
     const l2 = easterMode ? "DEGEN MODE: ACTIVE" : statusLine;
 
     typeText(line1, l1, 18, ()=>{
       addTimeout(()=> typeText(line2, l2, 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          // Removed dex icon next to READY (as requested)
           line3.innerHTML = `status: <span class="ready">READY</span>`;
           addTimeout(()=> typeBaronOnce(easterMode ? baronTextDegen : baronTextNormal), 220);
         }), 140);
