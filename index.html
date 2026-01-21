@@ -18,7 +18,7 @@
 
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial, Helvetica, sans-serif;}
 
-  /* CRT */
+  /* CRT overlay */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
@@ -111,11 +111,8 @@
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
 
-  /* FIX: CA button white */
-  .btn-ca{
-    background:#fff;
-    color:#0b0b0b;
-  }
+  /* CA button WHITE (as requested) */
+  .btn-ca{background:#fff;color:#0b0b0b}
 
   .icon{width:18px;height:18px;image-rendering:pixelated;flex:0 0 auto}
 
@@ -175,7 +172,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* Mobile */
+  /* Mobile layout */
   @media (max-width:420px){
     .wrap{padding:12px;align-items:flex-start}
     .card{padding:12px}
@@ -185,7 +182,12 @@
     .btn{margin:10px 0;padding:14px 12px;min-height:52px}
   }
 
-  /* IMPORTANT: do NOT disable animations on reduce-motion (you want arcade vibe on PC) */
+  /* Force logo bobbing even if Windows "Reduce motion" is enabled */
+  @media (prefers-reduced-motion: reduce){
+    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
+    .degen{animation:blink 1s steps(1,end) infinite !important;}
+    .cursor{animation:cursor .8s steps(1,end) infinite !important;}
+  }
 </style>
 </head>
 
@@ -205,6 +207,7 @@
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
+    <!-- Icons on the LEFT of each button -->
     <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
@@ -215,6 +218,7 @@
       DEXSCREENER
     </a>
 
+    <!-- Remove old "X /" text: just TWITTER, with x.png icon -->
     <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
       <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
       TWITTER
@@ -237,6 +241,7 @@
   </div>
 </div>
 
+<!-- Optional: place arcade.mp3 next to index.html -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 
 <script>
@@ -244,29 +249,27 @@
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
-  const DEX_ICON = "dex.png"; // terminal tiny icon
+  const DEX_ICON = "dex.png"; // used in terminal READY line
 
   // links
   document.getElementById("insertBtn").href = INSERT_URL;
   document.getElementById("dexBtn").href = DEX_URL;
 
-  // Hide broken icons + log it so you know if path is wrong
+  // hide broken images (prevents broken-image squares)
   function safeImg(id){
     const el = document.getElementById(id);
     if(!el) return;
-    el.onerror = () => {
-      console.warn("Missing image:", el.getAttribute("src"));
-      el.style.display = "none";
-    };
+    el.onerror = () => { el.style.display = "none"; };
   }
   safeImg("pumpIcon");
   safeImg("dexIcon");
   safeImg("xIcon");
 
-  // CA short display
-  document.getElementById("caText").textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
+  // CA short display, full copy
+  document.getElementById("caText").textContent =
+    "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // ===== CLICK SFX =====
+  // ===== CLICK SFX (PC + mobile) =====
   const sfxEl = document.getElementById("clickSfx");
   let audioCtx = null;
 
@@ -277,7 +280,7 @@
       const g = audioCtx.createGain();
       o.type = "square";
       o.frequency.value = 740;
-      g.gain.value = 0.04;
+      g.gain.value = 0.045;
       o.connect(g); g.connect(audioCtx.destination);
       o.start();
       setTimeout(()=> o.stop(), 70);
@@ -295,6 +298,7 @@
     }
   }
 
+  // Play sound on any button/link with .js-click
   document.querySelectorAll(".js-click").forEach(el=>{
     el.addEventListener("click", ()=>{ playClick(); }, {passive:true});
   });
@@ -306,6 +310,7 @@
     try{
       await navigator.clipboard.writeText(CA);
     }catch{
+      // robust fallback
       try{
         const t=document.createElement("textarea");
         t.value=CA; document.body.appendChild(t);
@@ -320,7 +325,7 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
-  // ===== LOOP (FIXED) =====
+  // ===== LOOP (terminal lines + baron) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
@@ -332,7 +337,7 @@
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
 
-  // Only clear per-cycle timers (NOT the main loop interval)
+  // ONLY per-cycle timers live here (so the main loop never gets cleared)
   let cycleTimers = [];
 
   function addTimeout(fn, ms){
@@ -340,19 +345,15 @@
     cycleTimers.push(t);
     return t;
   }
-  function addInterval(fn, ms){
-    const t = setInterval(fn, ms);
-    cycleTimers.push(t);
-    return t;
-  }
+
   function killCycleTimers(){
-    cycleTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    cycleTimers.forEach(t => clearTimeout(t));
     cycleTimers = [];
   }
 
   function typeText(el, text, speed, done){
-    let i=0;
-    el.textContent="";
+    let i = 0;
+    el.textContent = "";
     const t = setInterval(()=>{
       el.textContent += text[i++] || "";
       if(i >= text.length){
@@ -360,24 +361,26 @@
         done && done();
       }
     }, speed);
+    // store interval id too (clear with clearInterval via clearTimeout is harmless, but be explicit)
     cycleTimers.push(t);
   }
 
   function typeBaronOnce(){
+    // glitch wipe
     baronLine.classList.remove("glitch");
     void baronLine.offsetWidth;
     baronLine.classList.add("glitch");
 
-    baronEl.textContent="";
-    baronCursor.style.display="inline-block";
+    baronEl.textContent = "";
+    baronCursor.style.display = "inline-block";
 
     addTimeout(()=>{
-      let i=0;
-      const t=setInterval(()=>{
+      let i = 0;
+      const t = setInterval(()=>{
         baronEl.textContent += baronText[i++] || "";
-        if(i>=baronText.length){
+        if(i >= baronText.length){
           clearInterval(t);
-          addTimeout(()=>{ baronCursor.style.display="none"; }, 550);
+          addTimeout(()=>{ baronCursor.style.display = "none"; }, 550);
         }
       }, 14);
       cycleTimers.push(t);
@@ -385,18 +388,24 @@
   }
 
   function runCycle(){
-    killCycleTimers();
+    // stop any previous typing mid-cycle, then restart clean
+    // clearTimeout won't clear intervals, so clear both:
+    cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
+    cycleTimers = [];
 
-    line1.textContent="";
-    line2.textContent="";
-    line3.textContent="";
-    baronEl.textContent="";
-    baronCursor.style.display="none";
+    // reset terminal + baron
+    line1.textContent = "";
+    line2.textContent = "";
+    line3.textContent = "";
+    baronEl.textContent = "";
+    baronCursor.style.display = "none";
 
     typeText(line1, "initializing degen terminal...", 18, ()=>{
       addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          line3.innerHTML = `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
+          // READY always green + dex icon (no fragile replace)
+          line3.innerHTML =
+            `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
           addTimeout(typeBaronOnce, 220);
         }), 140);
       }), 140);
@@ -404,7 +413,6 @@
   }
 
   runCycle();
-  // Main loop interval is NOT tracked/cleared
   setInterval(runCycle, LOOP_MS);
 </script>
 </body>
