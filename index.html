@@ -109,7 +109,6 @@
     cursor:pointer;
     animation:blink 1s steps(1,end) infinite;
 
-    /* PC click reliability */
     pointer-events:auto;
     position:relative;
     z-index:50;
@@ -295,20 +294,75 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
+  /* ===== MOBILE FIT (NO SCROLL; BARON LINE ALWAYS VISIBLE) ===== */
   @media (max-width:420px){
-    .wrap{align-items:flex-start}
-    .card{padding:10px;margin-top:6px}
-    .logo{width:150px;height:150px}
-    h1{font-size:26px;margin:6px 0 2px}
-    .terminal{font-size:11px;padding:8px 10px;line-height:1.35}
-    .btn{margin:8px 0;padding:12px 10px;min-height:48px}
-    .icon{width:28px;height:28px}
-    .baron-line{font-size:11px;margin-top:4px}
-    .hint{margin-bottom:4px}
+    .wrap{
+      align-items:flex-start;
+      padding:10px;
+      padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .card{
+      padding:10px;
+      margin-top:6px;
+    }
+
+    /* dynamic logo sizing based on viewport height */
+    .logo{
+      width:clamp(118px, 20dvh, 150px);
+      height:clamp(118px, 20dvh, 150px);
+    }
+
+    h1{font-size:clamp(22px, 3.4dvh, 26px);margin:6px 0 2px}
+    .ticker{margin-bottom:6px}
+
+    .degen{
+      margin:6px 0 10px;
+      padding:6px 10px;
+      font-size:12px;
+    }
+
+    .terminal{
+      font-size:clamp(10px, 1.55dvh, 11px);
+      padding:8px 10px;
+      line-height:1.32;
+      margin-bottom:8px;
+    }
+
+    .btn{
+      margin:6px 0;
+      padding:11px 10px;
+      min-height:44px;
+      gap:12px;
+      font-size:13px;
+    }
+
+    .icon{width:26px;height:26px}
+
+    .hint{
+      margin-top:-4px;
+      margin-bottom:6px;
+      font-size:10px;
+    }
+
+    .baron-line{
+      font-size:clamp(10px, 1.5dvh, 11px);
+      margin-top:4px;
+      line-height:1.25;
+    }
+
     .mute{top:8px;right:8px}
-    .degen{padding:6px 10px}
   }
 
+  /* super short phones */
+  @media (max-width:420px) and (max-height:700px){
+    .logo{width:clamp(110px, 18dvh, 135px);height:clamp(110px, 18dvh, 135px)}
+    .btn{margin:5px 0; padding:10px 10px; min-height:42px; font-size:12.5px}
+    .terminal{margin-bottom:7px}
+    .baron-line{margin-top:3px}
+  }
+
+  /* keep arcade animations even if reduce-motion is enabled */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
@@ -506,7 +560,6 @@
     }catch(e){}
   }
 
-  // click sounds
   ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -559,7 +612,6 @@
   }
 
   function handleDegenActivate(e){
-    // prevent double-fire when we bind multiple events
     if(handleDegenActivate._lock) return;
     handleDegenActivate._lock = true;
     setTimeout(()=>{ handleDegenActivate._lock = false; }, 350);
@@ -576,7 +628,6 @@
     e && e.preventDefault && e.preventDefault();
   }
 
-  // ✅ Desktop reliability: bind multiple pointer types
   degenBtn.addEventListener("pointerdown", handleDegenActivate);
   degenBtn.addEventListener("mousedown", handleDegenActivate);
   degenBtn.addEventListener("click", handleDegenActivate);
