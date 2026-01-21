@@ -38,6 +38,9 @@
     79%{opacity:0}
   }
 
+  /* FIX: keep content above CRT overlays */
+  .wrap, .card{position:relative; z-index:5;}
+
   .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
   .card{
     width:100%;max-width:520px;
@@ -99,7 +102,7 @@
 
   .btn{
     width:100%;
-    display:flex;align-items:center;justify-content:center;gap:12px;
+    display:flex;align-items:center;justify-content:center;gap:14px;
     margin:12px 0;padding:16px 14px;min-height:56px;
     font-weight:900;text-transform:uppercase;text-decoration:none;
     border:4px solid #000;box-shadow:4px 4px 0 #000;
@@ -111,10 +114,17 @@
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
 
-  /* CA button WHITE (as requested) */
-  .btn-ca{background:#fff;color:#0b0b0b}
+  /* FIX: CA button forced white + readable */
+  .btn-ca{
+    background:#fff !important;
+    color:#0b0b0b !important;
+  }
+  .btn-ca .mono{
+    color:#0b0b0b !important;
+  }
 
-  .icon{width:18px;height:18px;image-rendering:pixelated;flex:0 0 auto}
+  /* FIX: icons 2x bigger */
+  .icon{width:36px;height:36px;image-rendering:pixelated;flex:0 0 auto}
 
   .mono{
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -172,17 +182,32 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* Mobile layout */
-  @media (max-width:420px){
-    .wrap{padding:12px;align-items:flex-start}
-    .card{padding:12px}
-    .logo{width:170px;height:170px}
-    h1{font-size:30px;margin:8px 0 2px}
+  /* FIX: better mobile so CA + everything is immediately visible */
+  @media (max-width:520px){
+    .wrap{
+      padding:12px;
+      align-items:flex-start;
+      justify-content:center;
+    }
+    .card{
+      padding:12px;
+      margin-top:8px;
+    }
+    .logo{width:180px;height:180px}
+    h1{font-size:28px;margin:8px 0 2px}
     .terminal{padding:9px 10px}
     .btn{margin:10px 0;padding:14px 12px;min-height:52px}
+    .hint{margin-bottom:4px}
+    .baron-line{margin-top:6px}
+    .icon{width:30px;height:30px}
   }
 
-  /* Force logo bobbing even if Windows "Reduce motion" is enabled */
+  @media (max-width:380px){
+    .terminal{font-size:11px}
+    .logo{width:165px;height:165px}
+  }
+
+  /* Force arcade motion even if Windows "Reduce motion" enabled */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
@@ -207,7 +232,7 @@
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- Icons on the LEFT of each button -->
+    <!-- Icons on the LEFT of each button (transparent PNGs supported) -->
     <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
@@ -218,7 +243,6 @@
       DEXSCREENER
     </a>
 
-    <!-- Remove old "X /" text: just TWITTER, with x.png icon -->
     <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
       <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
       TWITTER
@@ -337,18 +361,12 @@
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
 
-  // ONLY per-cycle timers live here (so the main loop never gets cleared)
   let cycleTimers = [];
 
   function addTimeout(fn, ms){
     const t = setTimeout(fn, ms);
     cycleTimers.push(t);
     return t;
-  }
-
-  function killCycleTimers(){
-    cycleTimers.forEach(t => clearTimeout(t));
-    cycleTimers = [];
   }
 
   function typeText(el, text, speed, done){
@@ -361,12 +379,10 @@
         done && done();
       }
     }, speed);
-    // store interval id too (clear with clearInterval via clearTimeout is harmless, but be explicit)
     cycleTimers.push(t);
   }
 
   function typeBaronOnce(){
-    // glitch wipe
     baronLine.classList.remove("glitch");
     void baronLine.offsetWidth;
     baronLine.classList.add("glitch");
@@ -388,12 +404,11 @@
   }
 
   function runCycle(){
-    // stop any previous typing mid-cycle, then restart clean
-    // clearTimeout won't clear intervals, so clear both:
+    // clear both timeouts + intervals from previous cycle
     cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
     cycleTimers = [];
 
-    // reset terminal + baron
+    // reset
     line1.textContent = "";
     line2.textContent = "";
     line3.textContent = "";
@@ -403,7 +418,6 @@
     typeText(line1, "initializing degen terminal...", 18, ()=>{
       addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          // READY always green + dex icon (no fragile replace)
           line3.innerHTML =
             `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
           addTimeout(typeBaronOnce, 220);
