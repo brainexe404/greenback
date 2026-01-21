@@ -61,7 +61,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* FIX: flicker works reliably on PC (opacity instead of visibility) */
+  /* DEGEN flicker (PC-safe: opacity, not visibility) */
   .degen{
     display:inline-block;margin:6px 0 12px;padding:6px 10px;
     border:3px solid #000;background:#0b0b0b;box-shadow:3px 3px 0 #000;
@@ -69,7 +69,6 @@
     font-weight:900;letter-spacing:1px;text-transform:uppercase;
     color:var(--yellow);
     animation:blink 1s steps(1,end) infinite;
-    opacity:1;
   }
   @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
@@ -112,10 +111,10 @@
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
 
-  /* FIX: CA button should be dark with white text (no blacked-out look) */
+  /* FIX: CA button white */
   .btn-ca{
-    background:#0b0b0b;
-    color:var(--ink);
+    background:#fff;
+    color:#0b0b0b;
   }
 
   .icon{width:18px;height:18px;image-rendering:pixelated;flex:0 0 auto}
@@ -124,7 +123,7 @@
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:14px;font-weight:900;text-transform:none;
     overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-    color:var(--ink);
+    color:#0b0b0b;
   }
   .hint{
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -186,12 +185,7 @@
     .btn{margin:10px 0;padding:14px 12px;min-height:52px}
   }
 
-  /* Reduced motion: keep page safe, but DO NOT disable DEGEN blink (you wanted it) */
-  @media (prefers-reduced-motion: reduce){
-    body::before, body::after{display:none !important}
-    .logo{animation:none !important}
-    /* keep .degen and cursor alive on purpose */
-  }
+  /* IMPORTANT: do NOT disable animations on reduce-motion (you want arcade vibe on PC) */
 </style>
 </head>
 
@@ -205,27 +199,24 @@
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <div class="terminal" aria-label="status terminal" aria-live="polite">
+    <div class="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- INSERT COINS with pump.png icon on the left -->
     <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
-      <img class="icon" src="pump.png" alt="" aria-hidden="true">
+      <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
     </a>
 
-    <!-- DEXSCREENER with dex.png icon on the left -->
     <a class="btn btn-green js-click" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
       <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
       DEXSCREENER
     </a>
 
-    <!-- TWITTER with x.png icon on the left (remove old X text) -->
     <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
-      <img class="icon" src="x.png" alt="" aria-hidden="true">
+      <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
       TWITTER
     </a>
 
@@ -246,7 +237,6 @@
   </div>
 </div>
 
-<!-- Optional: put arcade.mp3 next to index.html -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 
 <script>
@@ -254,23 +244,29 @@
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
-  const DEX_ICON = "dex.png"; // for terminal tiny icon too
+  const DEX_ICON = "dex.png"; // terminal tiny icon
 
   // links
-  const insertBtn = document.getElementById("insertBtn");
-  const dexBtn = document.getElementById("dexBtn");
-  insertBtn.href = INSERT_URL;
-  dexBtn.href = DEX_URL;
+  document.getElementById("insertBtn").href = INSERT_URL;
+  document.getElementById("dexBtn").href = DEX_URL;
 
-  // ensure icon path + fallback if missing
-  const dexIconEl = document.getElementById("dexIcon");
-  dexIconEl.src = "dex.png";
-  dexIconEl.onerror = () => { dexIconEl.style.display = "none"; };
+  // Hide broken icons + log it so you know if path is wrong
+  function safeImg(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.onerror = () => {
+      console.warn("Missing image:", el.getAttribute("src"));
+      el.style.display = "none";
+    };
+  }
+  safeImg("pumpIcon");
+  safeImg("dexIcon");
+  safeImg("xIcon");
 
-  // CA short display, full copy
+  // CA short display
   document.getElementById("caText").textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // ===== CLICK SFX (works on PC + mobile) =====
+  // ===== CLICK SFX =====
   const sfxEl = document.getElementById("clickSfx");
   let audioCtx = null;
 
@@ -284,25 +280,21 @@
       g.gain.value = 0.04;
       o.connect(g); g.connect(audioCtx.destination);
       o.start();
-      setTimeout(()=>{ o.stop(); }, 70);
+      setTimeout(()=> o.stop(), 70);
     }catch(e){}
   }
 
   async function playClick(){
-    // Try file first
     try{
       if(!sfxEl) return beepFallback();
       sfxEl.currentTime = 0;
       const p = sfxEl.play();
-      if(p && typeof p.then === "function"){
-        await p;
-      }
+      if(p && typeof p.then === "function") await p;
     }catch{
       beepFallback();
     }
   }
 
-  // Play on any clickable UI element
   document.querySelectorAll(".js-click").forEach(el=>{
     el.addEventListener("click", ()=>{ playClick(); }, {passive:true});
   });
@@ -314,7 +306,6 @@
     try{
       await navigator.clipboard.writeText(CA);
     }catch{
-      // robust fallback
       try{
         const t=document.createElement("textarea");
         t.value=CA; document.body.appendChild(t);
@@ -329,49 +320,50 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
-  // ===== TIMER MGMT (FIX: clear timeouts too) =====
-  let activeTimers = [];
-
-  function addTimeout(fn, ms){
-    const t = setTimeout(fn, ms);
-    activeTimers.push(t);
-    return t;
-  }
-  function addInterval(fn, ms){
-    const t = setInterval(fn, ms);
-    activeTimers.push(t);
-    return t;
-  }
-  function killTimers(){
-    activeTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
-    activeTimers = [];
-  }
-
-  function typeText(el, text, speed, done){
-    let i=0; el.textContent="";
-    const timer = setInterval(()=>{
-      el.textContent += text[i++] || "";
-      if(i >= text.length){
-        clearInterval(timer);
-        done && done();
-      }
-    }, speed);
-    activeTimers.push(timer);
-  }
-
-  // ===== FULL LOOP (terminal lines + baron) =====
+  // ===== LOOP (FIXED) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
 
   const LOOP_MS = 10000;
+
   const baronText = "THE BARON ALWAYS EXITS FIRST";
   const baronEl = document.getElementById("baronTyped");
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
 
+  // Only clear per-cycle timers (NOT the main loop interval)
+  let cycleTimers = [];
+
+  function addTimeout(fn, ms){
+    const t = setTimeout(fn, ms);
+    cycleTimers.push(t);
+    return t;
+  }
+  function addInterval(fn, ms){
+    const t = setInterval(fn, ms);
+    cycleTimers.push(t);
+    return t;
+  }
+  function killCycleTimers(){
+    cycleTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    cycleTimers = [];
+  }
+
+  function typeText(el, text, speed, done){
+    let i=0;
+    el.textContent="";
+    const t = setInterval(()=>{
+      el.textContent += text[i++] || "";
+      if(i >= text.length){
+        clearInterval(t);
+        done && done();
+      }
+    }, speed);
+    cycleTimers.push(t);
+  }
+
   function typeBaronOnce(){
-    // glitch wipe
     baronLine.classList.remove("glitch");
     void baronLine.offsetWidth;
     baronLine.classList.add("glitch");
@@ -388,21 +380,22 @@
           addTimeout(()=>{ baronCursor.style.display="none"; }, 550);
         }
       }, 14);
-      activeTimers.push(t);
+      cycleTimers.push(t);
     }, 90);
   }
 
   function runCycle(){
-    killTimers();
+    killCycleTimers();
 
-    // reset terminal + baron line
-    line1.textContent=""; line2.textContent=""; line3.textContent="";
-    baronEl.textContent=""; baronCursor.style.display="none";
+    line1.textContent="";
+    line2.textContent="";
+    line3.textContent="";
+    baronEl.textContent="";
+    baronCursor.style.display="none";
 
     typeText(line1, "initializing degen terminal...", 18, ()=>{
       addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          // FIX: render READY in green reliably on all browsers
           line3.innerHTML = `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
           addTimeout(typeBaronOnce, 220);
         }), 140);
@@ -411,7 +404,8 @@
   }
 
   runCycle();
-  addInterval(runCycle, LOOP_MS);
+  // Main loop interval is NOT tracked/cleared
+  setInterval(runCycle, LOOP_MS);
 </script>
 </body>
 </html>
