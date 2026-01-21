@@ -58,7 +58,23 @@
     box-shadow:0 0 0 4px #1a1a1a;
     padding:18px;
     text-align:center;
+    position:relative; /* for mute button */
   }
+
+  /* (1) Mute toggle (text icon) */
+  .mute{
+    position:absolute;top:10px;right:10px;
+    width:44px;height:36px;
+    border:3px solid #000;
+    box-shadow:3px 3px 0 #000;
+    background:#0b0b0b;color:var(--yellow);
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:900;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    user-select:none;
+  }
+  .mute:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 
   .logo{
     width:240px;height:240px;max-width:100%;
@@ -76,7 +92,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* DEGEN flicker (PC safe) */
+  /* DEGEN flicker (PC safe) + clickable for easter egg */
   .degen{
     display:inline-block;margin:6px 0 12px;padding:6px 10px;
     border:3px solid #000;background:#0b0b0b;box-shadow:3px 3px 0 #000;
@@ -84,6 +100,8 @@
     font-weight:900;letter-spacing:1px;text-transform:uppercase;
     color:var(--yellow);
     animation:blink 1s steps(1,end) infinite;
+    user-select:none;
+    cursor:pointer;
   }
   @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
@@ -94,6 +112,8 @@
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:12px;line-height:1.45;
     color:#cfcfcf;user-select:none;
+    position:relative;             /* for coin animation */
+    overflow:hidden;               /* keep coin inside */
   }
 
   .prompt{color:var(--yellow);font-weight:900}
@@ -123,6 +143,35 @@
   .term-icon{
     width:14px;height:14px;margin-left:6px;
     image-rendering:pixelated;vertical-align:-2px;
+  }
+
+  /* (2) Coin insert animation */
+  .coin{
+    position:absolute;
+    left:14px; top:-26px;
+    width:18px;height:18px;
+    border:3px solid #000;
+    box-shadow:3px 3px 0 #000;
+    background:var(--yellow);
+    opacity:0;
+    pointer-events:none;
+  }
+  .coin.drop{
+    opacity:1;
+    animation:coinDrop 520ms steps(8,end) 1;
+  }
+  @keyframes coinDrop{
+    0%{transform:translateY(-8px)}
+    70%{transform:translateY(78px)}
+    100%{transform:translateY(72px)}
+  }
+  .terminal.flash{
+    animation:termFlash 140ms steps(2,end) 2;
+  }
+  @keyframes termFlash{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(1.3)}
+    100%{filter:brightness(1)}
   }
 
   .btn{
@@ -213,6 +262,7 @@
     .icon{width:28px;height:28px}
     .baron-line{font-size:11px;margin-top:4px}
     .hint{margin-bottom:4px}
+    .mute{top:8px;right:8px}
   }
   @media (max-width:420px) and (max-height:740px){
     .logo{width:135px;height:135px}
@@ -243,13 +293,21 @@
 <div class="wrap">
   <div class="card">
 
+    <!-- (1) Mute toggle -->
+    <button class="mute js-click" id="muteBtn" type="button" aria-label="Toggle sound">🔊</button>
+
     <img class="logo" src="logo.png" alt="Greenback logo" />
 
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
-    <div class="degen">DEGEN</div>
 
-    <div class="terminal" aria-label="status terminal">
+    <!-- (4) Easter egg: click DEGEN 5x -->
+    <div class="degen" id="degenBtn" title="...">DEGEN</div>
+
+    <div class="terminal" id="terminal" aria-label="status terminal">
+      <!-- (2) coin element -->
+      <span class="coin" id="coin" aria-hidden="true"></span>
+
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
@@ -276,7 +334,7 @@
         <span class="mono" id="caText"></span>
       </button>
     </div>
-    <div class="hint">tap to copy </div>
+    <div class="hint">tap to copy</div>
 
     <div class="baron-line" id="baronLine" aria-label="baron terminal line">
       <span class="glitchwipe" aria-hidden="true"></span>
@@ -287,7 +345,10 @@
   </div>
 </div>
 
+<!-- existing arcade click -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
+<!-- (1) baron voice line (you uploaded) -->
+<audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
 
 <script>
   // ===== CONFIG =====
@@ -295,6 +356,17 @@
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
   const DEX_ICON = "dex.png"; // terminal icon
+
+  // (3) terminal live status rotation
+  const STATUS_LINES = [
+    "loading greenback protocol v0.0.1",
+    "syncing liquidity routes... OK",
+    "scanning degen index... OK",
+    "checking rugs... NOT FOUND",
+    "loading memes... OK",
+    "routing orders... STABLE"
+  ];
+  let statusIdx = 0;
 
   // links
   const insertBtn = document.getElementById("insertBtn");
@@ -313,32 +385,70 @@
   const caTextEl = document.getElementById("caText");
   caTextEl.textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // ===== CLICK SFX (arcade.mp3 + WebAudio fallback) =====
+  // ===== AUDIO (mute toggle + unlock + 2 channels) =====
+  const muteBtn = document.getElementById("muteBtn");
   const sfxEl = document.getElementById("clickSfx");
+  const baronElAudio = document.getElementById("baronVoice");
+
+  // If you accidentally uploaded as baron.mps, try it as fallback:
+  if(baronElAudio){
+    baronElAudio.onerror = () => {
+      // fallback attempt (won't throw if file doesn't exist)
+      baronElAudio.src = "baron.mps";
+    };
+  }
+
   let audioCtx = null;
   let audioUnlocked = false;
+
+  // persist mute
+  let isMuted = (localStorage.getItem("gb_muted") === "1");
+  function renderMute(){
+    muteBtn.textContent = isMuted ? "🔇" : "🔊";
+    if(sfxEl) sfxEl.muted = isMuted;
+    if(baronElAudio) baronElAudio.muted = isMuted;
+  }
+  renderMute();
+
+  muteBtn.addEventListener("click", (e)=>{
+    // click sound still respects mute; toggle happens first
+    isMuted = !isMuted;
+    localStorage.setItem("gb_muted", isMuted ? "1" : "0");
+    renderMute();
+  });
 
   function ensureAudioUnlocked(){
     if(audioUnlocked) return;
     audioUnlocked = true;
+
+    // resume WebAudio if needed
     try{
-      // resume WebAudio if needed
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
-    try{
-      // prime <audio> on first gesture
-      if(sfxEl){
-        sfxEl.muted = true;
-        const p = sfxEl.play();
+
+    // prime <audio> elements silently on first gesture (helps iOS/Android)
+    [sfxEl, baronElAudio].forEach(a=>{
+      if(!a) return;
+      try{
+        const wasMuted = a.muted;
+        a.muted = true;
+        a.volume = 0.75;
+        const p = a.play();
         if(p && p.then){
-          p.then(()=>{ sfxEl.pause(); sfxEl.currentTime = 0; sfxEl.muted = false; })
-           .catch(()=>{ sfxEl.muted = false; });
+          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; })
+           .catch(()=>{ a.muted = wasMuted; });
         }else{
-          sfxEl.pause(); sfxEl.currentTime = 0; sfxEl.muted = false;
+          a.pause(); a.currentTime = 0; a.muted = wasMuted;
         }
-      }
-    }catch(e){}
+      }catch(e){}
+    });
+
+    // if we were waiting to speak, do it now
+    if(pendingBaronSpeak) {
+      pendingBaronSpeak = false;
+      maybePlayBaronOnce();
+    }
   }
 
   function beepFallback(){
@@ -357,8 +467,10 @@
 
   async function playClick(){
     ensureAudioUnlocked();
+    if(isMuted) return;
     try{
       if(!sfxEl) return beepFallback();
+      sfxEl.volume = 0.85;
       sfxEl.currentTime = 0;
       const p = sfxEl.play();
       if(p && typeof p.then === "function") await p;
@@ -367,11 +479,25 @@
     }
   }
 
+  async function playBaronVoice(){
+    ensureAudioUnlocked();
+    if(isMuted) return;
+    try{
+      if(!baronElAudio) return;
+      baronElAudio.volume = 0.75;
+      baronElAudio.currentTime = 0;
+      const p = baronElAudio.play();
+      if(p && typeof p.then === "function") await p;
+    }catch{
+      // ignore; no fallback here
+    }
+  }
+
   // unlock on first user gesture anywhere
   window.addEventListener("pointerdown", ensureAudioUnlocked, {once:true, passive:true});
   window.addEventListener("touchstart", ensureAudioUnlocked, {once:true, passive:true});
 
-  // play sound on any clickables
+  // play click sound on any clickables
   document.querySelectorAll(".js-click").forEach(el=>{
     el.addEventListener("click", ()=>{ playClick(); });
   });
@@ -396,6 +522,69 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
+  // ===== (2) COIN INSERT ANIMATION =====
+  const terminal = document.getElementById("terminal");
+  const coin = document.getElementById("coin");
+
+  function coinDrop(){
+    if(!coin || !terminal) return;
+    terminal.classList.remove("flash");
+    coin.classList.remove("drop");
+    void terminal.offsetWidth; // reflow
+    terminal.classList.add("flash");
+    coin.classList.add("drop");
+    // clean up after animation
+    setTimeout(()=> coin.classList.remove("drop"), 650);
+    setTimeout(()=> terminal.classList.remove("flash"), 420);
+  }
+
+  // only on INSERT COINS (not all buttons)
+  insertBtn.addEventListener("click", ()=>{ coinDrop(); }, {passive:true});
+
+  // ===== (1) BARON VOICE ONCE PER SESSION (after boot) =====
+  let pendingBaronSpeak = false;
+
+  function maybePlayBaronOnce(){
+    if(isMuted) return;
+    if(sessionStorage.getItem("gb_baron_played") === "1") return;
+
+    if(!audioUnlocked){
+      pendingBaronSpeak = true;
+      return;
+    }
+    sessionStorage.setItem("gb_baron_played", "1");
+    playBaronVoice();
+  }
+
+  // ===== (4) EASTER EGG: click DEGEN 5x =====
+  const degenBtn = document.getElementById("degenBtn");
+  let degenClicks = 0;
+  let degenTimer = null;
+  let easterMode = false;
+
+  function triggerEasterEgg(){
+    // one-time per session voice line (separate from main)
+    if(sessionStorage.getItem("gb_easter_voice_played") !== "1"){
+      sessionStorage.setItem("gb_easter_voice_played", "1");
+      playBaronVoice();
+    }
+    // force a special cycle immediately
+    easterMode = true;
+    runCycle(true);
+    // reset easter mode after a bit so normal loop resumes
+    setTimeout(()=>{ easterMode = false; }, 14000);
+  }
+
+  degenBtn.addEventListener("click", ()=>{
+    degenClicks++;
+    clearTimeout(degenTimer);
+    degenTimer = setTimeout(()=>{ degenClicks = 0; }, 1400);
+    if(degenClicks >= 5){
+      degenClicks = 0;
+      triggerEasterEgg();
+    }
+  });
+
   // ===== LOOP (terminal lines + baron) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
@@ -403,19 +592,18 @@
 
   const LOOP_MS = 10000;
 
-  const baronText = "THE BARON ALWAYS EXITS FIRST";
-  const baronEl = document.getElementById("baronTyped");
+  const baronTextNormal = "THE BARON ALWAYS EXITS FIRST";
+  const baronTextEaster = "YOU SHOULDN'T BE HERE";
+  const baronTyped = document.getElementById("baronTyped");
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
 
   let cycleTimers = [];
-
   function addTimeout(fn, ms){
     const t = setTimeout(fn, ms);
     cycleTimers.push(t);
     return t;
   }
-
   function typeText(el, text, speed, done){
     let i = 0;
     el.textContent = "";
@@ -429,19 +617,19 @@
     cycleTimers.push(t);
   }
 
-  function typeBaronOnce(){
+  function typeBaronOnce(text){
     baronLine.classList.remove("glitch");
     void baronLine.offsetWidth;
     baronLine.classList.add("glitch");
 
-    baronEl.textContent = "";
+    baronTyped.textContent = "";
     baronCursor.style.display = "inline-block";
 
     addTimeout(()=>{
       let i = 0;
       const t = setInterval(()=>{
-        baronEl.textContent += baronText[i++] || "";
-        if(i >= baronText.length){
+        baronTyped.textContent += text[i++] || "";
+        if(i >= text.length){
           clearInterval(t);
           addTimeout(()=>{ baronCursor.style.display = "none"; }, 550);
         }
@@ -450,25 +638,37 @@
     }, 90);
   }
 
-  function runCycle(){
+  function runCycle(forceNow=false){
     // clear both timeouts + intervals from previous cycle
     cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
     cycleTimers = [];
+
+    // choose rotating status line
+    const statusLine = STATUS_LINES[statusIdx % STATUS_LINES.length];
+    statusIdx++;
 
     // reset
     line1.textContent = "";
     line2.textContent = "";
     line3.textContent = "";
-    baronEl.textContent = "";
+    baronTyped.textContent = "";
     baronCursor.style.display = "none";
 
-    typeText(line1, "initializing degen terminal...", 18, ()=>{
-      addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
+    // normal vs easter cycle text
+    const l1 = easterMode ? "ACCESS GRANTED..." : "initializing degen terminal...";
+    const l2 = easterMode ? "DEGEN OVERDRIVE ENABLED" : statusLine;
+
+    typeText(line1, l1, 18, ()=>{
+      addTimeout(()=> typeText(line2, l2, 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          // READY: yellow + flicker via .ready
           line3.innerHTML =
             `status: <span class="ready">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
-          addTimeout(typeBaronOnce, 220);
+
+          // speak once per session after boot completes
+          maybePlayBaronOnce();
+
+          // baron line (normal loop or easter egg)
+          addTimeout(()=> typeBaronOnce(easterMode ? baronTextEaster : baronTextNormal), 220);
         }), 140);
       }), 140);
     });
