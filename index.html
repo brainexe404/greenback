@@ -92,34 +92,25 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
-  /* ACTIVATE DEGEN button (more visible + button-like) */
+  /* ACTIVATE DEGEN! (same size vibe as before, but more arcade buttony) */
   .degen{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
+    display:inline-block;
     margin:6px 0 12px;
-    padding:12px 14px;
+    padding:7px 12px;
     border:4px solid #000;
-    background:var(--yellow);
-    box-shadow:4px 4px 0 #000;
+    background:#0b0b0b;
+    box-shadow:4px 4px 0 #000, 0 0 14px rgba(200,255,47,.18);
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-weight:900;
     letter-spacing:1px;
     text-transform:uppercase;
-    color:#0b0b0b;
+    color:var(--yellow);
     user-select:none;
     cursor:pointer;
-    width:100%;
-    max-width:520px;
+    animation:blink 1s steps(1,end) infinite;
   }
-  .degen:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-  .degen small{
-    font-size:10px;
-    color:#1a1a1a;
-    letter-spacing:0.5px;
-    opacity:.9;
-  }
+  .degen:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000, 0 0 14px rgba(200,255,47,.12)}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
   .terminal{
     margin:0 auto 12px;width:100%;
@@ -128,8 +119,8 @@
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:12px;line-height:1.45;
     color:#cfcfcf;user-select:none;
-    position:relative;             /* for coin animation */
-    overflow:hidden;               /* keep coin inside */
+    position:relative;
+    overflow:hidden;
   }
 
   .prompt{color:var(--yellow);font-weight:900}
@@ -176,9 +167,7 @@
     70%{transform:translateY(78px)}
     100%{transform:translateY(72px)}
   }
-  .terminal.flash{
-    animation:termFlash 140ms steps(2,end) 2;
-  }
+  .terminal.flash{animation:termFlash 140ms steps(2,end) 2;}
   @keyframes termFlash{
     0%{filter:brightness(1)}
     50%{filter:brightness(1.3)}
@@ -274,7 +263,7 @@
     .baron-line{font-size:11px;margin-top:4px}
     .hint{margin-bottom:4px}
     .mute{top:8px;right:8px}
-    .degen{padding:11px 12px}
+    .degen{padding:6px 10px}
   }
   @media (max-width:420px) and (max-height:740px){
     .logo{width:135px;height:135px}
@@ -294,6 +283,7 @@
   /* IMPORTANT: keep arcade animations even if reduce-motion is enabled */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
+    .degen{animation:blink 1s steps(1,end) infinite !important;}
     .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
   }
@@ -304,19 +294,15 @@
 <div class="wrap">
   <div class="card">
 
-    <!-- Mute toggle -->
-    <button class="mute js-click" id="muteBtn" type="button" aria-label="Toggle sound">🔊</button>
+    <button class="mute" id="muteBtn" type="button" aria-label="Toggle sound">🔊</button>
 
     <img class="logo" src="logo.png" alt="Greenback logo" />
 
     <h1>Greenback</h1>
     <div class="ticker">$GBACK</div>
 
-    <!-- ACTIVATE DEGEN button -->
-    <div class="degen js-click" id="degenBtn" role="button" aria-label="Activate degen">
-      ACTIVATE DEGEN!
-      <small>(tap)</small>
-    </div>
+    <!-- Arcade-style flicker button -->
+    <div class="degen" id="degenBtn" role="button" aria-label="Activate degen">ACTIVATE DEGEN!</div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
       <span class="coin" id="coin" aria-hidden="true"></span>
@@ -326,23 +312,23 @@
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
+    <a class="btn btn-yellow" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
     </a>
 
-    <a class="btn btn-green js-click" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
+    <a class="btn btn-green" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
       <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
       DEXSCREENER
     </a>
 
-    <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/" target="_blank" rel="noopener" aria-label="Open X profile">
+    <a class="btn btn-yellow" id="xBtn" href="https://x.com/" target="_blank" rel="noopener" aria-label="Open X profile">
       <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
       TWITTER
     </a>
 
     <div class="ca-wrap">
-      <button class="btn btn-ca js-click" id="caBtn" type="button" aria-label="Copy contract address">
+      <button class="btn btn-ca" id="caBtn" type="button" aria-label="Copy contract address">
         <span class="tooltip" id="tip">COPIED!</span>
         <span class="mono" id="caText"></span>
       </button>
@@ -358,9 +344,8 @@
   </div>
 </div>
 
-<!-- existing arcade click -->
+<!-- kept for preload + compatibility -->
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
-<!-- baron voice line -->
 <audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
 
 <script>
@@ -386,7 +371,7 @@
   insertBtn.href = INSERT_URL;
   dexBtn.href = DEX_URL;
 
-  // hide broken images (prevents broken-image squares)
+  // hide broken images
   ["pumpIcon","dexIcon","xIcon"].forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
@@ -397,20 +382,14 @@
   const caTextEl = document.getElementById("caText");
   caTextEl.textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // ===== AUDIO (mute toggle + unlock + 2 channels) =====
+  // ===== AUDIO (fixed: plays EVERY click reliably) =====
   const muteBtn = document.getElementById("muteBtn");
-  const sfxEl = document.getElementById("clickSfx");
-  const baronElAudio = document.getElementById("baronVoice");
+  const preloadClick = document.getElementById("clickSfx");
+  const preloadBaron = document.getElementById("baronVoice");
 
-  let audioCtx = null;
-  let audioUnlocked = false;
-
-  // persist mute
   let isMuted = (localStorage.getItem("gb_muted") === "1");
   function renderMute(){
     muteBtn.textContent = isMuted ? "🔇" : "🔊";
-    if(sfxEl) sfxEl.muted = isMuted;
-    if(baronElAudio) baronElAudio.muted = isMuted;
   }
   renderMute();
 
@@ -420,73 +399,58 @@
     renderMute();
   });
 
-  function ensureAudioUnlocked(){
+  // Mobile browsers require a gesture to "unlock" audio.
+  // We unlock using a tiny silent play attempt on the first user interaction.
+  let audioUnlocked = false;
+  function unlockAudio(){
     if(audioUnlocked) return;
     audioUnlocked = true;
-
-    // resume WebAudio if needed
-    try{
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if(audioCtx.state === "suspended") audioCtx.resume();
-    }catch(e){}
-
-    // prime <audio> elements silently on first gesture (helps iOS/Android)
-    [sfxEl, baronElAudio].forEach(a=>{
+    // attempt to prime both preloaded elements
+    [preloadClick, preloadBaron].forEach(a=>{
       if(!a) return;
       try{
         const wasMuted = a.muted;
         a.muted = true;
-        a.volume = 0.75;
         const p = a.play();
         if(p && p.then){
-          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; })
-           .catch(()=>{ a.muted = wasMuted; });
+          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; }).catch(()=>{ a.muted = wasMuted; });
         }else{
           a.pause(); a.currentTime = 0; a.muted = wasMuted;
         }
       }catch(e){}
     });
   }
+  window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true});
+  window.addEventListener("touchstart", unlockAudio, {once:true, passive:true});
 
-  // Unlock on first user gesture anywhere
-  window.addEventListener("pointerdown", ensureAudioUnlocked, {once:true, passive:true});
-  window.addEventListener("touchstart", ensureAudioUnlocked, {once:true, passive:true});
-
-  // IMPORTANT FIX: <audio> sometimes stops after one play on some mobile browsers.
-  // We clone the audio node each click so it always plays.
-  function playFromClone(audioEl, volume){
+  // Reliable per-click sound: create a fresh Audio instance each time and keep it alive briefly.
+  const liveAudio = [];
+  function playSound(src, volume){
     if(isMuted) return;
-    if(!audioEl) return;
+    unlockAudio();
     try{
-      const a = audioEl.cloneNode(true);
+      const a = new Audio(src);
+      a.preload = "auto";
       a.volume = volume;
-      a.muted = false;
-      // iOS: ensure it starts from 0
-      a.currentTime = 0;
-      // fire and forget
-      a.play().catch(()=>{});
+      liveAudio.push(a);
+      const cleanup = () => {
+        const i = liveAudio.indexOf(a);
+        if(i !== -1) liveAudio.splice(i,1);
+      };
+      a.addEventListener("ended", cleanup);
+      a.addEventListener("error", cleanup);
+      a.play().catch(()=>{ cleanup(); });
     }catch(e){}
   }
 
-  async function playClick(){
-    ensureAudioUnlocked();
-    playFromClone(sfxEl, 0.85);
-  }
-
-  async function playBaronVoice(){
-    ensureAudioUnlocked();
-    playFromClone(baronElAudio, 0.75);
-  }
-
-  // play click sound on any clickables
-  document.querySelectorAll(".js-click").forEach(el=>{
-    el.addEventListener("click", ()=>{ playClick(); });
-  });
+  function playClick(){ playSound("arcade.mp3", 0.85); }
+  function playBaron(){ playSound("baron.mp3", 0.75); }
 
   // ===== COPY CA =====
   const tip = document.getElementById("tip");
   let tipTimer;
   document.getElementById("caBtn").addEventListener("click", async ()=>{
+    playClick();
     try{ await navigator.clipboard.writeText(CA); }
     catch{
       try{
@@ -503,15 +467,21 @@
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
 
+  // Click sounds for the main buttons/links
+  ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("click", ()=>{ playClick(); });
+  });
+
   // ===== COIN INSERT ANIMATION =====
   const terminal = document.getElementById("terminal");
   const coin = document.getElementById("coin");
-
   function coinDrop(){
     if(!coin || !terminal) return;
     terminal.classList.remove("flash");
     coin.classList.remove("drop");
-    void terminal.offsetWidth; // reflow
+    void terminal.offsetWidth;
     terminal.classList.add("flash");
     coin.classList.add("drop");
     setTimeout(()=> coin.classList.remove("drop"), 650);
@@ -519,30 +489,19 @@
   }
   insertBtn.addEventListener("click", ()=>{ coinDrop(); }, {passive:true});
 
-  // ===== BARON VOICE ONCE PER SESSION (after boot) =====
-  let pendingBaronSpeak = false;
-  function maybePlayBaronOnce(){
-    if(isMuted) return;
-    if(sessionStorage.getItem("gb_baron_played") === "1") return;
-    if(!audioUnlocked){
-      pendingBaronSpeak = true;
-      return;
-    }
-    sessionStorage.setItem("gb_baron_played", "1");
-    playBaronVoice();
-  }
-
-  // ===== ACTIVATE DEGEN triggers terminal cycle on 1 click =====
+  // ===== ACTIVATE DEGEN (1 click triggers terminal + plays baron mp3 EVERY click) =====
   const degenBtn = document.getElementById("degenBtn");
   let easterMode = false;
 
   degenBtn.addEventListener("click", ()=>{
-    easterMode = true;     // one-shot "degen mode"
+    playClick();     // button click sound
+    playBaron();     // baron mp3 every time you press ACTIVATE DEGEN!
+    easterMode = true;
     runCycle(true);
     setTimeout(()=>{ easterMode = false; }, 14000);
   });
 
-  // ===== LOOP (terminal lines + baron) =====
+  // ===== LOOP (terminal lines + baron typed line) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
@@ -595,7 +554,7 @@
     }, 90);
   }
 
-  function runCycle(forceNow=false){
+  function runCycle(){
     cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
     cycleTimers = [];
 
@@ -614,13 +573,8 @@
     typeText(line1, l1, 18, ()=>{
       addTimeout(()=> typeText(line2, l2, 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-          // Removed dex icon next to READY
+          // Removed dex icon next to READY (as requested)
           line3.innerHTML = `status: <span class="ready">READY</span>`;
-
-          // speak once per session after boot completes
-          maybePlayBaronOnce();
-
-          // baron line
           addTimeout(()=> typeBaronOnce(easterMode ? baronTextDegen : baronTextNormal), 220);
         }), 140);
       }), 140);
@@ -629,20 +583,6 @@
 
   runCycle();
   setInterval(runCycle, LOOP_MS);
-
-  // if we queued baron speak before unlock, play it after first gesture
-  window.addEventListener("pointerdown", ()=>{
-    if(pendingBaronSpeak){
-      pendingBaronSpeak = false;
-      maybePlayBaronOnce();
-    }
-  }, {once:true, passive:true});
-  window.addEventListener("touchstart", ()=>{
-    if(pendingBaronSpeak){
-      pendingBaronSpeak = false;
-      maybePlayBaronOnce();
-    }
-  }, {once:true, passive:true});
 </script>
 </body>
 </html>
