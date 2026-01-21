@@ -61,6 +61,7 @@
   h1{margin:12px 0 4px;font-size:34px}
   .ticker{color:var(--muted);margin-bottom:8px}
 
+  /* FIX: flicker works reliably on PC (opacity instead of visibility) */
   .degen{
     display:inline-block;margin:6px 0 12px;padding:6px 10px;
     border:3px solid #000;background:#0b0b0b;box-shadow:3px 3px 0 #000;
@@ -68,8 +69,9 @@
     font-weight:900;letter-spacing:1px;text-transform:uppercase;
     color:var(--yellow);
     animation:blink 1s steps(1,end) infinite;
+    opacity:1;
   }
-  @keyframes blink{0%,49%{visibility:visible}50%,100%{visibility:hidden}}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 
   .terminal{
     margin:0 auto 12px;width:100%;
@@ -109,7 +111,12 @@
 
   .btn-yellow{background:var(--yellow);color:#0b0b0b}
   .btn-green{background:var(--green);color:#0b0b0b}
-  .btn-ca{background:#fff;color:#0b0b0b}
+
+  /* FIX: CA button should be dark with white text (no blacked-out look) */
+  .btn-ca{
+    background:#0b0b0b;
+    color:var(--ink);
+  }
 
   .icon{width:18px;height:18px;image-rendering:pixelated;flex:0 0 auto}
 
@@ -117,6 +124,7 @@
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:14px;font-weight:900;text-transform:none;
     overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+    color:var(--ink);
   }
   .hint{
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -168,7 +176,7 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* Mobile: anchor to top so CA is visible */
+  /* Mobile */
   @media (max-width:420px){
     .wrap{padding:12px;align-items:flex-start}
     .card{padding:12px}
@@ -178,11 +186,11 @@
     .btn{margin:10px 0;padding:14px 12px;min-height:52px}
   }
 
-  /* Reduced motion safety (only affects users who enabled it) */
+  /* Reduced motion: keep page safe, but DO NOT disable DEGEN blink (you wanted it) */
   @media (prefers-reduced-motion: reduce){
-    *{animation:none !important;transition:none !important}
     body::before, body::after{display:none !important}
-    .cursor,.glitchwipe{display:none !important}
+    .logo{animation:none !important}
+    /* keep .degen and cursor alive on purpose */
   }
 </style>
 </head>
@@ -197,24 +205,28 @@
     <div class="ticker">$GBACK</div>
     <div class="degen">DEGEN</div>
 
-    <div class="terminal" aria-label="status terminal">
+    <div class="terminal" aria-label="status terminal" aria-live="polite">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
+    <!-- INSERT COINS with pump.png icon on the left -->
     <a class="btn btn-yellow js-click" id="insertBtn" href="#" target="_blank" rel="noopener" aria-label="Insert coins">
+      <img class="icon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
     </a>
 
+    <!-- DEXSCREENER with dex.png icon on the left -->
     <a class="btn btn-green js-click" id="dexBtn" href="#" target="_blank" rel="noopener" aria-label="Open Dexscreener">
-      <img class="icon" id="dexIcon" src="dex-owl-64.png" alt="" aria-hidden="true">
+      <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
       DEXSCREENER
     </a>
 
-    <!-- Twitter should be YELLOW -->
+    <!-- TWITTER with x.png icon on the left (remove old X text) -->
     <a class="btn btn-yellow js-click" id="xBtn" href="https://x.com/GannicusXRP" target="_blank" rel="noopener" aria-label="Open X profile">
-      X / TWITTER
+      <img class="icon" src="x.png" alt="" aria-hidden="true">
+      TWITTER
     </a>
 
     <div class="ca-wrap">
@@ -234,39 +246,118 @@
   </div>
 </div>
 
+<!-- Optional: put arcade.mp3 next to index.html -->
+<audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
+
 <script>
   // ===== CONFIG =====
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
-  const DEX_ICON = "dex-owl-64.png"; // make sure this file exists next to index.html
+  const DEX_ICON = "dex.png"; // for terminal tiny icon too
 
   // links
-  document.getElementById("insertBtn").href = INSERT_URL;
-  document.getElementById("dexBtn").href = DEX_URL;
+  const insertBtn = document.getElementById("insertBtn");
+  const dexBtn = document.getElementById("dexBtn");
+  insertBtn.href = INSERT_URL;
+  dexBtn.href = DEX_URL;
 
   // ensure icon path + fallback if missing
   const dexIconEl = document.getElementById("dexIcon");
-  dexIconEl.src = DEX_ICON;
-  dexIconEl.onerror = () => { dexIconEl.style.display = "none"; }; // avoids broken-image box
+  dexIconEl.src = "dex.png";
+  dexIconEl.onerror = () => { dexIconEl.style.display = "none"; };
 
   // CA short display, full copy
   document.getElementById("caText").textContent = "CA: " + CA.slice(0,6) + "..." + CA.slice(-6);
 
-  // copy
+  // ===== CLICK SFX (works on PC + mobile) =====
+  const sfxEl = document.getElementById("clickSfx");
+  let audioCtx = null;
+
+  function beepFallback(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 740;
+      g.gain.value = 0.04;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, 70);
+    }catch(e){}
+  }
+
+  async function playClick(){
+    // Try file first
+    try{
+      if(!sfxEl) return beepFallback();
+      sfxEl.currentTime = 0;
+      const p = sfxEl.play();
+      if(p && typeof p.then === "function"){
+        await p;
+      }
+    }catch{
+      beepFallback();
+    }
+  }
+
+  // Play on any clickable UI element
+  document.querySelectorAll(".js-click").forEach(el=>{
+    el.addEventListener("click", ()=>{ playClick(); }, {passive:true});
+  });
+
+  // ===== COPY CA =====
   const tip = document.getElementById("tip");
   let tipTimer;
   document.getElementById("caBtn").addEventListener("click", async ()=>{
-    try{ await navigator.clipboard.writeText(CA); }
-    catch{
-      const t=document.createElement("textarea");
-      t.value=CA; document.body.appendChild(t); t.select();
-      document.execCommand("copy"); document.body.removeChild(t);
+    try{
+      await navigator.clipboard.writeText(CA);
+    }catch{
+      // robust fallback
+      try{
+        const t=document.createElement("textarea");
+        t.value=CA; document.body.appendChild(t);
+        t.select(); document.execCommand("copy");
+        document.body.removeChild(t);
+      }catch{
+        window.prompt("Copy CA:", CA);
+      }
     }
     tip.classList.add("show");
     clearTimeout(tipTimer);
     tipTimer=setTimeout(()=>tip.classList.remove("show"), 900);
   });
+
+  // ===== TIMER MGMT (FIX: clear timeouts too) =====
+  let activeTimers = [];
+
+  function addTimeout(fn, ms){
+    const t = setTimeout(fn, ms);
+    activeTimers.push(t);
+    return t;
+  }
+  function addInterval(fn, ms){
+    const t = setInterval(fn, ms);
+    activeTimers.push(t);
+    return t;
+  }
+  function killTimers(){
+    activeTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    activeTimers = [];
+  }
+
+  function typeText(el, text, speed, done){
+    let i=0; el.textContent="";
+    const timer = setInterval(()=>{
+      el.textContent += text[i++] || "";
+      if(i >= text.length){
+        clearInterval(timer);
+        done && done();
+      }
+    }, speed);
+    activeTimers.push(timer);
+  }
 
   // ===== FULL LOOP (terminal lines + baron) =====
   const line1 = document.getElementById("termLine1");
@@ -279,22 +370,6 @@
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
 
-  let activeTimers = [];
-
-  function killTimers(){
-    activeTimers.forEach(t => clearInterval(t));
-    activeTimers = [];
-  }
-
-  function typeText(el, text, speed, done){
-    let i=0; el.textContent="";
-    const timer=setInterval(()=>{
-      el.textContent += text[i++] || "";
-      if(i>=text.length){ clearInterval(timer); done && done(); }
-    }, speed);
-    activeTimers.push(timer);
-  }
-
   function typeBaronOnce(){
     // glitch wipe
     baronLine.classList.remove("glitch");
@@ -304,13 +379,13 @@
     baronEl.textContent="";
     baronCursor.style.display="inline-block";
 
-    setTimeout(()=>{
+    addTimeout(()=>{
       let i=0;
       const t=setInterval(()=>{
         baronEl.textContent += baronText[i++] || "";
         if(i>=baronText.length){
           clearInterval(t);
-          setTimeout(()=>{ baronCursor.style.display="none"; }, 550);
+          addTimeout(()=>{ baronCursor.style.display="none"; }, 550);
         }
       }, 14);
       activeTimers.push(t);
@@ -325,20 +400,18 @@
     baronEl.textContent=""; baronCursor.style.display="none";
 
     typeText(line1, "initializing degen terminal...", 18, ()=>{
-      setTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
-        setTimeout(()=> typeText(line3, "status: READY", 16, ()=>{
-          line3.innerHTML = line3.textContent.replace(
-            "READY",
-            `<span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`
-          );
-          setTimeout(typeBaronOnce, 220);
+      addTimeout(()=> typeText(line2, "loading greenback protocol v0.0.1", 14, ()=>{
+        addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
+          // FIX: render READY in green reliably on all browsers
+          line3.innerHTML = `status: <span class="ok">READY</span><img src="${DEX_ICON}" class="term-icon" alt="" aria-hidden="true">`;
+          addTimeout(typeBaronOnce, 220);
         }), 140);
       }), 140);
     });
   }
 
   runCycle();
-  setInterval(runCycle, LOOP_MS);
+  addInterval(runCycle, LOOP_MS);
 </script>
 </body>
 </html>
