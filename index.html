@@ -108,6 +108,8 @@
     opacity:0;
     animation:jackGlow 1200ms steps(6,end) 1;
   }
+
+  /* ✅ FIXED: no opacity:0 at 100% (prevents 777 disappearing) */
   @keyframes jackFlash{
     0%{filter:brightness(1); transform:translate(0,0)}
     10%{filter:brightness(1.9); transform:translate(-1px,-1px)}
@@ -116,7 +118,7 @@
     45%{filter:brightness(1.0); transform:translate(0,0)}
     60%{filter:brightness(2.4); transform:translate(1px,-1px)}
     75%{filter:brightness(1.05); transform:translate(0,0)}
-    100%{filter:brightness(1); transform:translate(0,0); opacity:0}
+    100%{filter:brightness(1); transform:translate(0,0)}
   }
   @keyframes jackGlow{
     0%{opacity:0}
@@ -242,10 +244,7 @@
     user-select:none;
     line-height:1.2;
   }
-  .jackpot-countdown b{
-    color:var(--yellow);
-    font-weight:900;
-  }
+  .jackpot-countdown b{ color:var(--yellow); font-weight:900; }
 
   /* ✅ tiny blink when it updates */
   .jackpot-countdown.blink{
@@ -506,7 +505,6 @@
 
     <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
 
-    <!-- ✅ Countdown + READY flash -->
     <div class="jackpot-countdown" id="jpWrap" aria-label="jackpot countdown">
       JACKPOT: <b id="jpCountText">1/5</b>
       <span class="jp-ready" id="jpReady" aria-hidden="true">JACKPOT READY!</span>
@@ -558,6 +556,8 @@ SEE YOU AT ATH!</span>
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 <audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
 <audio id="laughSfx" src="laugh.mp3" preload="auto"></audio>
+<!-- ✅ NEW jackpot sound (add this file): -->
+<audio id="jackpotSfx" src="jackpot.mp3" preload="auto"></audio>
 
 <script>
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
@@ -567,7 +567,7 @@ SEE YOU AT ATH!</span>
 
   const JACKPOT_CHANCE = 0.02;     // 2% random
   const COMBO_TARGET = 5;          // guaranteed every 5 presses
-  const COMBO_KEY = "gb_comboCount_fixed"; // ✅ new key so old offsets can't mess it up
+  const COMBO_KEY = "gb_comboCount_fixed";
   const LAUGH_DELAY_MS = 170;
 
   const STATUS_LINES = [
@@ -604,7 +604,7 @@ SEE YOU AT ATH!</span>
   }
 
   function renderJackpotCountdown(){
-    const progress = safeGetCombo();       // 0..4 (how many presses done in cycle)
+    const progress = safeGetCombo();       // 0..4
     const shown = progress + 1;            // 1..5
     jpCountText.textContent = `${shown}/${COMBO_TARGET}`;
 
@@ -639,6 +639,7 @@ SEE YOU AT ATH!</span>
   const preloadClick = document.getElementById("clickSfx");
   const preloadBaron = document.getElementById("baronVoice");
   const preloadLaugh = document.getElementById("laughSfx");
+  const preloadJackpot = document.getElementById("jackpotSfx");
 
   let isMuted = (localStorage.getItem("gb_muted") === "1");
   function renderMute(){ muteBtn.textContent = isMuted ? "🔇" : "🔊"; }
@@ -662,7 +663,8 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
+    // prime muted so mobile allows later plays
+    [preloadClick, preloadBaron, preloadLaugh, preloadJackpot].forEach(a=>{
       if(!a) return;
       try{
         const wasMuted = a.muted;
@@ -679,6 +681,7 @@ SEE YOU AT ATH!</span>
 
     initClickPool();
     initLaughPool();
+    initJackpotPool();
   }
 
   window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
@@ -784,10 +787,42 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
-  function playJackpotCoins(){
-    playClick(1.0);
-    setTimeout(()=>playClick(1.0), 90);
-    setTimeout(()=>playClick(1.0), 180);
+  // ✅ NEW: jackpot sound pool (jackpot.mp3)
+  const JACKPOT_POOL_SIZE = 2;
+  const jackpotPool = [];
+  let jackpotPoolIdx = 0;
+
+  function initJackpotPool(){
+    if(jackpotPool.length) return;
+    for(let i=0;i<JACKPOT_POOL_SIZE;i++){
+      const a = new Audio("jackpot.mp3");
+      a.preload = "auto";
+      a.volume = 0.95;
+      jackpotPool.push(a);
+    }
+  }
+
+  function stopJackpot(){
+    try{
+      jackpotPool.forEach(a=>{
+        a.pause();
+        a.currentTime = 0;
+      });
+    }catch(e){}
+  }
+
+  function playJackpot(){
+    if(isMuted) return;
+    unlockAudio();
+    try{
+      initJackpotPool();
+      stopJackpot();
+      const a = jackpotPool[jackpotPoolIdx % jackpotPool.length];
+      jackpotPoolIdx++;
+      a.currentTime = 0;
+      const p = a.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
+    }catch(e){}
   }
 
   ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
@@ -926,17 +961,14 @@ SEE YOU AT ATH!</span>
     clearTimeout(jackpotTimer);
     jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
 
-    playJackpotCoins();
+    // ✅ changed: NO click mp3 here
+    playJackpot();
     extraPulse();
   }
 
-  // ✅ FIXED GUARANTEED 5-CLICK LOGIC:
-  // stored progress = 0..4
-  // - if progress === 4 -> THIS press triggers jackpot and resets to 0
-  // - else progress++ (no jackpot)
+  // guaranteed 5-click logic
   function comboStepAndCheckHit(){
     let progress = safeGetCombo(); // 0..4
-
     const willHitNow = (progress === (COMBO_TARGET - 1)); // 4 means 5th click
     if(willHitNow){
       sessionStorage.setItem(COMBO_KEY, "0");
@@ -947,49 +979,6 @@ SEE YOU AT ATH!</span>
       return false;
     }
   }
-
-  let degenLock = false;
-
-  function handleDegenActivate(e){
-    if(e) e.preventDefault?.();
-    unlockAudio();
-
-    if(degenLock) return;
-    degenLock = true;
-    setTimeout(()=>{ degenLock = false; }, 350);
-
-    playClick();
-    playBaron();
-
-    setDegenActivatedTemp();
-    pulseInsertCoins();
-    bumpCoinCount();
-
-    const comboHit = comboStepAndCheckHit();
-
-    renderJackpotCountdown();
-    blinkCountdown();
-
-    if(comboHit){
-      triggerJackpot("combo");
-    }else if(Math.random() < JACKPOT_CHANCE){
-      triggerJackpot("random");
-    }
-
-    easterMode = true;
-    runCycle(true);
-    setTimeout(()=>{ easterMode = false; }, 14000);
-
-    exitAttractMode();
-  }
-
-  degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
-  degenBtn.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter" || e.key === " "){
-      e.preventDefault();
-      handleDegenActivate(e);
-    }
-  });
 
   // ===== LOOP (terminal) =====
   const line1 = document.getElementById("termLine1");
@@ -1066,7 +1055,7 @@ SEE YOU AT ATH!</span>
 
     clearInterval(attractPulseTimer);
     attractPulseTimer = setInterval(()=> {
-      if(attractMode) pulseInsertCoins();
+      if(attractMode) pulseInsertCoins(); // no audio
     }, ATTRACT_PULSE_EVERY_MS);
 
     runCycle();
@@ -1130,6 +1119,48 @@ SEE YOU AT ATH!</span>
       }), 140);
     });
   }
+
+  // Handle activate
+  let degenLock = false;
+  function handleDegenActivate(e){
+    if(e) e.preventDefault?.();
+    unlockAudio();
+
+    if(degenLock) return;
+    degenLock = true;
+    setTimeout(()=>{ degenLock = false; }, 350);
+
+    playClick();
+    playBaron();
+
+    setDegenActivatedTemp();
+    pulseInsertCoins();
+    bumpCoinCount();
+
+    const comboHit = comboStepAndCheckHit();
+    renderJackpotCountdown();
+    blinkCountdown();
+
+    if(comboHit){
+      triggerJackpot("combo");
+    }else if(Math.random() < JACKPOT_CHANCE){
+      triggerJackpot("random");
+    }
+
+    easterMode = true;
+    runCycle(true);
+    setTimeout(()=>{ easterMode = false; }, 14000);
+
+    exitAttractMode();
+  }
+
+  degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
+  degenBtn.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      handleDegenActivate(e);
+    }
+  });
 
   runCycle();
   setInterval(runCycle, LOOP_MS);
