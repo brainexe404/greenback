@@ -246,6 +246,20 @@
     user-select:none;
   }
 
+  /* (7) COINS INSERTED counter */
+  .coin-counter{
+    margin-top:-4px;
+    margin-bottom:8px;
+    text-align:center;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:11px;
+    color:#8d8d8d;
+    user-select:none;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+  }
+  .coin-counter b{color:var(--yellow);font-weight:900}
+
   .ca-wrap{position:relative}
   .tooltip{
     position:absolute;top:-36px;left:50%;transform:translateX(-50%);
@@ -338,6 +352,12 @@
       font-size:10.5px;
     }
 
+    .coin-counter{
+      font-size:10.5px;
+      margin-top:-2px;
+      margin-bottom:7px;
+    }
+
     .baron-line{
       font-size:clamp(10.5px, 1.6dvh, 11.5px);
       margin-top:4px;
@@ -353,16 +373,16 @@
     .logo{width:clamp(120px, 20dvh, 150px);height:clamp(120px, 20dvh, 150px)}
     .btn{margin:6px 0; padding:11px 10px; min-height:44px; font-size:12.8px}
     .terminal{margin-bottom:8px}
+    .coin-counter{margin-bottom:6px}
     .baron-line{margin-top:3px}
   }
 
-  /* reduced motion: keep visual "lit" state, but DON'T kill the pulse entirely */
+  /* reduced motion: keep visuals without disabling pulse entirely */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
     .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
-    /* NOTE: intentionally NOT disabling .btn.pulse animation anymore */
   }
 </style>
 </head>
@@ -378,7 +398,6 @@
     <h1>Baron Greenback</h1>
     <div class="ticker">$GBARON</div>
 
-    <!-- switched to a real button so iOS treats it as a proper "user gesture" click target -->
     <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
@@ -387,11 +406,15 @@
       <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
     </div>
 
-    <!-- (fallback real hrefs) -->
     <a class="btn btn-yellow" id="insertBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
       <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
       INSERT COINS
     </a>
+
+    <!-- (7) session-only fake coin counter -->
+    <div class="coin-counter" aria-label="coins inserted counter">
+      COINS INSERTED: <b id="coinCount">00</b>
+    </div>
 
     <a class="btn btn-green" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer" aria-label="Open Dexscreener">
       <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
@@ -446,6 +469,19 @@
   // FULL CA shown on button
   const caTextEl = document.getElementById("caText");
   caTextEl.textContent = CA;
+
+  // ===== (7) SESSION COIN COUNT =====
+  const coinCountEl = document.getElementById("coinCount");
+  let coinCount = Number(sessionStorage.getItem("gb_coinCount") || "0");
+  function renderCoinCount(){
+    coinCountEl.textContent = String(coinCount).padStart(2, "0");
+  }
+  function bumpCoinCount(){
+    coinCount = Math.min(99, coinCount + 1);
+    sessionStorage.setItem("gb_coinCount", String(coinCount));
+    renderCoinCount();
+  }
+  renderCoinCount();
 
   // ===== AUDIO =====
   const muteBtn = document.getElementById("muteBtn");
@@ -545,12 +581,10 @@
     }
   }
 
-  // IMPORTANT: baron.mp3 must play on FIRST ACTIVATE press (mobile-safe: trigger from CLICK)
   function playBaron(){
     if(isMuted) return;
     unlockAudio();
     try{
-      // fresh instance is most consistent across browsers
       const a = new Audio("baron.mp3");
       a.preload = "auto";
       a.volume = 0.75;
@@ -577,6 +611,21 @@
 
   const canClipboard = !!(navigator.clipboard && window.isSecureContext);
 
+  // (6) Rare CA-copy easter text
+  function getRareCopyMessage(){
+    // ~10% chance
+    if(Math.random() < 0.10){
+      const rare = [
+        "BARON APPROVES",
+        "SEE YOU AT ATH",
+        "EXIT LIQUIDITY LOADING",
+        "DEGEN CONFIRMED"
+      ];
+      return rare[Math.floor(Math.random() * rare.length)];
+    }
+    return "COPIED!";
+  }
+
   document.getElementById("caBtn").addEventListener("click", async ()=>{
     playClick();
     try{
@@ -595,7 +644,7 @@
         window.prompt("Copy CA:", CA);
       }
     }
-    showTip("COPIED!");
+    showTip(getRareCopyMessage());
   });
 
   // ===== ACTIVATE DEGEN tweaks =====
@@ -604,7 +653,6 @@
   let degenResetTimer = null;
   let pulseTimer = null;
 
-  // FIX: pulse should restart reliably on desktop AND mobile
   function pulseInsertCoins(){
     insertBtn.classList.remove("pulse");
     clearTimeout(pulseTimer);
@@ -612,7 +660,6 @@
     // force reflow to hard-reset animation (helps on some desktop browsers)
     void insertBtn.offsetWidth;
 
-    // double-rAF is the most reliable way to restart CSS animation across browsers
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         insertBtn.classList.add("pulse");
@@ -631,39 +678,35 @@
     }, 10000);
   }
 
-  // one true handler (CLICK) so:
-  // - mobile plays audio immediately on first press
-  // - desktop doesn't get pointerdown/mousedown/click duplicates fighting the lock
   let degenLock = false;
 
   function handleDegenActivate(e){
     if(e) e.preventDefault?.();
 
-    // MUST be inside click/tap gesture for iOS
     unlockAudio();
 
     if(degenLock) return;
     degenLock = true;
     setTimeout(()=>{ degenLock = false; }, 350);
 
-    // Play BOTH on first press
     playClick();
     playBaron();
 
     setDegenActivatedTemp();
     pulseInsertCoins();
 
+    // (7) bump fake coin count on each activate
+    bumpCoinCount();
+
     easterMode = true;
     runCycle(true);
     setTimeout(()=>{ easterMode = false; }, 14000);
+
+    // (8) any interaction exits attract mode
+    exitAttractMode();
   }
 
-  // ✅ Only click (plus keyboard). This fixes:
-  // - mobile: audio triggers on ACTIVATE DEGEN (first press)
-  // - desktop: pulse reliably fires (no multi-event race)
   degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
-
-  // keyboard activate (doesn't break anything)
   degenBtn.addEventListener("keydown", (e)=>{
     if(e.key === "Enter" || e.key === " "){
       e.preventDefault();
@@ -680,6 +723,7 @@
 
   const baronTextNormal = "THE BARON ALWAYS EXITS FIRST";
   const baronTextDegen = "DEGEN OVERDRIVE ENABLED";
+  const baronTextAttract = "INSERT COINS TO BEGIN";
   const baronTyped = document.getElementById("baronTyped");
   const baronCursor = document.getElementById("baronCursor");
   const baronLine = document.getElementById("baronLine");
@@ -732,6 +776,48 @@
     line3.appendChild(s);
   }
 
+  // (8) Attract mode (idle demo)
+  let attractMode = false;
+  let attractIdleTimer = null;
+  let attractPulseTimer = null;
+  const ATTRACT_IDLE_MS = 30000; // 30s idle
+  const ATTRACT_PULSE_EVERY_MS = 6500;
+
+  function enterAttractMode(){
+    if(attractMode) return;
+    attractMode = true;
+
+    // visual-only demo: pulse insert coins periodically (NO audio)
+    clearInterval(attractPulseTimer);
+    attractPulseTimer = setInterval(()=> {
+      if(attractMode) pulseInsertCoins();
+    }, ATTRACT_PULSE_EVERY_MS);
+
+    runCycle();
+  }
+
+  function exitAttractMode(){
+    if(!attractMode) return;
+    attractMode = false;
+    clearInterval(attractPulseTimer);
+    attractPulseTimer = null;
+    runCycle();
+  }
+
+  function resetAttractIdle(){
+    clearTimeout(attractIdleTimer);
+    attractIdleTimer = setTimeout(()=> enterAttractMode(), ATTRACT_IDLE_MS);
+  }
+
+  // any interaction resets idle (and exits attract mode if active)
+  ["pointerdown","mousedown","touchstart","keydown","wheel","scroll"].forEach(evt=>{
+    window.addEventListener(evt, ()=>{
+      resetAttractIdle();
+      if(attractMode) exitAttractMode();
+    }, {passive:true});
+  });
+  resetAttractIdle();
+
   function runCycle(){
     cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
     cycleTimers = [];
@@ -745,14 +831,26 @@
     baronTyped.textContent = "";
     baronCursor.style.display = "none";
 
-    const l1 = easterMode ? "ACCESS GRANTED..." : "initializing terminal on solana...";
-    const l2 = easterMode ? "DEGEN MODE: ACTIVE" : statusLine;
+    const l1 =
+      easterMode ? "ACCESS GRANTED..." :
+      attractMode ? "ARCADE CABINET ONLINE..." :
+      "initializing terminal on solana...";
+
+    const l2 =
+      easterMode ? "DEGEN MODE: ACTIVE" :
+      attractMode ? "DEMO LOOP: RUNNING" :
+      statusLine;
+
+    const baronLineText =
+      easterMode ? baronTextDegen :
+      attractMode ? baronTextAttract :
+      baronTextNormal;
 
     typeText(line1, l1, 18, ()=>{
       addTimeout(()=> typeText(line2, l2, 14, ()=>{
         addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
           setReadyLine();
-          addTimeout(()=> typeBaronOnce(easterMode ? baronTextDegen : baronTextNormal), 220);
+          addTimeout(()=> typeBaronOnce(baronLineText), 220);
         }), 140);
       }), 140);
     });
