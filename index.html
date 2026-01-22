@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -59,6 +59,31 @@
     padding:18px;
     text-align:center;
     position:relative;
+  }
+
+  /* ✅ FULL-SCREEN COIN RAIN LAYER */
+  .coin-rain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:9998; /* under jackpot overlay, over page */
+  }
+  .coin{
+    position:absolute;
+    top:-18px;
+    width:12px;height:12px;
+    border:2px solid #000;
+    background:var(--yellow);
+    box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
+    image-rendering:pixelated;
+    opacity:0;
+    will-change:transform, opacity;
+  }
+  .coin::after{
+    content:"";
+    position:absolute;inset:2px;
+    border:1px solid rgba(0,0,0,.25);
   }
 
   /* ===== JACKPOT OVERLAY ===== */
@@ -141,31 +166,6 @@
     color:var(--yellow);
     font-size:12px;
     opacity:.9;
-  }
-
-  /* ✅ FULL-SCREEN COIN RAIN LAYER */
-  .coin-rain{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    overflow:hidden;
-    z-index:9998;
-  }
-  .coin{
-    position:absolute;
-    top:-18px;
-    width:12px;height:12px;
-    border:2px solid #000;
-    background:var(--yellow);
-    box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
-    image-rendering:pixelated;
-    opacity:0;
-    will-change:transform, opacity;
-  }
-  .coin::after{
-    content:"";
-    position:absolute;inset:2px;
-    border:1px solid rgba(0,0,0,.25);
   }
 
   /* Mute toggle */
@@ -374,7 +374,6 @@
     margin-top:-4px;
     margin-bottom:8px;
     text-align:center;
-    consider: ui-monospace, Menlo, Consolas, monospace;
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:11px;
     color:#8d8d8d;
@@ -386,7 +385,7 @@
 
   .ca-wrap{position:relative}
   .tooltip{
-    position:absolute;top:-36px;left:50%;transform:translateX(-50%);
+    position:absolute;top:-38px;left:50%;transform:translateX(-50%);
     background:#0b0b0b;color:var(--yellow);
     border:3px solid #000;box-shadow:3px 3px 0 #000;
     padding:6px 10px;
@@ -445,14 +444,23 @@
     .btn-ca .mono{font-size:14px}
     .jackpot-nums{font-size:54px; letter-spacing:4px;}
   }
+
+  @media (prefers-reduced-motion: reduce){
+    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
+    .degen{animation:blink 1s steps(1,end) infinite !important;}
+    .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
+    .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
+  }
 </style>
 </head>
 
 <body>
+<!-- coin rain -->
 <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
 
+<!-- jackpot overlay -->
 <div class="jackpot" id="jackpot" aria-hidden="true">
-  <div class="jackpot-inner" id="jackpotInner">
+  <div class="jackpot-inner">
     <div class="jackpot-nums">777</div>
     <div class="jackpot-text">GBARON JACKPOT</div>
     <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
@@ -471,10 +479,9 @@
 
     <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
 
-    <!-- ✅ NEW: small countdown line -->
+    <!-- ✅ Jackpot countdown (tiny, visible) -->
     <div class="jackpot-countdown" aria-label="jackpot countdown">
       JACKPOT: <b id="jpCountText">1/5</b>
-      <span class="dim" style="opacity:.85"> • GUARANTEED ON 5TH</span>
     </div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
@@ -530,10 +537,9 @@ SEE YOU AT ATH!</span>
   const DEX_URL = "https://dexscreener.com";
   const TICKER = "$GBARON";
 
-  const JACKPOT_CHANCE = 0.02;       
-  const COMBO_TARGET = 5;            
+  const JACKPOT_CHANCE = 0.02;     // 2% random
+  const COMBO_TARGET = 5;          // guaranteed every 5 presses
   const COMBO_KEY = "gb_comboCount";
-
   const LAUGH_DELAY_MS = 170;
 
   const STATUS_LINES = [
@@ -546,24 +552,26 @@ SEE YOU AT ATH!</span>
   ];
   let statusIdx = 0;
 
+  // wire URLs
   const insertBtn = document.getElementById("insertBtn");
   const dexBtn = document.getElementById("dexBtn");
   insertBtn.href = INSERT_URL;
   dexBtn.href = DEX_URL;
 
+  // ✅ FULL CA shown on button (this was missing when JS broke)
   document.getElementById("caText").textContent = CA;
 
-  // ✅ NEW: jackpot countdown UI
+  // ===== jackpot countdown UI =====
   const jpCountText = document.getElementById("jpCountText");
   function renderJackpotCountdown(){
-    // combo stored as "0..4" where 0 means last hit, next is 1st step
-    const stored = Number(sessionStorage.getItem(COMBO_KEY) || "0");
-    const step = stored === 0 ? 1 : (stored + 1); // show upcoming count
-    jpCountText.textContent = `${step}/${COMBO_TARGET}`;
+    // stored is how many presses into the cycle we are: 0..4
+    const stored = Number(sessionStorage.getItem(COMBO_KEY) || "0"); // 0..4
+    const nextStep = stored + 1; // show 1..5
+    jpCountText.textContent = `${nextStep}/${COMBO_TARGET}`;
   }
   renderJackpotCountdown();
 
-  // ===== SESSION COIN COUNT =====
+  // ===== session coin count =====
   const coinCountEl = document.getElementById("coinCount");
   let coinCount = Number(sessionStorage.getItem("gb_coinCount") || "0");
   function renderCoinCount(){
@@ -604,6 +612,7 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
+    // prime muted so mobile allows later plays
     [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
       if(!a) return;
       try{
@@ -642,6 +651,7 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
+  // click pool
   const CLICK_POOL_SIZE = 6;
   const clickPool = [];
   let clickPoolIdx = 0;
@@ -687,6 +697,7 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
+  // laugh pool
   const LAUGH_POOL_SIZE = 2;
   const laughPool = [];
   let laughPoolIdx = 0;
@@ -754,7 +765,7 @@ SEE YOU AT ATH!</span>
   let laughTimer = null;
 
   document.getElementById("caBtn").addEventListener("click", async ()=>{
-    playClick();
+    playClick(); // beep first
 
     try{
       if(canClipboard){
@@ -814,7 +825,6 @@ SEE YOU AT ATH!</span>
   const jackpotEl = document.getElementById("jackpot");
   const jackpotSub = document.getElementById("jackpotSub");
   const coinRain = document.getElementById("coinRain");
-
   let jackpotTimer = null;
 
   function spawnCoinRain(count = 36){
@@ -871,11 +881,12 @@ SEE YOU AT ATH!</span>
     extraPulse();
   }
 
-  function nextComboCount(){
-    let c = Number(sessionStorage.getItem(COMBO_KEY) || "0");
-    c = (c + 1) % COMBO_TARGET;
+  // progress counter: 0..4
+  function advanceCombo(){
+    let c = Number(sessionStorage.getItem(COMBO_KEY) || "0"); // 0..4
+    c = (c + 1) % COMBO_TARGET; // after 5th press => 0
     sessionStorage.setItem(COMBO_KEY, String(c));
-    return c;
+    return c; // 0 means jackpot hit
   }
 
   let degenLock = false;
@@ -895,12 +906,11 @@ SEE YOU AT ATH!</span>
     pulseInsertCoins();
     bumpCoinCount();
 
-    const comboValue = nextComboCount();
-    const isComboHit = (comboValue === 0);
-
-    // ✅ update countdown right after the press
+    const c = advanceCombo();
+    // ✅ update countdown AFTER advancing
     renderJackpotCountdown();
 
+    const isComboHit = (c === 0);
     if(isComboHit){
       triggerJackpot("combo");
     }else if(Math.random() < JACKPOT_CHANCE){
@@ -922,7 +932,7 @@ SEE YOU AT ATH!</span>
     }
   });
 
-  // ===== LOOP =====
+  // ===== LOOP (terminal) =====
   const line1 = document.getElementById("termLine1");
   const line2 = document.getElementById("termLine2");
   const line3 = document.getElementById("termLine3");
@@ -938,7 +948,7 @@ SEE YOU AT ATH!</span>
 
   let cycleTimers = [];
   function addTimeout(fn, ms){
-    const t = setTimeout(fn, ms knowing);
+    const t = setTimeout(fn, ms);
     cycleTimers.push(t);
     return t;
   }
