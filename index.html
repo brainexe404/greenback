@@ -527,4 +527,524 @@ SEE YOU AT ATH!</span>
   const COMBO_TARGET = 5;            // guaranteed on every 5th ACTIVATE (session)
   const COMBO_KEY = "gb_comboCount"; // sessionStorage key
 
-  // laugh after CA copy (delay so it do
+  // laugh after CA copy (delay so it doesn't overlap the beep)
+  const LAUGH_DELAY_MS = 170;
+
+  const STATUS_LINES = [
+    "loading greenback protocol v0.0.1",
+    "syncing liquidity routes... OK",
+    "scanning degen index... OK",
+    "checking rugs... NOT FOUND",
+    "loading memes... OK",
+    "routing orders... STABLE"
+  ];
+  let statusIdx = 0;
+
+  const insertBtn = document.getElementById("insertBtn");
+  const dexBtn = document.getElementById("dexBtn");
+  insertBtn.href = INSERT_URL;
+  dexBtn.href = DEX_URL;
+
+  // FULL CA shown on button
+  document.getElementById("caText").textContent = CA;
+
+  // ===== (7) SESSION COIN COUNT =====
+  const coinCountEl = document.getElementById("coinCount");
+  let coinCount = Number(sessionStorage.getItem("gb_coinCount") || "0");
+  function renderCoinCount(){
+    coinCountEl.textContent = String(coinCount).padStart(2, "0");
+  }
+  function bumpCoinCount(){
+    coinCount = Math.min(99, coinCount + 1);
+    sessionStorage.setItem("gb_coinCount", String(coinCount));
+    renderCoinCount();
+  }
+  renderCoinCount();
+
+  // ===== AUDIO =====
+  const muteBtn = document.getElementById("muteBtn");
+  const preloadClick = document.getElementById("clickSfx");
+  const preloadBaron = document.getElementById("baronVoice");
+  const preloadLaugh = document.getElementById("laughSfx");
+
+  let isMuted = (localStorage.getItem("gb_muted") === "1");
+  function renderMute(){ muteBtn.textContent = isMuted ? "🔇" : "🔊"; }
+  renderMute();
+
+  muteBtn.addEventListener("click", ()=>{
+    isMuted = !isMuted;
+    localStorage.setItem("gb_muted", isMuted ? "1" : "0");
+    renderMute();
+  });
+
+  let audioUnlocked = false;
+  let audioCtx = null;
+
+  function unlockAudio(){
+    if(audioUnlocked) return;
+    audioUnlocked = true;
+
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+    }catch(e){}
+
+    // prime (muted) so mobile allows later plays
+    [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
+      if(!a) return;
+      try{
+        const wasMuted = a.muted;
+        a.muted = true;
+        const p = a.play();
+        if(p && p.then){
+          p.then(()=>{ a.pause(); a.currentTime = 0; a.muted = wasMuted; })
+           .catch(()=>{ a.muted = wasMuted; });
+        }else{
+          a.pause(); a.currentTime = 0; a.muted = wasMuted;
+        }
+      }catch(e){}
+    });
+
+    initClickPool();
+    initLaughPool();
+  }
+
+  window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
+  window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
+
+  function beepFallback(){
+    if(isMuted) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      o.frequency.value = 740;
+      g.gain.value = 0.05;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
+    }catch(e){}
+  }
+
+  // click pool
+  const CLICK_POOL_SIZE = 6;
+  const clickPool = [];
+  let clickPoolIdx = 0;
+
+  function initClickPool(){
+    if(clickPool.length) return;
+    for(let i=0;i<CLICK_POOL_SIZE;i++){
+      const a = new Audio("arcade.mp3");
+      a.preload = "auto";
+      a.volume = 0.85;
+      clickPool.push(a);
+    }
+  }
+
+  function playClick(volume=0.85){
+    if(isMuted) return;
+    unlockAudio();
+    try{
+      initClickPool();
+      const a = clickPool[clickPoolIdx % clickPool.length];
+      clickPoolIdx++;
+      a.pause();
+      a.currentTime = 0;
+      a.volume = volume;
+      const p = a.play();
+      if(p && typeof p.catch === "function"){
+        p.catch(()=>{ beepFallback(); });
+      }
+    }catch{
+      beepFallback();
+    }
+  }
+
+  function playBaron(){
+    if(isMuted) return;
+    unlockAudio();
+    try{
+      const a = new Audio("baron.mp3");
+      a.preload = "auto";
+      a.volume = 0.75;
+      const p = a.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
+    }catch(e){}
+  }
+
+  // ✅ laugh pool (so it can play reliably, and we can stop/restart cleanly)
+  const LAUGH_POOL_SIZE = 2;
+  const laughPool = [];
+  let laughPoolIdx = 0;
+
+  function initLaughPool(){
+    if(laughPool.length) return;
+    for(let i=0;i<LAUGH_POOL_SIZE;i++){
+      const a = new Audio("laugh.mp3");
+      a.preload = "auto";
+      a.volume = 0.9;
+      laughPool.push(a);
+    }
+  }
+
+  function stopLaugh(){
+    try{
+      laughPool.forEach(a=>{
+        a.pause();
+        a.currentTime = 0;
+      });
+    }catch(e){}
+  }
+
+  function playLaugh(){
+    if(isMuted) return;
+    unlockAudio();
+    try{
+      initLaughPool();
+      // stop any ongoing laugh so it never overlaps itself
+      stopLaugh();
+      const a = laughPool[laughPoolIdx % laughPool.length];
+      laughPoolIdx++;
+      a.currentTime = 0;
+      const p = a.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
+    }catch(e){}
+  }
+
+  // louder jackpot "coin hits"
+  function playJackpotCoins(){
+    playClick(1.0);
+    setTimeout(()=>playClick(1.0), 90);
+    setTimeout(()=>playClick(1.0), 180);
+  }
+
+  ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("click", ()=>{ playClick(); });
+  });
+
+  // ===== COPY CA =====
+  const tip = document.getElementById("tip");
+  let tipTimer;
+  function showTip(text){
+    tip.textContent = text;
+    tip.classList.add("show");
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(()=> tip.classList.remove("show"), 900);
+  }
+
+  const canClipboard = !!(navigator.clipboard && window.isSecureContext);
+  function getCopyMessage(){
+    return "BARON APPROVES\nSEE YOU AT ATH!";
+  }
+
+  let laughTimer = null;
+
+  document.getElementById("caBtn").addEventListener("click", async ()=>{
+    // beep first
+    playClick();
+
+    // copy
+    try{
+      if(canClipboard){
+        await navigator.clipboard.writeText(CA);
+      }else{
+        throw new Error("clipboard not available");
+      }
+    }catch{
+      try{
+        const t=document.createElement("textarea");
+        t.value=CA; document.body.appendChild(t);
+        t.select(); document.execCommand("copy");
+        document.body.removeChild(t);
+      }catch{
+        window.prompt("Copy CA:", CA);
+      }
+    }
+
+    // tooltip
+    showTip(getCopyMessage());
+
+    // ✅ laugh AFTER the beep so no overlap
+    clearTimeout(laughTimer);
+    laughTimer = setTimeout(()=>{
+      playLaugh();
+    }, LAUGH_DELAY_MS);
+  });
+
+  // ===== ACTIVATE DEGEN + JACKPOT =====
+  const degenBtn = document.getElementById("degenBtn");
+  let easterMode = false;
+  let degenResetTimer = null;
+  let pulseTimer = null;
+
+  function pulseInsertCoins(){
+    insertBtn.classList.remove("pulse");
+    clearTimeout(pulseTimer);
+    void insertBtn.offsetWidth;
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        insertBtn.classList.add("pulse");
+        pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
+      });
+    });
+  }
+  function extraPulse(){
+    setTimeout(()=> pulseInsertCoins(), 140);
+    setTimeout(()=> pulseInsertCoins(), 320);
+  }
+
+  function setDegenActivatedTemp(){
+    degenBtn.classList.add("activated");
+    degenBtn.textContent = "ACTIVATED";
+    clearTimeout(degenResetTimer);
+    degenResetTimer = setTimeout(()=>{
+      degenBtn.classList.remove("activated");
+      degenBtn.textContent = "ACTIVATE DEGEN!";
+    }, 10000);
+  }
+
+  const jackpotEl = document.getElementById("jackpot");
+  const jackpotSub = document.getElementById("jackpotSub");
+  const coinRain = document.getElementById("coinRain");
+
+  let jackpotTimer = null;
+
+  // ✅ RELIABLE coin rain (set full animation string in JS)
+  function spawnCoinRain(count = 26){
+    coinRain.innerHTML = "";
+    for(let i=0;i<count;i++){
+      const c = document.createElement("span");
+      c.className = "coin";
+
+      const left  = Math.random() * 100;       // %
+      const dur   = 700 + Math.random() * 650; // ms
+      const delay = Math.random() * 220;       // ms
+      const size  = 8 + Math.random() * 8;     // px
+
+      c.style.left = left + "%";
+      c.style.width = size + "px";
+      c.style.height = size + "px";
+
+      c.style.animation = `coinFall ${dur}ms linear ${delay}ms forwards`;
+
+      coinRain.appendChild(c);
+    }
+  }
+
+  function triggerJackpot(reason){
+    jackpotSub.textContent =
+      (reason === "combo")
+        ? `COMBO WIN! YOU WON: 777 ${TICKER}`
+        : `YOU WON: 777 ${TICKER}`;
+
+    spawnCoinRain(34);
+
+    jackpotEl.classList.remove("show");
+    void jackpotEl.offsetWidth;
+    jackpotEl.classList.add("show");
+
+    clearTimeout(jackpotTimer);
+    jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
+
+    playJackpotCoins();
+    extraPulse();
+  }
+
+  // session combo counter (guaranteed every 5)
+  function nextComboCount(){
+    let c = Number(sessionStorage.getItem(COMBO_KEY) || "0");
+    c = (c + 1) % COMBO_TARGET; // 0..4
+    sessionStorage.setItem(COMBO_KEY, String(c));
+    return c; // 0 means it just wrapped (hit)
+  }
+
+  let degenLock = false;
+
+  function handleDegenActivate(e){
+    if(e) e.preventDefault?.();
+    unlockAudio();
+
+    if(degenLock) return;
+    degenLock = true;
+    setTimeout(()=>{ degenLock = false; }, 350);
+
+    playClick();
+    playBaron();
+
+    setDegenActivatedTemp();
+    pulseInsertCoins();
+    bumpCoinCount();
+
+    const comboValue = nextComboCount();
+    const isComboHit = (comboValue === 0);
+
+    if(isComboHit){
+      triggerJackpot("combo");
+    }else if(Math.random() < JACKPOT_CHANCE){
+      triggerJackpot("random");
+    }
+
+    easterMode = true;
+    runCycle(true);
+    setTimeout(()=>{ easterMode = false; }, 14000);
+
+    exitAttractMode();
+  }
+
+  degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
+  degenBtn.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      handleDegenActivate(e);
+    }
+  });
+
+  // ===== LOOP =====
+  const line1 = document.getElementById("termLine1");
+  const line2 = document.getElementById("termLine2");
+  const line3 = document.getElementById("termLine3");
+
+  const LOOP_MS = 10000;
+
+  const baronTextNormal = "THE BARON ALWAYS EXITS FIRST";
+  const baronTextDegen = "DEGEN OVERDRIVE ENABLED";
+  const baronTextAttract = "INSERT COINS TO BEGIN";
+  const baronTyped = document.getElementById("baronTyped");
+  const baronCursor = document.getElementById("baronCursor");
+  const baronLine = document.getElementById("baronLine");
+
+  let cycleTimers = [];
+  function addTimeout(fn, ms){
+    const t = setTimeout(fn, ms);
+    cycleTimers.push(t);
+    return t;
+  }
+  function typeText(el, text, speed, done){
+    let i = 0;
+    el.textContent = "";
+    const t = setInterval(()=>{
+      el.textContent += text[i++] || "";
+      if(i >= text.length){
+        clearInterval(t);
+        done && done();
+      }
+    }, speed);
+    cycleTimers.push(t);
+  }
+
+  function typeBaronOnce(text){
+    baronLine.classList.remove("glitch");
+    void baronLine.offsetWidth;
+    baronLine.classList.add("glitch");
+
+    baronTyped.textContent = "";
+    baronCursor.style.display = "inline-block";
+
+    addTimeout(()=>{
+      let i = 0;
+      const t = setInterval(()=>{
+        baronTyped.textContent += text[i++] || "";
+        if(i >= text.length){
+          clearInterval(t);
+          addTimeout(()=>{ baronCursor.style.display = "none"; }, 550);
+        }
+      }, 14);
+      cycleTimers.push(t);
+    }, 90);
+  }
+
+  function setReadyLine(){
+    line3.textContent = "status: ";
+    const s = document.createElement("span");
+    s.className = "ready";
+    s.textContent = "READY";
+    line3.appendChild(s);
+  }
+
+  // (8) Attract mode (idle demo)
+  let attractMode = false;
+  let attractIdleTimer = null;
+  let attractPulseTimer = null;
+  const ATTRACT_IDLE_MS = 30000;
+  const ATTRACT_PULSE_EVERY_MS = 6500;
+
+  function enterAttractMode(){
+    if(attractMode) return;
+    attractMode = true;
+
+    clearInterval(attractPulseTimer);
+    attractPulseTimer = setInterval(()=> {
+      if(attractMode) pulseInsertCoins();
+    }, ATTRACT_PULSE_EVERY_MS);
+
+    runCycle();
+  }
+
+  function exitAttractMode(){
+    if(!attractMode) return;
+    attractMode = false;
+    clearInterval(attractPulseTimer);
+    attractPulseTimer = null;
+    runCycle();
+  }
+
+  function resetAttractIdle(){
+    clearTimeout(attractIdleTimer);
+    attractIdleTimer = setTimeout(()=> enterAttractMode(), ATTRACT_IDLE_MS);
+  }
+
+  ["pointerdown","mousedown","touchstart","keydown","wheel","scroll"].forEach(evt=>{
+    window.addEventListener(evt, ()=>{
+      resetAttractIdle();
+      if(attractMode) exitAttractMode();
+    }, {passive:true});
+  });
+  resetAttractIdle();
+
+  function runCycle(){
+    cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
+    cycleTimers = [];
+
+    const statusLine = STATUS_LINES[statusIdx % STATUS_LINES.length];
+    statusIdx++;
+
+    line1.textContent = "";
+    line2.textContent = "";
+    line3.textContent = "";
+    baronTyped.textContent = "";
+    baronCursor.style.display = "none";
+
+    const l1 =
+      easterMode ? "ACCESS GRANTED..." :
+      attractMode ? "ARCADE CABINET ONLINE..." :
+      "initializing terminal on solana...";
+
+    const l2 =
+      easterMode ? "DEGEN MODE: ACTIVE" :
+      attractMode ? "DEMO LOOP: RUNNING" :
+      statusLine;
+
+    const baronLineText =
+      easterMode ? baronTextDegen :
+      attractMode ? baronTextAttract :
+      baronTextNormal;
+
+    typeText(line1, l1, 18, ()=>{
+      addTimeout(()=> typeText(line2, l2, 14, ()=>{
+        addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
+          setReadyLine();
+          addTimeout(()=> typeBaronOnce(baronLineText), 220);
+        }), 140);
+      }), 140);
+    });
+  }
+
+  runCycle();
+  setInterval(runCycle, LOOP_MS);
+</script>
+</body>
+</html>
