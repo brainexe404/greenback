@@ -122,6 +122,7 @@
       0 0 14px rgba(200,255,47,.35),
       0 0 34px rgba(200,255,47,.18);
     line-height:1;
+    position:relative; z-index:2; /* ✅ ensure above coin rain */
   }
   .jackpot-text{
     margin-top:6px;
@@ -131,6 +132,7 @@
     text-transform:uppercase;
     color:#eaeaea;
     font-size:14px;
+    position:relative; z-index:2; /* ✅ */
   }
   .jackpot-sub{
     margin-top:6px;
@@ -141,12 +143,14 @@
     color:var(--yellow);
     font-size:12px;
     opacity:.9;
+    position:relative; z-index:2; /* ✅ */
   }
 
   .coin-rain{
     position:absolute;inset:0;
     pointer-events:none;
     overflow:hidden;
+    z-index:1; /* ✅ visible behind text */
   }
   .coin{
     position:absolute;
@@ -156,9 +160,8 @@
     background:var(--yellow);
     box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
     image-rendering:pixelated;
-    transform:rotate(0deg);
     opacity:.95;
-    animation:coinFall linear forwards;
+    /* animation is set fully in JS for reliability */
   }
   .coin::after{
     content:"";
@@ -750,33 +753,35 @@ SEE YOU AT ATH!</span>
 
   let jackpotTimer = null;
 
-  function spawnCoinRain(count=26){
+  // ✅ RELIABLE coin rain (set full animation string in JS)
+  function spawnCoinRain(count = 26){
     coinRain.innerHTML = "";
-    const w = window.innerWidth || 520;
     for(let i=0;i<count;i++){
       const c = document.createElement("span");
       c.className = "coin";
-      const left = Math.random() * 100; // %
-      const dur = 700 + Math.random() * 650; // ms
-      const delay = Math.random() * 220; // ms
-      const size = 8 + Math.random() * 8; // px
+
+      const left  = Math.random() * 100;       // %
+      const dur   = 700 + Math.random() * 650; // ms
+      const delay = Math.random() * 220;       // ms
+      const size  = 8 + Math.random() * 8;     // px
+
       c.style.left = left + "%";
-      c.style.animationDuration = dur + "ms";
-      c.style.animationDelay = delay + "ms";
       c.style.width = size + "px";
       c.style.height = size + "px";
+
+      // set entire animation (most reliable across browsers)
+      c.style.animation = `coinFall ${dur}ms linear ${delay}ms forwards`;
+
       coinRain.appendChild(c);
     }
   }
 
   function triggerJackpot(reason){
-    // Cosmetic message tied to ticker
     jackpotSub.textContent =
       (reason === "combo")
         ? `COMBO WIN! YOU WON: 777 ${TICKER}`
         : `YOU WON: 777 ${TICKER}`;
 
-    // show flash + 777 + coins
     spawnCoinRain(34);
 
     jackpotEl.classList.remove("show");
@@ -786,7 +791,6 @@ SEE YOU AT ATH!</span>
     clearTimeout(jackpotTimer);
     jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
 
-    // louder hit + extra pulse
     playJackpotCoins();
     extraPulse();
   }
@@ -816,7 +820,6 @@ SEE YOU AT ATH!</span>
     pulseInsertCoins();
     bumpCoinCount();
 
-    // guaranteed combo jackpot on every 5th press
     const comboValue = nextComboCount();
     const isComboHit = (comboValue === 0);
 
