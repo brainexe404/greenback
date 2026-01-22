@@ -108,10 +108,11 @@
     user-select:none;
     cursor:pointer;
     animation:blink 1s steps(1,end) infinite;
-
     pointer-events:auto;
     position:relative;
     z-index:50;
+    appearance:none;
+    outline:none;
   }
   .degen:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000, 0 0 14px rgba(200,255,47,.12)}
   @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
@@ -224,12 +225,10 @@
   .btn-ca .mono{
     color:#0b0b0b !important;
     font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:16px;           /* bigger */
+    font-size:16px;
     font-weight:900;
     letter-spacing:.2px;
     text-transform:none;
-
-    /* show FULL CA nicely */
     white-space:normal;
     overflow:visible;
     text-overflow:clip;
@@ -357,14 +356,13 @@
     .baron-line{margin-top:3px}
   }
 
-  /* keep your original reduced motion behavior (do NOT kill degen blink unexpectedly) */
+  /* reduced motion: keep visual "lit" state, but DON'T kill the pulse entirely */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
     .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
-    .btn.pulse{animation:none !important;}
-    .btn.pulse::after{animation:none !important;opacity:.85;}
+    /* NOTE: intentionally NOT disabling .btn.pulse animation anymore */
   }
 </style>
 </head>
@@ -380,7 +378,8 @@
     <h1>Baron Greenback</h1>
     <div class="ticker">$GBARON</div>
 
-    <div class="degen" id="degenBtn" role="button" tabindex="0" aria-label="Activate degen">ACTIVATE DEGEN!</div>
+    <!-- switched to a real button so iOS treats it as a proper "user gesture" click target -->
+    <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
@@ -475,7 +474,7 @@
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    // silent prime so mobile allows later plays
+    // prime (muted) so mobile allows later plays
     [preloadClick, preloadBaron].forEach(a=>{
       if(!a) return;
       try{
@@ -546,16 +545,17 @@
     }
   }
 
-  // IMPORTANT: make baron.mp3 reliably play on the very FIRST "ACTIVATE DEGEN!" press.
-  // Using a fresh Audio instance is the most consistent cross-browser for this case.
+  // IMPORTANT: baron.mp3 must play on FIRST ACTIVATE press (mobile-safe: trigger from CLICK)
   function playBaron(){
     if(isMuted) return;
     unlockAudio();
     try{
+      // fresh instance is most consistent across browsers
       const a = new Audio("baron.mp3");
       a.preload = "auto";
       a.volume = 0.75;
-      a.play().catch(()=>{});
+      const p = a.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
     }catch(e){}
   }
 
@@ -609,6 +609,9 @@
     insertBtn.classList.remove("pulse");
     clearTimeout(pulseTimer);
 
+    // force reflow to hard-reset animation (helps on some desktop browsers)
+    void insertBtn.offsetWidth;
+
     // double-rAF is the most reliable way to restart CSS animation across browsers
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
@@ -628,12 +631,20 @@
     }, 10000);
   }
 
+  // one true handler (CLICK) so:
+  // - mobile plays audio immediately on first press
+  // - desktop doesn't get pointerdown/mousedown/click duplicates fighting the lock
+  let degenLock = false;
+
   function handleDegenActivate(e){
+    if(e) e.preventDefault?.();
+
+    // MUST be inside click/tap gesture for iOS
     unlockAudio();
 
-    if(handleDegenActivate._lock) return;
-    handleDegenActivate._lock = true;
-    setTimeout(()=>{ handleDegenActivate._lock = false; }, 350);
+    if(degenLock) return;
+    degenLock = true;
+    setTimeout(()=>{ degenLock = false; }, 350);
 
     // Play BOTH on first press
     playClick();
@@ -645,14 +656,12 @@
     easterMode = true;
     runCycle(true);
     setTimeout(()=>{ easterMode = false; }, 14000);
-
-    if(e && e.preventDefault) e.preventDefault();
   }
 
-  // keep your original multi-event approach
-  degenBtn.addEventListener("pointerdown", handleDegenActivate);
-  degenBtn.addEventListener("mousedown", handleDegenActivate);
-  degenBtn.addEventListener("click", handleDegenActivate);
+  // ✅ Only click (plus keyboard). This fixes:
+  // - mobile: audio triggers on ACTIVATE DEGEN (first press)
+  // - desktop: pulse reliably fires (no multi-event race)
+  degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
 
   // keyboard activate (doesn't break anything)
   degenBtn.addEventListener("keydown", (e)=>{
