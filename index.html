@@ -231,7 +231,7 @@
     box-shadow:4px 4px 0 #000, 0 0 18px rgba(200,255,47,.25);
   }
 
-  /* ✅ NEW: tiny jackpot countdown under degen */
+  /* ✅ Jackpot countdown line (small) */
   .jackpot-countdown{
     margin:0 0 10px;
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -245,6 +245,33 @@
   .jackpot-countdown b{
     color:var(--yellow);
     font-weight:900;
+  }
+
+  /* ✅ tiny blink when it updates */
+  .jackpot-countdown.blink{
+    animation:countBlink 220ms steps(2,end) 1;
+  }
+  @keyframes countBlink{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(1.65)}
+    100%{filter:brightness(1)}
+  }
+
+  /* ✅ "JACKPOT READY!" flash when on 5/5 */
+  .jp-ready{
+    margin-left:8px;
+    display:inline-block;
+    color:var(--yellow);
+    font-weight:900;
+    letter-spacing:1px;
+    opacity:.9;
+  }
+  .jp-ready.flash{
+    animation:readyFlash 700ms steps(2,end) infinite;
+  }
+  @keyframes readyFlash{
+    0%,49%{opacity:1; filter:brightness(1.2)}
+    50%,100%{opacity:.15; filter:brightness(0.9)}
   }
 
   .terminal{
@@ -450,15 +477,15 @@
     .degen{animation:blink 1s steps(1,end) infinite !important;}
     .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
+    .jp-ready.flash{animation:none !important; opacity:1;}
+    .jackpot-countdown.blink{animation:none !important;}
   }
 </style>
 </head>
 
 <body>
-<!-- coin rain -->
 <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
 
-<!-- jackpot overlay -->
 <div class="jackpot" id="jackpot" aria-hidden="true">
   <div class="jackpot-inner">
     <div class="jackpot-nums">777</div>
@@ -479,9 +506,10 @@
 
     <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
 
-    <!-- ✅ Jackpot countdown (tiny, visible) -->
-    <div class="jackpot-countdown" aria-label="jackpot countdown">
+    <!-- ✅ Countdown + READY flash -->
+    <div class="jackpot-countdown" id="jpWrap" aria-label="jackpot countdown">
       JACKPOT: <b id="jpCountText">1/5</b>
+      <span class="jp-ready" id="jpReady" aria-hidden="true">JACKPOT READY!</span>
     </div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
@@ -539,7 +567,7 @@ SEE YOU AT ATH!</span>
 
   const JACKPOT_CHANCE = 0.02;     // 2% random
   const COMBO_TARGET = 5;          // guaranteed every 5 presses
-  const COMBO_KEY = "gb_comboCount";
+  const COMBO_KEY = "gb_comboCount_fixed"; // ✅ new key so old offsets can't mess it up
   const LAUGH_DELAY_MS = 170;
 
   const STATUS_LINES = [
@@ -558,17 +586,39 @@ SEE YOU AT ATH!</span>
   insertBtn.href = INSERT_URL;
   dexBtn.href = DEX_URL;
 
-  // ✅ FULL CA shown on button (this was missing when JS broke)
+  // CA on button
   document.getElementById("caText").textContent = CA;
 
   // ===== jackpot countdown UI =====
+  const jpWrap = document.getElementById("jpWrap");
   const jpCountText = document.getElementById("jpCountText");
-  function renderJackpotCountdown(){
-    // stored is how many presses into the cycle we are: 0..4
-    const stored = Number(sessionStorage.getItem(COMBO_KEY) || "0"); // 0..4
-    const nextStep = stored + 1; // show 1..5
-    jpCountText.textContent = `${nextStep}/${COMBO_TARGET}`;
+  const jpReady = document.getElementById("jpReady");
+
+  function safeGetCombo(){
+    const raw = Number(sessionStorage.getItem(COMBO_KEY) || "0");
+    if(!Number.isFinite(raw) || raw < 0 || raw > (COMBO_TARGET - 1)){
+      sessionStorage.setItem(COMBO_KEY, "0");
+      return 0;
+    }
+    return raw;
   }
+
+  function renderJackpotCountdown(){
+    const progress = safeGetCombo();       // 0..4 (how many presses done in cycle)
+    const shown = progress + 1;            // 1..5
+    jpCountText.textContent = `${shown}/${COMBO_TARGET}`;
+
+    const ready = (shown === COMBO_TARGET);
+    jpReady.style.display = ready ? "inline-block" : "none";
+    jpReady.classList.toggle("flash", ready);
+  }
+
+  function blinkCountdown(){
+    jpWrap.classList.remove("blink");
+    void jpWrap.offsetWidth;
+    jpWrap.classList.add("blink");
+  }
+
   renderJackpotCountdown();
 
   // ===== session coin count =====
@@ -612,7 +662,6 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    // prime muted so mobile allows later plays
     [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
       if(!a) return;
       try{
@@ -881,12 +930,22 @@ SEE YOU AT ATH!</span>
     extraPulse();
   }
 
-  // progress counter: 0..4
-  function advanceCombo(){
-    let c = Number(sessionStorage.getItem(COMBO_KEY) || "0"); // 0..4
-    c = (c + 1) % COMBO_TARGET; // after 5th press => 0
-    sessionStorage.setItem(COMBO_KEY, String(c));
-    return c; // 0 means jackpot hit
+  // ✅ FIXED GUARANTEED 5-CLICK LOGIC:
+  // stored progress = 0..4
+  // - if progress === 4 -> THIS press triggers jackpot and resets to 0
+  // - else progress++ (no jackpot)
+  function comboStepAndCheckHit(){
+    let progress = safeGetCombo(); // 0..4
+
+    const willHitNow = (progress === (COMBO_TARGET - 1)); // 4 means 5th click
+    if(willHitNow){
+      sessionStorage.setItem(COMBO_KEY, "0");
+      return true;
+    }else{
+      progress += 1;
+      sessionStorage.setItem(COMBO_KEY, String(progress));
+      return false;
+    }
   }
 
   let degenLock = false;
@@ -906,12 +965,12 @@ SEE YOU AT ATH!</span>
     pulseInsertCoins();
     bumpCoinCount();
 
-    const c = advanceCombo();
-    // ✅ update countdown AFTER advancing
-    renderJackpotCountdown();
+    const comboHit = comboStepAndCheckHit();
 
-    const isComboHit = (c === 0);
-    if(isComboHit){
+    renderJackpotCountdown();
+    blinkCountdown();
+
+    if(comboHit){
       triggerJackpot("combo");
     }else if(Math.random() < JACKPOT_CHANCE){
       triggerJackpot("random");
