@@ -61,7 +61,7 @@
     position:relative;
   }
 
-  /* ===== JACKPOT OVERLAY + COIN RAIN ===== */
+  /* ===== JACKPOT OVERLAY ===== */
   .jackpot{
     position:fixed;inset:0;
     display:flex;align-items:center;justify-content:center;
@@ -122,7 +122,6 @@
       0 0 14px rgba(200,255,47,.35),
       0 0 34px rgba(200,255,47,.18);
     line-height:1;
-    position:relative; z-index:2;
   }
   .jackpot-text{
     margin-top:6px;
@@ -132,7 +131,6 @@
     text-transform:uppercase;
     color:#eaeaea;
     font-size:14px;
-    position:relative; z-index:2;
   }
   .jackpot-sub{
     margin-top:6px;
@@ -143,34 +141,31 @@
     color:var(--yellow);
     font-size:12px;
     opacity:.9;
-    position:relative; z-index:2;
   }
 
+  /* ✅ FULL-SCREEN COIN RAIN LAYER */
   .coin-rain{
-    position:absolute;inset:0;
+    position:fixed;
+    inset:0;
     pointer-events:none;
     overflow:hidden;
-    z-index:1;
+    z-index:9998; /* under jackpot text box but above page */
   }
   .coin{
     position:absolute;
-    top:-14px;
-    width:10px;height:10px;
+    top:-18px;
+    width:12px;height:12px;
     border:2px solid #000;
     background:var(--yellow);
     box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
     image-rendering:pixelated;
-    opacity:.95;
+    opacity:0;
+    will-change:transform, opacity;
   }
   .coin::after{
     content:"";
     position:absolute;inset:2px;
     border:1px solid rgba(0,0,0,.25);
-  }
-  @keyframes coinFall{
-    0%{transform:translateY(-10px) rotate(0deg); opacity:0}
-    8%{opacity:1}
-    100%{transform:translateY(420px) rotate(360deg); opacity:0}
   }
 
   /* Mute toggle */
@@ -432,24 +427,16 @@
     .btn-ca .mono{font-size:14px}
     .jackpot-nums{font-size:54px; letter-spacing:4px;}
   }
-
-  @media (prefers-reduced-motion: reduce){
-    .logo{animation:bob 2.4s steps(2,end) infinite !important;}
-    .degen{animation:blink 1s steps(1,end) infinite !important;}
-    .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
-    .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
-    .jackpot.show{animation:none !important; opacity:1;}
-    .jackpot::before{animation:none !important; opacity:.35;}
-    .coin{animation:none !important; opacity:.35;}
-  }
 </style>
 </head>
 
 <body>
+<!-- ✅ FULL SCREEN coin rain container -->
+<div class="coin-rain" id="coinRain" aria-hidden="true"></div>
+
 <!-- JACKPOT overlay -->
 <div class="jackpot" id="jackpot" aria-hidden="true">
   <div class="jackpot-inner" id="jackpotInner">
-    <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
     <div class="jackpot-nums">777</div>
     <div class="jackpot-text">GBARON JACKPOT</div>
     <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
@@ -513,7 +500,6 @@ SEE YOU AT ATH!</span>
 
 <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
 <audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
-<!-- ✅ NEW: laugh -->
 <audio id="laughSfx" src="laugh.mp3" preload="auto"></audio>
 
 <script>
@@ -523,9 +509,9 @@ SEE YOU AT ATH!</span>
   const TICKER = "$GBARON";
 
   // RNG jackpot chance + guaranteed combo jackpot
-  const JACKPOT_CHANCE = 0.02;       // 2% random
-  const COMBO_TARGET = 5;            // guaranteed on every 5th ACTIVATE (session)
-  const COMBO_KEY = "gb_comboCount"; // sessionStorage key
+  const JACKPOT_CHANCE = 0.02;       
+  const COMBO_TARGET = 5;            
+  const COMBO_KEY = "gb_comboCount";
 
   // laugh after CA copy (delay so it doesn't overlap the beep)
   const LAUGH_DELAY_MS = 170;
@@ -545,10 +531,9 @@ SEE YOU AT ATH!</span>
   insertBtn.href = INSERT_URL;
   dexBtn.href = DEX_URL;
 
-  // FULL CA shown on button
   document.getElementById("caText").textContent = CA;
 
-  // ===== (7) SESSION COIN COUNT =====
+  // ===== SESSION COIN COUNT =====
   const coinCountEl = document.getElementById("coinCount");
   let coinCount = Number(sessionStorage.getItem("gb_coinCount") || "0");
   function renderCoinCount(){
@@ -589,7 +574,7 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    // prime (muted) so mobile allows later plays
+    // prime muted so mobile allows later plays
     [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
       if(!a) return;
       try{
@@ -674,7 +659,7 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
-  // ✅ laugh pool (so it can play reliably, and we can stop/restart cleanly)
+  // laugh pool
   const LAUGH_POOL_SIZE = 2;
   const laughPool = [];
   let laughPoolIdx = 0;
@@ -703,7 +688,6 @@ SEE YOU AT ATH!</span>
     unlockAudio();
     try{
       initLaughPool();
-      // stop any ongoing laugh so it never overlaps itself
       stopLaugh();
       const a = laughPool[laughPoolIdx % laughPool.length];
       laughPoolIdx++;
@@ -744,10 +728,8 @@ SEE YOU AT ATH!</span>
   let laughTimer = null;
 
   document.getElementById("caBtn").addEventListener("click", async ()=>{
-    // beep first
-    playClick();
+    playClick(); // beep first
 
-    // copy
     try{
       if(canClipboard){
         await navigator.clipboard.writeText(CA);
@@ -765,14 +747,10 @@ SEE YOU AT ATH!</span>
       }
     }
 
-    // tooltip
     showTip(getCopyMessage());
 
-    // ✅ laugh AFTER the beep so no overlap
     clearTimeout(laughTimer);
-    laughTimer = setTimeout(()=>{
-      playLaugh();
-    }, LAUGH_DELAY_MS);
+    laughTimer = setTimeout(()=> playLaugh(), LAUGH_DELAY_MS);
   });
 
   // ===== ACTIVATE DEGEN + JACKPOT =====
@@ -813,26 +791,42 @@ SEE YOU AT ATH!</span>
 
   let jackpotTimer = null;
 
-  // ✅ RELIABLE coin rain (set full animation string in JS)
-  function spawnCoinRain(count = 26){
+  // ✅ TRUE "from the sky" coin rain using Web Animations API
+  function spawnCoinRain(count = 36){
     coinRain.innerHTML = "";
+
+    const W = window.innerWidth || 520;
+    const H = window.innerHeight || 700;
+
     for(let i=0;i<count;i++){
       const c = document.createElement("span");
       c.className = "coin";
 
-      const left  = Math.random() * 100;       // %
-      const dur   = 700 + Math.random() * 650; // ms
-      const delay = Math.random() * 220;       // ms
-      const size  = 8 + Math.random() * 8;     // px
+      const left = Math.random() * W;
+      const size = 8 + Math.random() * 10;
+      const dur  = 900 + Math.random() * 900;
+      const delay = Math.random() * 240;
+      const rot = 240 + Math.random() * 360;
 
-      c.style.left = left + "%";
+      c.style.left = left + "px";
       c.style.width = size + "px";
       c.style.height = size + "px";
 
-      c.style.animation = `coinFall ${dur}ms linear ${delay}ms forwards`;
-
       coinRain.appendChild(c);
+
+      // Animate from above viewport to below viewport
+      c.animate(
+        [
+          { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
+          { opacity: 1, offset: 0.12 },
+          { transform: `translateY(${H + 80}px) rotate(${rot}deg)`, opacity: 0 }
+        ],
+        { duration: dur, delay, easing: "linear", fill: "forwards" }
+      );
     }
+
+    // cleanup so DOM doesn't grow if people spam jackpot
+    setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
   }
 
   function triggerJackpot(reason){
@@ -841,7 +835,7 @@ SEE YOU AT ATH!</span>
         ? `COMBO WIN! YOU WON: 777 ${TICKER}`
         : `YOU WON: 777 ${TICKER}`;
 
-    spawnCoinRain(34);
+    spawnCoinRain(42);
 
     jackpotEl.classList.remove("show");
     void jackpotEl.offsetWidth;
@@ -854,12 +848,11 @@ SEE YOU AT ATH!</span>
     extraPulse();
   }
 
-  // session combo counter (guaranteed every 5)
   function nextComboCount(){
     let c = Number(sessionStorage.getItem(COMBO_KEY) || "0");
-    c = (c + 1) % COMBO_TARGET; // 0..4
+    c = (c + 1) % COMBO_TARGET;
     sessionStorage.setItem(COMBO_KEY, String(c));
-    return c; // 0 means it just wrapped (hit)
+    return c; // 0 means hit
   }
 
   let degenLock = false;
@@ -965,7 +958,7 @@ SEE YOU AT ATH!</span>
     line3.appendChild(s);
   }
 
-  // (8) Attract mode (idle demo)
+  // Attract mode (idle demo)
   let attractMode = false;
   let attractIdleTimer = null;
   let attractPulseTimer = null;
