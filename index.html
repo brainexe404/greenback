@@ -61,7 +61,7 @@
     position:relative;
   }
 
-  /* ===== JACKPOT OVERLAY (1–2% chance) ===== */
+  /* ===== JACKPOT OVERLAY + COIN RAIN ===== */
   .jackpot{
     position:fixed;inset:0;
     display:flex;align-items:center;justify-content:center;
@@ -71,7 +71,7 @@
   }
   .jackpot.show{
     opacity:1;
-    animation:jackFlash 980ms steps(6,end) 1;
+    animation:jackFlash 1200ms steps(6,end) 1;
   }
   .jackpot::before{
     content:"";
@@ -81,7 +81,7 @@
       rgba(45,255,106,.12) 35%,
       rgba(0,0,0,.0) 70%);
     opacity:0;
-    animation:jackGlow 980ms steps(6,end) 1;
+    animation:jackGlow 1200ms steps(6,end) 1;
   }
   @keyframes jackFlash{
     0%{filter:brightness(1); transform:translate(0,0)}
@@ -101,14 +101,16 @@
     85%{opacity:.08}
     100%{opacity:0}
   }
+
   .jackpot-inner{
     position:relative;
     padding:18px 22px;
     border:4px solid #000;
-    box-shadow:6px 6px 0 #000, 0 0 42px rgba(200,255,47,.22);
+    box-shadow:6px 6px 0 #000, 0 0 48px rgba(200,255,47,.22);
     background:#0b0b0b;
     text-align:center;
     transform:translateY(2px);
+    overflow:hidden;
   }
   .jackpot-nums{
     font-family:ui-monospace, Menlo, Consolas, monospace;
@@ -129,6 +131,44 @@
     text-transform:uppercase;
     color:#eaeaea;
     font-size:14px;
+  }
+  .jackpot-sub{
+    margin-top:6px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:900;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--yellow);
+    font-size:12px;
+    opacity:.9;
+  }
+
+  .coin-rain{
+    position:absolute;inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .coin{
+    position:absolute;
+    top:-14px;
+    width:10px;height:10px;
+    border:2px solid #000;
+    background:var(--yellow);
+    box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
+    image-rendering:pixelated;
+    transform:rotate(0deg);
+    opacity:.95;
+    animation:coinFall linear forwards;
+  }
+  .coin::after{
+    content:"";
+    position:absolute;inset:2px;
+    border:1px solid rgba(0,0,0,.25);
+  }
+  @keyframes coinFall{
+    0%{transform:translateY(-10px) rotate(0deg); opacity:0}
+    8%{opacity:1}
+    100%{transform:translateY(420px) rotate(360deg); opacity:0}
   }
 
   /* Mute toggle */
@@ -278,7 +318,7 @@
     100%{opacity:0}
   }
 
-  /* ✅ CA BUTTON: full address + bigger + subtle arcade pop */
+  /* ✅ CA BUTTON */
   .btn-ca{
     background:#fff !important;
     color:#0b0b0b !important;
@@ -373,84 +413,24 @@
     100%{transform:translateX(55%) skewX(18deg);opacity:0}
   }
 
-  /* ===== MOBILE: bigger again, still no scroll ===== */
   @media (max-width:420px){
-    .wrap{
-      align-items:flex-start;
-      padding:12px;
-      padding-bottom:calc(12px + env(safe-area-inset-bottom));
-    }
-
-    .card{
-      padding:12px;
-      margin-top:6px;
-    }
-
-    .logo{
-      width:clamp(128px, 22dvh, 165px);
-      height:clamp(128px, 22dvh, 165px);
-    }
-
+    .wrap{align-items:flex-start;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+    .card{padding:12px;margin-top:6px;}
+    .logo{width:clamp(128px, 22dvh, 165px);height:clamp(128px, 22dvh, 165px);}
     h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
     .ticker{margin-bottom:7px}
-
-    .degen{
-      margin:7px 0 11px;
-      padding:7px 11px;
-      font-size:13px;
-    }
-
-    .terminal{
-      font-size:clamp(10.5px, 1.65dvh, 11.5px);
-      padding:9px 10px;
-      line-height:1.34;
-      margin-bottom:9px;
-    }
-
-    .btn{
-      margin:7px 0;
-      padding:12px 10px;
-      min-height:46px;
-      gap:12px;
-      font-size:13.2px;
-    }
-
+    .degen{margin:7px 0 11px;padding:7px 11px;font-size:13px;}
+    .terminal{font-size:clamp(10.5px, 1.65dvh, 11.5px);padding:9px 10px;line-height:1.34;margin-bottom:9px;}
+    .btn{margin:7px 0;padding:12px 10px;min-height:46px;gap:12px;font-size:13.2px;}
     .icon{width:27px;height:27px}
-
-    .hint{
-      margin-top:-4px;
-      margin-bottom:7px;
-      font-size:10.5px;
-    }
-
-    .coin-counter{
-      font-size:10.5px;
-      margin-top:-2px;
-      margin-bottom:7px;
-    }
-
-    .baron-line{
-      font-size:clamp(10.5px, 1.6dvh, 11.5px);
-      margin-top:4px;
-      line-height:1.25;
-    }
-
+    .hint{margin-top:-4px;margin-bottom:7px;font-size:10.5px;}
+    .coin-counter{font-size:10.5px;margin-top:-2px;margin-bottom:7px;}
+    .baron-line{font-size:clamp(10.5px, 1.6dvh, 11.5px);margin-top:4px;line-height:1.25;}
     .mute{top:8px;right:8px}
-
     .btn-ca .mono{font-size:14px}
-
     .jackpot-nums{font-size:54px; letter-spacing:4px;}
   }
 
-  @media (max-width:420px) and (max-height:700px){
-    .logo{width:clamp(120px, 20dvh, 150px);height:clamp(120px, 20dvh, 150px)}
-    .btn{margin:6px 0; padding:11px 10px; min-height:44px; font-size:12.8px}
-    .terminal{margin-bottom:8px}
-    .coin-counter{margin-bottom:6px}
-    .baron-line{margin-top:3px}
-  }
-
-  /* reduced motion: keep visuals without disabling pulse entirely */
   @media (prefers-reduced-motion: reduce){
     .logo{animation:bob 2.4s steps(2,end) infinite !important;}
     .degen{animation:blink 1s steps(1,end) infinite !important;}
@@ -458,6 +438,7 @@
     .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
     .jackpot.show{animation:none !important; opacity:1;}
     .jackpot::before{animation:none !important; opacity:.35;}
+    .coin{animation:none !important; opacity:.35;}
   }
 </style>
 </head>
@@ -465,9 +446,11 @@
 <body>
 <!-- JACKPOT overlay -->
 <div class="jackpot" id="jackpot" aria-hidden="true">
-  <div class="jackpot-inner">
+  <div class="jackpot-inner" id="jackpotInner">
+    <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
     <div class="jackpot-nums">777</div>
-    <div class="jackpot-text">JACKPOT</div>
+    <div class="jackpot-text">GBARON JACKPOT</div>
+    <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
   </div>
 </div>
 
@@ -494,7 +477,6 @@
       INSERT COINS
     </a>
 
-    <!-- (7) session-only fake coin counter -->
     <div class="coin-counter" aria-label="coins inserted counter">
       COINS INSERTED: <b id="coinCount">00</b>
     </div>
@@ -534,9 +516,12 @@ SEE YOU AT ATH!</span>
   const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
   const INSERT_URL = "https://pump.fun";
   const DEX_URL = "https://dexscreener.com";
+  const TICKER = "$GBARON";
 
-  // 1–2% jackpot chance on ACTIVATE
-  const JACKPOT_CHANCE = 0.02;
+  // RNG jackpot chance + guaranteed combo jackpot
+  const JACKPOT_CHANCE = 0.02;      // 2% random
+  const COMBO_TARGET = 5;           // guaranteed on every 5th ACTIVATE (session)
+  const COMBO_KEY = "gb_comboCount"; // sessionStorage key
 
   const STATUS_LINES = [
     "loading greenback protocol v0.0.1",
@@ -554,8 +539,7 @@ SEE YOU AT ATH!</span>
   dexBtn.href = DEX_URL;
 
   // FULL CA shown on button
-  const caTextEl = document.getElementById("caText");
-  caTextEl.textContent = CA;
+  document.getElementById("caText").textContent = CA;
 
   // ===== (7) SESSION COIN COUNT =====
   const coinCountEl = document.getElementById("coinCount");
@@ -597,7 +581,6 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    // prime (muted) so mobile allows later plays
     [preloadClick, preloadBaron].forEach(a=>{
       if(!a) return;
       try{
@@ -616,7 +599,6 @@ SEE YOU AT ATH!</span>
     initClickPool();
   }
 
-  // capture phase so audio unlock happens BEFORE element handlers on mobile
   window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
   window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
 
@@ -650,7 +632,7 @@ SEE YOU AT ATH!</span>
     }
   }
 
-  function playClick(){
+  function playClick(volume=0.85){
     if(isMuted) return;
     unlockAudio();
     try{
@@ -659,6 +641,7 @@ SEE YOU AT ATH!</span>
       clickPoolIdx++;
       a.pause();
       a.currentTime = 0;
+      a.volume = volume;
       const p = a.play();
       if(p && typeof p.catch === "function"){
         p.catch(()=>{ beepFallback(); });
@@ -666,27 +649,6 @@ SEE YOU AT ATH!</span>
     }catch{
       beepFallback();
     }
-  }
-
-  // louder coin "jackpot" hit(s)
-  function playJackpotCoin(){
-    if(isMuted) return;
-    unlockAudio();
-    try{
-      const a1 = new Audio("arcade.mp3");
-      a1.preload = "auto";
-      a1.volume = 1.0; // louder
-      a1.play().catch(()=>{});
-      // tiny follow-up hit for "WIN" feel
-      setTimeout(()=>{
-        try{
-          const a2 = new Audio("arcade.mp3");
-          a2.preload = "auto";
-          a2.volume = 1.0;
-          a2.play().catch(()=>{});
-        }catch(e){}
-      }, 90);
-    }catch(e){}
   }
 
   function playBaron(){
@@ -699,6 +661,13 @@ SEE YOU AT ATH!</span>
       const p = a.play();
       if(p && typeof p.catch === "function") p.catch(()=>{});
     }catch(e){}
+  }
+
+  // louder jackpot "coin hits"
+  function playJackpotCoins(){
+    playClick(1.0);
+    setTimeout(()=>playClick(1.0), 90);
+    setTimeout(()=>playClick(1.0), 180);
   }
 
   ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
@@ -718,7 +687,6 @@ SEE YOU AT ATH!</span>
   }
 
   const canClipboard = !!(navigator.clipboard && window.isSecureContext);
-
   function getCopyMessage(){
     return "BARON APPROVES\nSEE YOU AT ATH!";
   }
@@ -744,7 +712,7 @@ SEE YOU AT ATH!</span>
     showTip(getCopyMessage());
   });
 
-  // ===== ACTIVATE DEGEN tweaks =====
+  // ===== ACTIVATE DEGEN + JACKPOT =====
   const degenBtn = document.getElementById("degenBtn");
   let easterMode = false;
   let degenResetTimer = null;
@@ -753,10 +721,7 @@ SEE YOU AT ATH!</span>
   function pulseInsertCoins(){
     insertBtn.classList.remove("pulse");
     clearTimeout(pulseTimer);
-
-    // force reflow to hard-reset animation (helps on some desktop browsers)
     void insertBtn.offsetWidth;
-
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         insertBtn.classList.add("pulse");
@@ -764,10 +729,9 @@ SEE YOU AT ATH!</span>
       });
     });
   }
-
   function extraPulse(){
-    // a second pulse hit shortly after the first
     setTimeout(()=> pulseInsertCoins(), 140);
+    setTimeout(()=> pulseInsertCoins(), 320);
   }
 
   function setDegenActivatedTemp(){
@@ -780,34 +744,71 @@ SEE YOU AT ATH!</span>
     }, 10000);
   }
 
-  // jackpot overlay
   const jackpotEl = document.getElementById("jackpot");
+  const jackpotSub = document.getElementById("jackpotSub");
+  const coinRain = document.getElementById("coinRain");
+
   let jackpotTimer = null;
-  function triggerJackpot(){
-    // show 777 flash
+
+  function spawnCoinRain(count=26){
+    coinRain.innerHTML = "";
+    const w = window.innerWidth || 520;
+    for(let i=0;i<count;i++){
+      const c = document.createElement("span");
+      c.className = "coin";
+      const left = Math.random() * 100; // %
+      const dur = 700 + Math.random() * 650; // ms
+      const delay = Math.random() * 220; // ms
+      const size = 8 + Math.random() * 8; // px
+      c.style.left = left + "%";
+      c.style.animationDuration = dur + "ms";
+      c.style.animationDelay = delay + "ms";
+      c.style.width = size + "px";
+      c.style.height = size + "px";
+      coinRain.appendChild(c);
+    }
+  }
+
+  function triggerJackpot(reason){
+    // Cosmetic message tied to ticker
+    jackpotSub.textContent =
+      (reason === "combo")
+        ? `COMBO WIN! YOU WON: 777 ${TICKER}`
+        : `YOU WON: 777 ${TICKER}`;
+
+    // show flash + 777 + coins
+    spawnCoinRain(34);
+
     jackpotEl.classList.remove("show");
     void jackpotEl.offsetWidth;
     jackpotEl.classList.add("show");
-    clearTimeout(jackpotTimer);
-    jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 1050);
 
-    // louder coin + extra pulse
-    playJackpotCoin();
+    clearTimeout(jackpotTimer);
+    jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
+
+    // louder hit + extra pulse
+    playJackpotCoins();
     extraPulse();
+  }
+
+  // session combo counter (guaranteed every 5)
+  function nextComboCount(){
+    let c = Number(sessionStorage.getItem(COMBO_KEY) || "0");
+    c = (c + 1) % COMBO_TARGET; // 0..4
+    sessionStorage.setItem(COMBO_KEY, String(c));
+    return c; // 0 means it just wrapped (hit)
   }
 
   let degenLock = false;
 
   function handleDegenActivate(e){
     if(e) e.preventDefault?.();
-
     unlockAudio();
 
     if(degenLock) return;
     degenLock = true;
     setTimeout(()=>{ degenLock = false; }, 350);
 
-    // normal sounds
     playClick();
     playBaron();
 
@@ -815,9 +816,14 @@ SEE YOU AT ATH!</span>
     pulseInsertCoins();
     bumpCoinCount();
 
-    // 1–2% jackpot chance
-    if(Math.random() < JACKPOT_CHANCE){
-      triggerJackpot();
+    // guaranteed combo jackpot on every 5th press
+    const comboValue = nextComboCount();
+    const isComboHit = (comboValue === 0);
+
+    if(isComboHit){
+      triggerJackpot("combo");
+    }else if(Math.random() < JACKPOT_CHANCE){
+      triggerJackpot("random");
     }
 
     easterMode = true;
@@ -901,14 +907,13 @@ SEE YOU AT ATH!</span>
   let attractMode = false;
   let attractIdleTimer = null;
   let attractPulseTimer = null;
-  const ATTRACT_IDLE_MS = 30000; // 30s idle
+  const ATTRACT_IDLE_MS = 30000;
   const ATTRACT_PULSE_EVERY_MS = 6500;
 
   function enterAttractMode(){
     if(attractMode) return;
     attractMode = true;
 
-    // visual-only demo: pulse insert coins periodically (NO audio)
     clearInterval(attractPulseTimer);
     attractPulseTimer = setInterval(()=> {
       if(attractMode) pulseInsertCoins();
@@ -930,7 +935,6 @@ SEE YOU AT ATH!</span>
     attractIdleTimer = setTimeout(()=> enterAttractMode(), ATTRACT_IDLE_MS);
   }
 
-  // any interaction resets idle (and exits attract mode if active)
   ["pointerdown","mousedown","touchstart","keydown","wheel","scroll"].forEach(evt=>{
     window.addEventListener(evt, ()=>{
       resetAttractIdle();
