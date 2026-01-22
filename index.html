@@ -149,7 +149,7 @@
     inset:0;
     pointer-events:none;
     overflow:hidden;
-    z-index:9998; /* under jackpot text box but above page */
+    z-index:9998;
   }
   .coin{
     position:absolute;
@@ -202,7 +202,7 @@
   /* ACTIVATE DEGEN! (KEEP FLICKER) */
   .degen{
     display:inline-block;
-    margin:6px 0 12px;
+    margin:6px 0 6px;
     padding:7px 12px;
     border:4px solid #000;
     background:#0b0b0b;
@@ -229,6 +229,22 @@
     background:var(--yellow);
     color:#0b0b0b;
     box-shadow:4px 4px 0 #000, 0 0 18px rgba(200,255,47,.25);
+  }
+
+  /* ✅ NEW: tiny jackpot countdown under degen */
+  .jackpot-countdown{
+    margin:0 0 10px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:10px;
+    color:#7f7f7f;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    user-select:none;
+    line-height:1.2;
+  }
+  .jackpot-countdown b{
+    color:var(--yellow);
+    font-weight:900;
   }
 
   .terminal{
@@ -358,6 +374,7 @@
     margin-top:-4px;
     margin-bottom:8px;
     text-align:center;
+    consider: ui-monospace, Menlo, Consolas, monospace;
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-size:11px;
     color:#8d8d8d;
@@ -416,7 +433,8 @@
     .logo{width:clamp(128px, 22dvh, 165px);height:clamp(128px, 22dvh, 165px);}
     h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
     .ticker{margin-bottom:7px}
-    .degen{margin:7px 0 11px;padding:7px 11px;font-size:13px;}
+    .degen{margin:7px 0 5px;padding:7px 11px;font-size:13px;}
+    .jackpot-countdown{font-size:9.5px;margin-bottom:9px}
     .terminal{font-size:clamp(10.5px, 1.65dvh, 11.5px);padding:9px 10px;line-height:1.34;margin-bottom:9px;}
     .btn{margin:7px 0;padding:12px 10px;min-height:46px;gap:12px;font-size:13.2px;}
     .icon{width:27px;height:27px}
@@ -431,10 +449,8 @@
 </head>
 
 <body>
-<!-- ✅ FULL SCREEN coin rain container -->
 <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
 
-<!-- JACKPOT overlay -->
 <div class="jackpot" id="jackpot" aria-hidden="true">
   <div class="jackpot-inner" id="jackpotInner">
     <div class="jackpot-nums">777</div>
@@ -454,6 +470,12 @@
     <div class="ticker">$GBARON</div>
 
     <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
+
+    <!-- ✅ NEW: small countdown line -->
+    <div class="jackpot-countdown" aria-label="jackpot countdown">
+      JACKPOT: <b id="jpCountText">1/5</b>
+      <span class="dim" style="opacity:.85"> • GUARANTEED ON 5TH</span>
+    </div>
 
     <div class="terminal" id="terminal" aria-label="status terminal">
       <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
@@ -508,12 +530,10 @@ SEE YOU AT ATH!</span>
   const DEX_URL = "https://dexscreener.com";
   const TICKER = "$GBARON";
 
-  // RNG jackpot chance + guaranteed combo jackpot
   const JACKPOT_CHANCE = 0.02;       
   const COMBO_TARGET = 5;            
   const COMBO_KEY = "gb_comboCount";
 
-  // laugh after CA copy (delay so it doesn't overlap the beep)
   const LAUGH_DELAY_MS = 170;
 
   const STATUS_LINES = [
@@ -532,6 +552,16 @@ SEE YOU AT ATH!</span>
   dexBtn.href = DEX_URL;
 
   document.getElementById("caText").textContent = CA;
+
+  // ✅ NEW: jackpot countdown UI
+  const jpCountText = document.getElementById("jpCountText");
+  function renderJackpotCountdown(){
+    // combo stored as "0..4" where 0 means last hit, next is 1st step
+    const stored = Number(sessionStorage.getItem(COMBO_KEY) || "0");
+    const step = stored === 0 ? 1 : (stored + 1); // show upcoming count
+    jpCountText.textContent = `${step}/${COMBO_TARGET}`;
+  }
+  renderJackpotCountdown();
 
   // ===== SESSION COIN COUNT =====
   const coinCountEl = document.getElementById("coinCount");
@@ -574,7 +604,6 @@ SEE YOU AT ATH!</span>
       if(audioCtx.state === "suspended") audioCtx.resume();
     }catch(e){}
 
-    // prime muted so mobile allows later plays
     [preloadClick, preloadBaron, preloadLaugh].forEach(a=>{
       if(!a) return;
       try{
@@ -613,7 +642,6 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
-  // click pool
   const CLICK_POOL_SIZE = 6;
   const clickPool = [];
   let clickPoolIdx = 0;
@@ -659,7 +687,6 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
-  // laugh pool
   const LAUGH_POOL_SIZE = 2;
   const laughPool = [];
   let laughPoolIdx = 0;
@@ -697,7 +724,6 @@ SEE YOU AT ATH!</span>
     }catch(e){}
   }
 
-  // louder jackpot "coin hits"
   function playJackpotCoins(){
     playClick(1.0);
     setTimeout(()=>playClick(1.0), 90);
@@ -728,7 +754,7 @@ SEE YOU AT ATH!</span>
   let laughTimer = null;
 
   document.getElementById("caBtn").addEventListener("click", async ()=>{
-    playClick(); // beep first
+    playClick();
 
     try{
       if(canClipboard){
@@ -791,7 +817,6 @@ SEE YOU AT ATH!</span>
 
   let jackpotTimer = null;
 
-  // ✅ TRUE "from the sky" coin rain using Web Animations API
   function spawnCoinRain(count = 36){
     coinRain.innerHTML = "";
 
@@ -814,7 +839,6 @@ SEE YOU AT ATH!</span>
 
       coinRain.appendChild(c);
 
-      // Animate from above viewport to below viewport
       c.animate(
         [
           { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
@@ -825,7 +849,6 @@ SEE YOU AT ATH!</span>
       );
     }
 
-    // cleanup so DOM doesn't grow if people spam jackpot
     setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
   }
 
@@ -852,7 +875,7 @@ SEE YOU AT ATH!</span>
     let c = Number(sessionStorage.getItem(COMBO_KEY) || "0");
     c = (c + 1) % COMBO_TARGET;
     sessionStorage.setItem(COMBO_KEY, String(c));
-    return c; // 0 means hit
+    return c;
   }
 
   let degenLock = false;
@@ -874,6 +897,9 @@ SEE YOU AT ATH!</span>
 
     const comboValue = nextComboCount();
     const isComboHit = (comboValue === 0);
+
+    // ✅ update countdown right after the press
+    renderJackpotCountdown();
 
     if(isComboHit){
       triggerJackpot("combo");
@@ -912,7 +938,7 @@ SEE YOU AT ATH!</span>
 
   let cycleTimers = [];
   function addTimeout(fn, ms){
-    const t = setTimeout(fn, ms);
+    const t = setTimeout(fn, ms knowing);
     cycleTimers.push(t);
     return t;
   }
