@@ -9,8 +9,6 @@
   *,*::before,*::after{box-sizing:border-box}
   :root{
     --bg:#070b10;
-    --panel:#0d1320;
-    --panel2:#0b111c;
     --text:#eaf2ff;
     --muted:#93a4c7;
     --line:rgba(255,255,255,.10);
@@ -53,7 +51,6 @@
     79%{opacity:0}
   }
 
-  /* stage */
   .stage{
     height:100vh;
     width:100%;
@@ -164,7 +161,6 @@
     gap:10px;
   }
 
-  /* LEFT / Chart */
   .chartWrap{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
   .heroRow{display:grid;grid-template-columns: 148px 1fr;gap:12px;align-items:start}
   .heroLogo{
@@ -199,7 +195,6 @@
     opacity:.6;mix-blend-mode:screen;
   }
 
-  /* ACTIONS */
   .actions{
     margin-top:auto;
     padding:12px;
@@ -216,9 +211,9 @@
   .btn{
     appearance:none;border:none;border-radius:14px;padding:12px 14px;
     font-weight:1000;letter-spacing:.3px;cursor:pointer;
-    color:#fff; /* WHITE letters */
+    color:#fff;
     border:1px solid var(--line);
-    transition:transform .06s ease, filter .2s ease, background .2s ease;
+    transition:transform .06s ease, filter .2s ease, background .2s ease, opacity .2s ease;
     user-select:none;-webkit-tap-highlight-color: transparent;
     flex:1;min-width:170px;
     display:flex;align-items:center;justify-content:center;gap:10px;
@@ -227,16 +222,18 @@
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-  /* requested bright colors */
+  /* ✅ SWITCHED COLORS:
+     INSERT = BRIGHT GREEN
+     DEGEN  = BRIGHT YELLOW */
   .btn.insert{
-    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
-    border-color:rgba(200,255,47,.55);
-    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(200,255,47,.18);
-  }
-  .btn.degenBtn{
     background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
     border-color:rgba(45,255,106,.55);
     box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(45,255,106,.14);
+  }
+  .btn.degenBtn{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
+    border-color:rgba(200,255,47,.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(200,255,47,.18);
   }
   .btn.danger{
     background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
@@ -249,14 +246,14 @@
     filter: drop-shadow(0 0 10px rgba(255,255,255,.12));
   }
 
-  /* INSERT COINS pulse (always) */
+  /* insert pulse always */
   .btn.pulseAlways{
     position:relative;
     animation: insertPulse 1.2s steps(6,end) infinite;
   }
   .btn.pulseAlways::after{
     content:"";position:absolute;inset:-8px;border-radius:18px;
-    border:2px solid rgba(200,255,47,.35);
+    border:2px solid rgba(45,255,106,.35);
     opacity:.0;animation: insertHalo 1.2s steps(6,end) infinite;
     pointer-events:none;
   }
@@ -274,7 +271,6 @@
     100%{opacity:0}
   }
 
-  /* RIGHT column panels */
   .rightStack{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
 
   .terminalBox{
@@ -303,22 +299,14 @@
     100%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
   }
 
-  /* pump.fun long button */
   .pumpBtn{
     display:flex;align-items:center;justify-content:center;gap:10px;
-    border-radius:14px;
-    border:1px solid var(--line);
+    border-radius:14px;border:1px solid var(--line);
     background:rgba(255,255,255,.04);
     padding:12px 12px;
-    font-weight:1000;
-    letter-spacing:.3px;
-    text-transform:uppercase;
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-    text-decoration:none;
-    color:#fff;
-    width:100%;
+    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
+    text-decoration:none;color:#fff;width:100%;
   }
   .pumpBtn:active{transform:translateY(1px) scale(.99)}
   .pumpBtn .ico{width:20px;height:20px;image-rendering:pixelated;filter: drop-shadow(0 0 10px rgba(255,255,255,.10))}
@@ -329,7 +317,6 @@
     100%{filter:brightness(1)}
   }
 
-  /* links row */
   .linkRow{display:flex;gap:10px;flex-wrap:wrap}
   .linkBtn{
     flex:1;min-width:140px;
@@ -339,12 +326,10 @@
     padding:11px 12px;
     font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
     cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
-    text-decoration:none;color:#fff; /* WHITE letters */
+    text-decoration:none;color:#fff;
   }
   .linkBtn:active{transform:translateY(1px) scale(.99)}
   .linkBtn .ico{width:18px;height:18px;image-rendering:pixelated;filter: drop-shadow(0 0 10px rgba(255,255,255,.10))}
-
-  /* requested bright links */
   .linkBtn.dex{
     background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.72));
     border-color:rgba(45,255,106,.55);
@@ -354,7 +339,6 @@
     border-color:rgba(200,255,47,.55);
   }
 
-  /* ACTIVITY LOG */
   .logWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
   .logHead{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -372,14 +356,10 @@
   .log::-webkit-scrollbar{width:10px}
   .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
 
-  /* CA area */
   .caCard{
-    padding:12px;
-    border-top:1px solid var(--line);
+    padding:12px;border-top:1px solid var(--line);
     background:rgba(255,255,255,.02);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+    display:flex;flex-direction:column;gap:8px;
   }
   .caBtn{
     width:100%;
@@ -390,12 +370,9 @@
       radial-gradient(700px 220px at 90% 60%, rgba(45,255,106,.10), transparent 45%),
       rgba(255,255,255,.04);
     padding:14px 14px;
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
     color:var(--text);
-    position:relative;
-    overflow:hidden;
+    position:relative;overflow:hidden;
     box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 24px rgba(200,255,47,.14);
     text-align:left;
   }
@@ -416,7 +393,6 @@
     line-height:1.22;
     overflow-wrap:anywhere;
   }
-
   .tapHint{
     font-family:var(--mono);
     font-size:11px;
@@ -424,7 +400,6 @@
     letter-spacing:.2px;
     text-transform:uppercase;
   }
-
   .caToast{
     position:absolute;top:10px;right:10px;
     font-family:var(--mono);font-weight:1000;font-size:11px;letter-spacing:.6px;text-transform:uppercase;
@@ -438,7 +413,7 @@
   /* pulse targets */
   .caBtn.pulse{animation:hotPulse 1s steps(6,end) infinite;}
 
-  /* Jackpot overlay + coin rain (surprise) */
+  /* Jackpot visuals (kept) */
   .coin-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
   .coin{
     position:absolute;top:-18px;width:12px;height:12px;border:2px solid rgba(0,0,0,.65);
@@ -496,7 +471,6 @@
     color:var(--warn);font-size:12px;opacity:.92;
   }
 
-  /* shake */
   .shake{ animation: shake .32s linear 1; }
   @keyframes shake{
     0%{transform:translate(0,0)}
@@ -510,7 +484,6 @@
 </head>
 
 <body>
-  <!-- FX layers -->
   <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
   <div class="jackpot" id="jackpot" aria-hidden="true">
     <div class="jackpot-inner">
@@ -553,7 +526,6 @@
       </header>
 
       <div class="content">
-        <!-- LEFT -->
         <section class="card" aria-label="Fake chart that pumps on clicks">
           <h2>📉 Fake Chart (Pumps on Clicks)</h2>
 
@@ -614,19 +586,17 @@
               </div>
               <div class="caBig" id="caText"></div>
             </button>
-
             <div class="tapHint">Tap to copy</div>
           </div>
         </section>
 
-        <!-- RIGHT -->
         <aside class="card" aria-label="Terminal / Links">
           <h2>Terminal / Links <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
 
           <div class="rightStack">
             <div class="terminalBox" aria-label="Terminal">
-              <div><span class="prompt">&gt;</span> <span class="dim" id="term1">THE BARON ALWAYS EXITS FIRST</span></div>
-              <div><span class="prompt">&gt;</span> <span class="dim" id="term2">LOADING MEMES — OK</span></div>
+              <div><span class="prompt">&gt;</span> <span class="dim" id="term1">INITIALIZING TERMINAL ON SOLANA NETWORK...</span></div>
+              <div><span class="prompt">&gt;</span> <span class="dim" id="term2">BOOTING NODE...</span></div>
               <div><span class="prompt">&gt;</span> <span class="dim" id="term3">READY FOR COINS... INSERT TO BEGIN</span><span class="cursor"></span></div>
             </div>
 
@@ -672,10 +642,10 @@ const DEX_URL  = "https://dexscreener.com";
 const X_URL    = "https://x.com/";
 const TICKER   = "$GBARON";
 
-/* jackpot is a SURPRISE now (VISUAL ONLY on degen; NO jackpot.mp3 on degen) */
+/* jackpot surprise visuals only (no jackpot.mp3 on degen) */
 const JACKPOT_CHANCE = 0.02;
 
-/* rank titles (coins inserted drives rank) */
+/* rank titles */
 const RANKS = [
   {at:0,  name:"paperhands"},
   {at:5,  name:"bagholder"},
@@ -729,7 +699,7 @@ const term2 = document.getElementById("term2");
 const term3 = document.getElementById("term3");
 
 /** =========================
- * STATE (persist)
+ * STATE
  * ========================= */
 let coinsInserted = Number(sessionStorage.getItem("gbaron_coins") || "0");
 if (!Number.isFinite(coinsInserted) || coinsInserted < 0) coinsInserted = 0;
@@ -778,7 +748,6 @@ let baronAudio = null;
 const laughPool = [];
 let laughIdx = 0;
 
-/* we still keep jackpotPool for other future use, but degen won't play it */
 const jackpotPool = [];
 let jackpotIdx = 0;
 
@@ -876,15 +845,11 @@ function playClick(){
   }
 }
 
-/* return a Promise that resolves when baron.mp3 finishes */
+/* Promise resolves when baron finishes */
 function playBaronPromise(){
   return new Promise((resolve)=>{
-    if(isMuted){
-      resolve();
-      return;
-    }
+    if(isMuted){ resolve(); return; }
     unlockAudio();
-
     stopLaugh(); stopJackpot();
 
     try{
@@ -1001,7 +966,7 @@ dexBtn.href  = DEX_URL;
 xBtn.href    = X_URL;
 
 /** =========================
- * FX: coin rain + jackpot overlay
+ * FX visuals (no audio)
  * ========================= */
 let jackpotTimer = null;
 
@@ -1047,7 +1012,6 @@ function triggerJackpotVisualOnly(){
   clearTimeout(jackpotTimer);
   jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
 
-  /* no jackpot.mp3 */
   addLog(`<span style="color:var(--warn);font-weight:1000;">JACKPOT</span> — 777 ${TICKER} (fake)`);
 }
 
@@ -1061,21 +1025,61 @@ function pulseEl(el, ms=1600){
 }
 
 /** =========================
- * Terminal DEGEN override blast (caps)
+ * TERMINAL: always moving text (no dormancy)
+ * - default state: SOLANA init + rotating status + animated dots
+ * - on DEGEN: show "THE BARON ALWAYS EXITS FIRST" + override lines (only while baron is playing)
  * ========================= */
-let degenTermTimer = null;
-function degenTerminalBlast(){
-  clearTimeout(degenTermTimer);
+const BASE_LINE_1 = "INITIALIZING TERMINAL ON SOLANA NETWORK";
+const BASE_LINE_3 = "READY FOR COINS... INSERT TO BEGIN";
 
+const STATUS_LINES = [
+  "CONNECTING RPC",
+  "SYNCING BLOCKHASH",
+  "CHECKING MEMPOOL",
+  "SCANNING LIQUIDITY ROUTES",
+  "VERIFYING SIGNATURES",
+  "PINGING VALIDATORS"
+];
+
+let statusIdx = 0;
+let dotCount = 0;
+let terminalLock = false;        // when true, the live ticker stops (during degen)
+let termTicker = null;
+
+function dots(n){
+  return ".".repeat(n);
+}
+
+function startTerminalTicker(){
+  if(termTicker) return;
+  termTicker = setInterval(()=>{
+    if(terminalLock) return;
+
+    dotCount = (dotCount + 1) % 4;
+    const d = dots(dotCount);
+
+    term1.textContent = `${BASE_LINE_1}${d}`;
+    term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]}${d} — OK`;
+    term3.textContent = `${BASE_LINE_3}${d}`;
+
+    // advance slower than dots so it feels alive
+    if(dotCount === 0) statusIdx++;
+  }, 180);
+}
+
+function setDegenTerminal(){
+  terminalLock = true;
   term1.textContent = "THE BARON ALWAYS EXITS FIRST";
   term2.textContent = "DEGEN OVERRIDE ACTIVATED";
   term3.textContent = "MAX VOLATILITY MODE: ENGAGED";
+}
 
-  degenTermTimer = setTimeout(()=> rotateTerminal(), 3200);
+function releaseTerminal(){
+  terminalLock = false;
 }
 
 /** =========================
- * Gameplay actions
+ * Gameplay
  * ========================= */
 function persist(){
   sessionStorage.setItem("gbaron_coins", String(coinsInserted));
@@ -1096,14 +1100,16 @@ function pumpFromInsert(){
   series.push(price);
   if(series.length > seriesLen) series.shift();
 
-  addLog(`<span style="color:var(--warn);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
+  addLog(`<span style="color:var(--good);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
+
+  /* ✅ ONLY pulse CA on insert (NO baron.mp3 here) */
   pulseEl(caBtn, 1800);
 
   persist();
   updateUI();
 }
 
-/* DEGEN locks until baron finishes, button shows ACTIVATED */
+/* ✅ DEGEN locks until baron finishes; terminal shows BARON line ONLY here */
 let degenBusy = false;
 async function degenActivateLocked(){
   if(degenBusy) return;
@@ -1115,8 +1121,8 @@ async function degenActivateLocked(){
   btnDegen.style.opacity = "0.88";
   btnDegen.style.cursor = "not-allowed";
 
-  degenTerminalBlast();
-  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN OVERRIDE ACTIVATED</span> — CAPS LOCK ENGAGED`);
+  setDegenTerminal();
+  addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN OVERRIDE ACTIVATED</span> — CAPS LOCK ENGAGED`);
   pulseEl(pumpBtn, 1800);
 
   lastPrice = price;
@@ -1129,7 +1135,7 @@ async function degenActivateLocked(){
   series.push(price);
   if(series.length > seriesLen) series.shift();
 
-  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
+  addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
 
   if(Math.random() < JACKPOT_CHANCE){
     triggerJackpotVisualOnly();
@@ -1138,7 +1144,10 @@ async function degenActivateLocked(){
   persist();
   updateUI();
 
+  /* ✅ ONLY baron.mp3 plays for DEGEN */
   await playBaronPromise();
+
+  releaseTerminal();
 
   btnDegen.disabled = false;
   btnDegen.style.opacity = "";
@@ -1205,7 +1214,7 @@ async function copyCA(){
 }
 
 /** =========================
- * Button wiring
+ * Wiring
  * ========================= */
 function withClick(fn){
   return ()=>{
@@ -1215,16 +1224,13 @@ function withClick(fn){
   };
 }
 
-/* INSERT: arcade click + baron after (no overlap) */
-btnInsert.addEventListener("click", withClick(()=>{
-  pumpFromInsert();
-  setTimeout(()=>{ if(!isMuted) playBaronPromise(); }, 140);
-}));
+/* ✅ INSERT: arcade click ONLY (no baron.mp3) */
+btnInsert.addEventListener("click", withClick(()=> pumpFromInsert()));
 
-/* DEGEN: NO arcade beep, ONLY baron.mp3, locked until baron ends */
+/* ✅ DEGEN: no arcade beep, only baron.mp3 */
 btnDegen.addEventListener("click", ()=>{
   unlockAudio();
-  stopLaugh(); stopJackpot();
+  stopLaugh(); stopJackpot(); // keep only baron
   degenActivateLocked();
 });
 
@@ -1245,33 +1251,15 @@ pumpBtn.addEventListener("click", ()=>{
 caBtn.addEventListener("click", withClick(()=> copyCA()));
 
 /** =========================
- * Terminal loop
- * ========================= */
-const STATUS_LINES = [
-  "LOADING GREENBACK PROTOCOL V0.0.1",
-  "SYNCING LIQUIDITY ROUTES",
-  "SCANNING DEGEN INDEX",
-  "CHECKING RUGS... NOT FOUND",
-  "LOADING MEMES",
-  "ROUTING ORDERS"
-];
-let statusIdx = 0;
-
-function rotateTerminal(){
-  term1.textContent = "THE BARON ALWAYS EXITS FIRST";
-  term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]} — OK`;
-  term3.textContent = "READY FOR COINS... INSERT TO BEGIN";
-  statusIdx++;
-}
-rotateTerminal();
-setInterval(rotateTerminal, 9000);
-
-/** =========================
  * Init
  * ========================= */
-ensureSeries();
-updateUI();
-addLog(`Booted terminal — <b>THE BARON ALWAYS EXITS FIRST</b>`);
+function persistInit(){
+  ensureSeries();
+  updateUI();
+  addLog(`Booted terminal — <b>SOLANA</b>`);
+}
+startTerminalTicker();
+persistInit();
 </script>
 
 </body>
