@@ -290,7 +290,7 @@
   .prompt{color:var(--warn); font-weight:1000}
   .dim{color:#94a4c2}
 
-  /* pulsing cursor (requested) */
+  /* pulsing cursor */
   .cursor{
     display:inline-block;width:8px;height:12px;background:var(--warn); margin-left:6px;
     transform:translateY(2px);
@@ -372,7 +372,7 @@
   .log::-webkit-scrollbar{width:10px}
   .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
 
-  /* CA area (bigger address + tap-to-copy underneath) */
+  /* CA area */
   .caCard{
     padding:12px;
     border-top:1px solid var(--line);
@@ -411,7 +411,7 @@
   .caBig{
     font-family:var(--mono);
     font-weight:1000;
-    font-size:16px;            /* bigger than before */
+    font-size:16px;
     letter-spacing:.25px;
     line-height:1.22;
     overflow-wrap:anywhere;
@@ -435,11 +435,10 @@
   }
   .caToast.show{opacity:1; transform:translateY(0)}
 
-  /* pulse targets (requested) */
+  /* pulse targets */
   .caBtn.pulse{animation:hotPulse 1s steps(6,end) infinite;}
-  /* use same hotPulse for CA & pump */
 
-  /* Jackpot overlay + coin rain (kept as surprise) */
+  /* Jackpot overlay + coin rain (surprise) */
   .coin-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
   .coin{
     position:absolute;top:-18px;width:12px;height:12px;border:2px solid rgba(0,0,0,.65);
@@ -611,7 +610,7 @@
               <span class="caToast" id="caToast">COPIED</span>
               <div class="caTop">
                 <span>CA</span>
-                <span style="color:var(--warn)">GBARON</span>
+                <span style="color:var(--warn)">$GBARON</span>
               </div>
               <div class="caBig" id="caText"></div>
             </button>
@@ -627,11 +626,10 @@
           <div class="rightStack">
             <div class="terminalBox" aria-label="Terminal">
               <div><span class="prompt">&gt;</span> <span class="dim" id="term1">THE BARON ALWAYS EXITS FIRST</span></div>
-              <div><span class="prompt">&gt;</span> <span class="dim" id="term2">loading memes... OK</span></div>
-              <div><span class="prompt">&gt;</span> <span class="dim" id="term3">ready for coins... insert to begin</span><span class="cursor"></span></div>
+              <div><span class="prompt">&gt;</span> <span class="dim" id="term2">LOADING MEMES — OK</span></div>
+              <div><span class="prompt">&gt;</span> <span class="dim" id="term3">READY FOR COINS... INSERT TO BEGIN</span><span class="cursor"></span></div>
             </div>
 
-            <!-- replaced jackpot progress with pump.fun long button -->
             <a class="pumpBtn" id="pumpBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Open pump.fun">
               <img class="ico" src="pump.png" alt="" aria-hidden="true">
               PUMP.FUN
@@ -674,8 +672,8 @@ const DEX_URL  = "https://dexscreener.com";
 const X_URL    = "https://x.com/";
 const TICKER   = "$GBARON";
 
-/* jackpot is a SURPRISE now */
-const JACKPOT_CHANCE = 0.02; // 2% chance on DEGEN
+/* jackpot is a SURPRISE now (VISUAL ONLY on degen; NO jackpot.mp3 on degen) */
+const JACKPOT_CHANCE = 0.02;
 
 /* rank titles (coins inserted drives rank) */
 const RANKS = [
@@ -725,6 +723,11 @@ const coinRain  = document.getElementById("coinRain");
 const soundToggle = document.getElementById("soundToggle");
 const soundState  = document.getElementById("soundState");
 
+/* terminal lines */
+const term1 = document.getElementById("term1");
+const term2 = document.getElementById("term2");
+const term3 = document.getElementById("term3");
+
 /** =========================
  * STATE (persist)
  * ========================= */
@@ -744,8 +747,6 @@ if (!Number.isFinite(ath) || ath <= 0) ath = price;
 
 /** =========================
  * SOUND
- * - Click sound on every click
- * - Insert: play baron AFTER click so it does NOT overlap the arcade beep
  * ========================= */
 let isMuted = (localStorage.getItem("gbaron_muted") === "1");
 
@@ -777,6 +778,7 @@ let baronAudio = null;
 const laughPool = [];
 let laughIdx = 0;
 
+/* we still keep jackpotPool for other future use, but degen won't play it */
 const jackpotPool = [];
 let jackpotIdx = 0;
 
@@ -874,27 +876,32 @@ function playClick(){
   }
 }
 
-function playBaron(){
-  if(isMuted) return;
-  unlockAudio();
+/* return a Promise that resolves when baron.mp3 finishes */
+function playBaronPromise(){
+  return new Promise((resolve)=>{
+    if(isMuted){
+      resolve();
+      return;
+    }
+    unlockAudio();
 
-  /* baron should not overlap with laugh/jackpot */
-  stopLaugh(); stopJackpot();
+    stopLaugh(); stopJackpot();
 
-  try{
-    stopBaron();
-    baronAudio = new Audio("baron.mp3");
-    baronAudio.preload = "auto";
-    baronAudio.volume = 0.75;
-    const p = baronAudio.play();
-    if(p && p.catch) p.catch(()=>{});
-  }catch(e){}
-}
+    try{
+      stopBaron();
+      baronAudio = new Audio("baron.mp3");
+      baronAudio.preload = "auto";
+      baronAudio.volume = 0.75;
 
-/* IMPORTANT: for INSERT COINS, baron must NOT overlap the arcade beep */
-function playBaronAfter(ms){
-  if(isMuted) return;
-  setTimeout(()=>{ if(!isMuted) playBaron(); }, ms);
+      baronAudio.onended = () => resolve();
+      baronAudio.onerror = () => resolve();
+
+      const p = baronAudio.play();
+      if(p && p.catch) p.catch(()=>resolve());
+    }catch(e){
+      resolve();
+    }
+  });
 }
 
 function playLaughAfter(ms){
@@ -912,20 +919,6 @@ function playLaughAfter(ms){
       if(p && p.catch) p.catch(()=>{});
     }catch(e){}
   }, ms);
-}
-
-function playJackpot(){
-  if(isMuted) return;
-  unlockAudio();
-  stopLaugh(); stopBaron();
-  try{
-    initJackpotPool();
-    const a = jackpotPool[jackpotIdx % jackpotPool.length];
-    jackpotIdx++;
-    a.pause(); a.currentTime = 0;
-    const p = a.play();
-    if(p && p.catch) p.catch(()=>{});
-  }catch(e){}
 }
 
 /** =========================
@@ -1043,7 +1036,7 @@ function spawnCoinRain(count = 38){
   setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
 }
 
-function triggerJackpot(){
+function triggerJackpotVisualOnly(){
   jackpotSub.textContent = `YOU WON: 777 ${TICKER}`;
   spawnCoinRain(44);
 
@@ -1054,17 +1047,31 @@ function triggerJackpot(){
   clearTimeout(jackpotTimer);
   jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
 
-  playJackpot();
+  /* no jackpot.mp3 */
   addLog(`<span style="color:var(--warn);font-weight:1000;">JACKPOT</span> — 777 ${TICKER} (fake)`);
 }
 
 /** =========================
- * Pulse targets (requested)
+ * Pulse targets
  * ========================= */
 function pulseEl(el, ms=1600){
   el.classList.add("pulse");
   clearTimeout(el._pulseT);
   el._pulseT = setTimeout(()=> el.classList.remove("pulse"), ms);
+}
+
+/** =========================
+ * Terminal DEGEN override blast (caps)
+ * ========================= */
+let degenTermTimer = null;
+function degenTerminalBlast(){
+  clearTimeout(degenTermTimer);
+
+  term1.textContent = "THE BARON ALWAYS EXITS FIRST";
+  term2.textContent = "DEGEN OVERRIDE ACTIVATED";
+  term3.textContent = "MAX VOLATILITY MODE: ENGAGED";
+
+  degenTermTimer = setTimeout(()=> rotateTerminal(), 3200);
 }
 
 /** =========================
@@ -1080,8 +1087,8 @@ function pumpFromInsert(){
   coinsInserted += 1;
   lastPrice = price;
 
-  const base = 0.003;   // 0.3%
-  const vol  = 0.018;   // mild random
+  const base = 0.003;
+  const vol  = 0.018;
   const jitter = (Math.random() * vol) - (vol * 0.22);
   const pctMove = base + jitter;
 
@@ -1090,22 +1097,29 @@ function pumpFromInsert(){
   if(series.length > seriesLen) series.shift();
 
   addLog(`<span style="color:var(--warn);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
-
-  /* requested: on INSERT COINS -> CA starts pulsing */
   pulseEl(caBtn, 1800);
 
   persist();
   updateUI();
 }
 
-let degenLock = false;
-function degenActivate(){
-  if(degenLock) return;
-  degenLock = true;
-  setTimeout(()=>{ degenLock = false; }, 320);
+/* DEGEN locks until baron finishes, button shows ACTIVATED */
+let degenBusy = false;
+async function degenActivateLocked(){
+  if(degenBusy) return;
+  degenBusy = true;
+
+  const prevLabel = btnDegen.innerHTML;
+  btnDegen.innerHTML = "ACTIVATED";
+  btnDegen.disabled = true;
+  btnDegen.style.opacity = "0.88";
+  btnDegen.style.cursor = "not-allowed";
+
+  degenTerminalBlast();
+  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN OVERRIDE ACTIVATED</span> — CAPS LOCK ENGAGED`);
+  pulseEl(pumpBtn, 1800);
 
   lastPrice = price;
-
   const base = 0.007;
   const vol  = 0.040;
   const jitter = (Math.random() * vol) - (vol * 0.25);
@@ -1115,22 +1129,23 @@ function degenActivate(){
   series.push(price);
   if(series.length > seriesLen) series.shift();
 
-  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN BUTTON</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
+  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
 
-  /* requested: on DEGEN -> pump.fun button starts pulsing */
-  pulseEl(pumpBtn, 1800);
-
-  /* surprise jackpot */
   if(Math.random() < JACKPOT_CHANCE){
-    triggerJackpot();
-  } else {
-    /* keep baron line sometimes */
-    playBaron();
-    addLog(`<span style="color:rgba(255,255,255,.85);font-weight:800;">BARON</span> — voice line`);
+    triggerJackpotVisualOnly();
   }
 
   persist();
   updateUI();
+
+  await playBaronPromise();
+
+  btnDegen.disabled = false;
+  btnDegen.style.opacity = "";
+  btnDegen.style.cursor = "";
+  btnDegen.innerHTML = prevLabel;
+
+  degenBusy = false;
 }
 
 function rugPull(){
@@ -1153,7 +1168,6 @@ function rugPull(){
   persist();
   updateUI();
 
-  /* laugh on rug; do not overlap with click (click handler stops others already) */
   playLaughAfter(160);
 }
 
@@ -1191,24 +1205,30 @@ async function copyCA(){
 }
 
 /** =========================
- * Button wiring (arcade click on EVERY button)
+ * Button wiring
  * ========================= */
 function withClick(fn){
-  return (e)=>{
+  return ()=>{
     unlockAudio();
     playClick();
-    fn && fn(e);
+    fn && fn();
   };
 }
 
-/* INSERT: baron must NOT overlap click -> play baron AFTER click */
+/* INSERT: arcade click + baron after (no overlap) */
 btnInsert.addEventListener("click", withClick(()=>{
   pumpFromInsert();
-  playBaronAfter(140);
+  setTimeout(()=>{ if(!isMuted) playBaronPromise(); }, 140);
 }));
 
-btnDegen.addEventListener("click", withClick(()=> degenActivate()));
-btnRug.addEventListener("click",  withClick(()=> rugPull()));
+/* DEGEN: NO arcade beep, ONLY baron.mp3, locked until baron ends */
+btnDegen.addEventListener("click", ()=>{
+  unlockAudio();
+  stopLaugh(); stopJackpot();
+  degenActivateLocked();
+});
+
+btnRug.addEventListener("click", withClick(()=> rugPull()));
 
 dexBtn.addEventListener("click", ()=>{
   unlockAudio(); playClick();
@@ -1225,26 +1245,22 @@ pumpBtn.addEventListener("click", ()=>{
 caBtn.addEventListener("click", withClick(()=> copyCA()));
 
 /** =========================
- * Terminal loop (keeps the Baron line alive)
+ * Terminal loop
  * ========================= */
-const term1 = document.getElementById("term1");
-const term2 = document.getElementById("term2");
-const term3 = document.getElementById("term3");
-
 const STATUS_LINES = [
-  "loading greenback protocol v0.0.1",
-  "syncing liquidity routes",
-  "scanning degen index",
-  "checking rugs... NOT FOUND",
-  "loading memes",
-  "routing orders"
+  "LOADING GREENBACK PROTOCOL V0.0.1",
+  "SYNCING LIQUIDITY ROUTES",
+  "SCANNING DEGEN INDEX",
+  "CHECKING RUGS... NOT FOUND",
+  "LOADING MEMES",
+  "ROUTING ORDERS"
 ];
 let statusIdx = 0;
 
 function rotateTerminal(){
   term1.textContent = "THE BARON ALWAYS EXITS FIRST";
   term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]} — OK`;
-  term3.textContent = "ready for coins... insert to begin";
+  term3.textContent = "READY FOR COINS... INSERT TO BEGIN";
   statusIdx++;
 }
 rotateTerminal();
@@ -1257,5 +1273,6 @@ ensureSeries();
 updateUI();
 addLog(`Booted terminal — <b>THE BARON ALWAYS EXITS FIRST</b>`);
 </script>
+
 </body>
 </html>
