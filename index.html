@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Baron Greenback ($GBARON)</title>
+
 <style>
   *,*::before,*::after{box-sizing:border-box}
   :root{
@@ -13,8 +14,8 @@
     --text:#eaf2ff;
     --muted:#93a4c7;
     --line:rgba(255,255,255,.10);
-    --good:#2dff6a;
-    --warn:#c8ff2f;     /* degen yellow */
+    --good:#2dff6a;   /* bright green */
+    --warn:#c8ff2f;   /* bright yellow */
     --bad:#ff4d6d;
     --shadow: 0 14px 40px rgba(0,0,0,.55);
     --r:18px;
@@ -52,19 +53,14 @@
     79%{opacity:0}
   }
 
-  /* full-screen stage */
+  /* stage */
   .stage{
-    height:100dvh;
-    min-height:100svh;
+    height:100vh;
     width:100%;
     display:flex;
     align-items:stretch;
     justify-content:center;
-    padding:
-      calc(12px + env(safe-area-inset-top))
-      12px
-      calc(12px + env(safe-area-inset-bottom))
-      12px;
+    padding:12px;
     position:relative;
     z-index:5;
   }
@@ -95,123 +91,55 @@
     border-radius:18px;
     min-height:60px;
   }
-
-  .leftHead{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
-  }
-
+  .leftHead{display:flex;align-items:center;gap:12px;min-width:0}
   .avatar{
     width:44px;height:44px;border-radius:12px;
     border:1px solid var(--line);
     background:rgba(255,255,255,.04);
-    overflow:hidden;
-    flex:0 0 auto;
+    overflow:hidden;flex:0 0 auto;
   }
   .avatar img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-
-  .brand{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    min-width:0;
-  }
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
   .brand .title{
-    font-weight:900;
-    letter-spacing:.3px;
-    font-size:clamp(16px, 2.2vw, 22px);
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    font-weight:900; letter-spacing:.3px; font-size:20px; line-height:1.1;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .brand .sub{
-    font-size:clamp(11px, 1.6vw, 13px);
-    color:var(--muted);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    font-size:13px; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
-  .stats{
-    display:flex;
-    align-items:stretch;
-    gap:10px;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-  }
-
+  .stats{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;justify-content:flex-end}
   .pill{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:2px;
-    padding:8px 10px;
-    border-radius:14px;
-    background:rgba(255,255,255,.04);
-    border:1px solid var(--line);
-    min-width:136px;
+    display:flex;flex-direction:column;justify-content:center;gap:2px;
+    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.04);
+    border:1px solid var(--line);min-width:136px;
   }
   .pill .k{font-size:11px;color:var(--muted);letter-spacing:.25px}
   .pill .v{
-    font-size:clamp(14px, 2vw, 18px);
-    font-weight:900;
-    line-height:1.1;
-    display:flex;
-    align-items:baseline;
-    gap:6px;
-    white-space:nowrap;
-    font-family:var(--mono);
+    font-size:18px;font-weight:900;line-height:1.1;display:flex;align-items:baseline;gap:6px;
+    white-space:nowrap;font-family:var(--mono);
   }
   .pill .v small{font-size:11px;color:var(--muted);font-weight:800;font-family:inherit}
   .pill.soundPill{min-width:170px}
-  .soundRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
+
+  .soundRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .soundToggle{
-    height:34px;
-    width:52px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:rgba(0,0,0,.20);
-    position:relative;
-    cursor:pointer;
-    user-select:none;
+    height:34px;width:52px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(0,0,0,.20);position:relative;cursor:pointer;user-select:none;
   }
   .soundToggle::after{
-    content:"";
-    position:absolute;top:4px;left:4px;
-    width:26px;height:26px;border-radius:999px;
-    background:rgba(255,255,255,.10);
-    border:1px solid var(--line);
+    content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:999px;
+    background:rgba(255,255,255,.10);border:1px solid var(--line);
     transition:transform .16s ease, background .16s ease;
   }
-  .soundToggle.on::after{
-    transform:translateX(18px);
-    background:rgba(45,255,106,.18);
-  }
-  .soundLabel{
-    font-family:var(--mono);
-    font-weight:900;
-    letter-spacing:.2px;
-    color:var(--muted);
-    font-size:11px;
-  }
+  .soundToggle.on::after{transform:translateX(18px); background:rgba(45,255,106,.18)}
+  .soundLabel{font-family:var(--mono);font-weight:900;letter-spacing:.2px;color:var(--muted);font-size:11px}
 
   .content{
-    flex:1;
-    min-height:0;
-    display:grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap:12px;
-    overflow:hidden;
+    flex:1;min-height:0;display:grid;grid-template-columns: 1.2fr .8fr;
+    gap:12px;overflow:hidden;
   }
-
   .card{
     background:rgba(0,0,0,.22);
     border:1px solid var(--line);
@@ -221,7 +149,6 @@
     flex-direction:column;
     min-height:0;
   }
-
   .card h2{
     margin:0;
     padding:10px 12px;
@@ -238,112 +165,38 @@
   }
 
   /* LEFT / Chart */
-  .chartWrap{
-    padding:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    min-height:0;
-  }
-
-  .heroRow{
-    display:grid;
-    grid-template-columns: 148px 1fr;
-    gap:12px;
-    align-items:start;
-  }
-
+  .chartWrap{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+  .heroRow{display:grid;grid-template-columns: 148px 1fr;gap:12px;align-items:start}
   .heroLogo{
-    width:148px;height:148px;
-    border-radius:16px;
-    border:1px solid var(--line);
-    background:rgba(0,0,0,.18);
-    overflow:hidden;
-    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
+    width:148px;height:148px;border-radius:16px;border:1px solid var(--line);
+    background:rgba(0,0,0,.18);overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
   }
-  .heroLogo img{
-    width:100%;height:100%;
-    object-fit:contain;
-    image-rendering:pixelated;
-    background:#0b111c;
-  }
+  .heroLogo img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;background:#0b111c}
+  .heroText h1{margin:2px 0 4px;font-weight:1000;letter-spacing:.2px;font-size:34px;line-height:1.05}
+  .heroText p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
 
-  .heroText h1{
-    margin:2px 0 4px;
-    font-weight:1000;
-    letter-spacing:.2px;
-    font-size:clamp(20px, 3.1vw, 34px);
-    line-height:1.05;
-  }
-  .heroText p{
-    margin:0;
-    color:var(--muted);
-    font-size:13px;
-    line-height:1.35;
-  }
-
-  .chartTop{
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:2px;
-  }
-
-  .price{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    min-width:0;
-  }
+  .chartTop{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .price{display:flex;flex-direction:column;gap:2px;min-width:0}
   .price .big{
-    font-weight:1000;
-    font-size:clamp(22px, 3.2vw, 34px);
-    line-height:1;
-    display:flex;
-    align-items:baseline;
-    gap:8px;
-    white-space:nowrap;
-    font-family:var(--mono);
+    font-weight:1000;font-size:34px;line-height:1;display:flex;align-items:baseline;gap:8px;
+    white-space:nowrap;font-family:var(--mono);
   }
   .price .big .pct{
-    font-size:12px;
-    font-weight:900;
-    padding:4px 8px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:rgba(45,255,106,.10);
-    color:var(--good);
-    font-family:var(--mono);
+    font-size:12px;font-weight:900;padding:4px 8px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(45,255,106,.10);color:var(--good);font-family:var(--mono);
   }
-  .price .small{
-    font-size:12px;
-    color:var(--muted);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
+  .price .small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   .sparkBox{
-    flex:1;
-    min-width:220px;
-    max-width:520px;
-    height:120px;
-    border-radius:14px;
-    border:1px solid var(--line);
+    flex:1;min-width:220px;max-width:520px;height:120px;border-radius:14px;border:1px solid var(--line);
     background:linear-gradient(180deg, rgba(110,231,255,.10), rgba(0,0,0,0));
-    overflow:hidden;
-    position:relative;
+    overflow:hidden;position:relative;
   }
-  .sparkBox svg{width:100%; height:100%}
+  .sparkBox svg{width:100%;height:100%}
   .sparkGlow{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
+    position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(320px 160px at 85% 35%, rgba(110,231,255,.22), transparent 60%);
-    opacity:.6;
-    mix-blend-mode:screen;
+    opacity:.6;mix-blend-mode:screen;
   }
 
   /* ACTIONS */
@@ -358,82 +211,60 @@
     justify-content:space-between;
     background:rgba(255,255,255,.02);
   }
-
-  .btnRow{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    flex:1;
-    min-width:0;
-  }
+  .btnRow{display:flex;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
 
   .btn{
-    appearance:none;
-    border:none;
-    border-radius:14px;
-    padding:12px 14px;
-    font-weight:1000;
-    letter-spacing:.3px;
-    cursor:pointer;
-    color:var(--text);
-    background:rgba(255,255,255,.06);
+    appearance:none;border:none;border-radius:14px;padding:12px 14px;
+    font-weight:1000;letter-spacing:.3px;cursor:pointer;
+    color:#fff; /* WHITE letters */
     border:1px solid var(--line);
-    transition: transform .06s ease, filter .2s ease, background .2s ease;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-    flex:1;
-    min-width:170px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
+    transition:transform .06s ease, filter .2s ease, background .2s ease;
+    user-select:none;-webkit-tap-highlight-color: transparent;
+    flex:1;min-width:170px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    background:rgba(255,255,255,.06);
   }
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-  .btn.primary{
-    background:linear-gradient(135deg, rgba(110,231,255,.22), rgba(167,139,250,.18));
-    border-color:rgba(110,231,255,.22);
+  /* requested bright colors */
+  .btn.insert{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
+    border-color:rgba(200,255,47,.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(200,255,47,.18);
   }
-  .btn.degen{
-    background:linear-gradient(135deg, rgba(200,255,47,.20), rgba(45,255,106,.10));
-    border-color:rgba(200,255,47,.24);
-    color:#0b111c;
-    text-shadow:none;
+  .btn.degenBtn{
+    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
+    border-color:rgba(45,255,106,.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(45,255,106,.14);
   }
   .btn.danger{
     background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
     border-color:rgba(255,77,109,.28);
   }
 
-  .btn .ico{
-    width:22px;height:22px;
-    image-rendering:pixelated;
-    flex:0 0 auto;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,.08));
+  .icoEmoji{
+    font-size:18px;
+    line-height:1;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,.12));
   }
 
   /* INSERT COINS pulse (always) */
   .btn.pulseAlways{
     position:relative;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 26px rgba(200,255,47,.20);
     animation: insertPulse 1.2s steps(6,end) infinite;
   }
   .btn.pulseAlways::after{
-    content:"";
-    position:absolute;
-    inset:-8px;
-    border-radius:18px;
+    content:"";position:absolute;inset:-8px;border-radius:18px;
     border:2px solid rgba(200,255,47,.35);
-    opacity:.0;
-    animation: insertHalo 1.2s steps(6,end) infinite;
+    opacity:.0;animation: insertHalo 1.2s steps(6,end) infinite;
     pointer-events:none;
   }
   @keyframes insertPulse{
     0%{filter:brightness(1); transform:translateY(0)}
-    25%{filter:brightness(1.12)}
-    50%{filter:brightness(1.28)}
-    75%{filter:brightness(1.10)}
+    25%{filter:brightness(1.10)}
+    50%{filter:brightness(1.22)}
+    75%{filter:brightness(1.08)}
     100%{filter:brightness(1)}
   }
   @keyframes insertHalo{
@@ -444,17 +275,10 @@
   }
 
   /* RIGHT column panels */
-  .rightStack{
-    padding:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    min-height:0;
-  }
+  .rightStack{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
 
   .terminalBox{
-    border-radius:14px;
-    border:1px solid var(--line);
+    border-radius:14px;border:1px solid var(--line);
     background:rgba(0,0,0,.22);
     padding:10px 10px;
     font-family:var(--mono);
@@ -465,76 +289,27 @@
   }
   .prompt{color:var(--warn); font-weight:1000}
   .dim{color:#94a4c2}
+
+  /* pulsing cursor (requested) */
   .cursor{
-    display:inline-block;width:8px;height:12px;background:var(--warn);
-    margin-left:6px;transform:translateY(2px);
-    animation:cursorBlink .8s steps(1,end) infinite;
+    display:inline-block;width:8px;height:12px;background:var(--warn); margin-left:6px;
+    transform:translateY(2px);
+    animation:cursorPulse .75s steps(2,end) infinite;
+    box-shadow:0 0 10px rgba(200,255,47,.18);
   }
-  @keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
-
-  /* JACKPOT PANEL (smaller, connected to lottery) */
-  .jackPanel{
-    border-radius:14px;
-    border:1px solid rgba(200,255,47,.22);
-    background:linear-gradient(180deg, rgba(200,255,47,.12), rgba(0,0,0,.12));
-    padding:10px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .jackLeft{
-    display:flex;flex-direction:column;gap:3px;min-width:0;
-  }
-  .jackLeft .t{
-    font-family:var(--mono);
-    font-weight:1000;
-    letter-spacing:.6px;
-    color:rgba(255,255,255,.85);
-    font-size:11px;
-    text-transform:uppercase;
-  }
-  .jackLeft .v{
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:14px;
-    color:var(--warn);
-    letter-spacing:.2px;
-    white-space:nowrap;
-  }
-  .jackReady{
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--warn);
-    opacity:.85;
-    display:none;
-  }
-  .jackReady.flash{display:inline-block; animation:readyFlash 700ms steps(2,end) infinite;}
-  @keyframes readyFlash{
-    0%,49%{opacity:1; filter:brightness(1.2)}
-    50%,100%{opacity:.18; filter:brightness(0.9)}
+  @keyframes cursorPulse{
+    0%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
+    50%{opacity:.22; filter:brightness(1.7); transform:translateY(2px) scaleX(1.12)}
+    100%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
   }
 
-  /* links row */
-  .linkRow{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  .linkBtn{
-    flex:1;
-    min-width:140px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
+  /* pump.fun long button */
+  .pumpBtn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
     border-radius:14px;
     border:1px solid var(--line);
     background:rgba(255,255,255,.04);
-    padding:11px 12px;
+    padding:12px 12px;
     font-weight:1000;
     letter-spacing:.3px;
     text-transform:uppercase;
@@ -542,53 +317,62 @@
     user-select:none;
     -webkit-tap-highlight-color: transparent;
     text-decoration:none;
-    color:var(--text);
+    color:#fff;
+    width:100%;
+  }
+  .pumpBtn:active{transform:translateY(1px) scale(.99)}
+  .pumpBtn .ico{width:20px;height:20px;image-rendering:pixelated;filter: drop-shadow(0 0 10px rgba(255,255,255,.10))}
+  .pumpBtn.pulse{animation:hotPulse 1s steps(6,end) infinite; box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 26px rgba(110,231,255,.14)}
+  @keyframes hotPulse{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(1.28)}
+    100%{filter:brightness(1)}
+  }
+
+  /* links row */
+  .linkRow{display:flex;gap:10px;flex-wrap:wrap}
+  .linkBtn{
+    flex:1;min-width:140px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    border-radius:14px;border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    padding:11px 12px;
+    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
+    text-decoration:none;color:#fff; /* WHITE letters */
   }
   .linkBtn:active{transform:translateY(1px) scale(.99)}
-  .linkBtn .ico{width:18px;height:18px;image-rendering:pixelated}
-  .linkBtn.dex{background:rgba(45,255,106,.10); border-color:rgba(45,255,106,.22); color:var(--good)}
-  .linkBtn.tw{background:rgba(200,255,47,.10); border-color:rgba(200,255,47,.22); color:var(--warn)}
+  .linkBtn .ico{width:18px;height:18px;image-rendering:pixelated;filter: drop-shadow(0 0 10px rgba(255,255,255,.10))}
+
+  /* requested bright links */
+  .linkBtn.dex{
+    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.72));
+    border-color:rgba(45,255,106,.55);
+  }
+  .linkBtn.tw{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
+    border-color:rgba(200,255,47,.55);
+  }
 
   /* ACTIVITY LOG */
-  .logWrap{
-    flex:1;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
+  .logWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
   .logHead{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    color:var(--muted);
-    font-size:11px;
-    font-family:var(--mono);
-    text-transform:uppercase;
-    letter-spacing:.6px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    color:var(--muted);font-size:11px;font-family:var(--mono);
+    text-transform:uppercase;letter-spacing:.6px;
   }
   .log{
-    flex:1;
-    min-height:0;
-    overflow:auto;
-    border-radius:14px;
-    border:1px solid var(--line);
+    flex:1;min-height:0;overflow:auto;
+    border-radius:14px;border:1px solid var(--line);
     background:rgba(0,0,0,.18);
-    padding:10px;
-    font-family:var(--mono);
+    padding:10px;font-family:var(--mono);
   }
-  .log p{
-    margin:0 0 8px 0;
-    font-size:12px;
-    color:#a8b6d6;
-    line-height:1.35;
-  }
+  .log p{margin:0 0 8px 0;font-size:12px;color:#a8b6d6;line-height:1.35}
   .log p b{color:var(--text)}
   .log::-webkit-scrollbar{width:10px}
-  .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10); border-radius:999px}
+  .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
 
-  /* CA button (make it pop) */
+  /* CA area (bigger address + tap-to-copy underneath) */
   .caCard{
     padding:12px;
     border-top:1px solid var(--line);
@@ -605,7 +389,7 @@
       radial-gradient(800px 220px at 10% 30%, rgba(200,255,47,.18), transparent 45%),
       radial-gradient(700px 220px at 90% 60%, rgba(45,255,106,.10), transparent 45%),
       rgba(255,255,255,.04);
-    padding:12px 14px;
+    padding:14px 14px;
     cursor:pointer;
     user-select:none;
     -webkit-tap-highlight-color: transparent;
@@ -613,112 +397,66 @@
     position:relative;
     overflow:hidden;
     box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 24px rgba(200,255,47,.14);
+    text-align:left;
   }
   .caBtn:active{transform:translateY(1px) scale(.995)}
   .caBtn:focus-visible{outline:2px solid rgba(200,255,47,.55); outline-offset:2px}
-  .caBtn .label{
-    font-family:var(--mono);
-    font-weight:1000;
-    letter-spacing:.7px;
-    font-size:11px;
-    text-transform:uppercase;
+
+  .caTop{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:var(--mono);font-weight:1000;letter-spacing:.7px;font-size:11px;text-transform:uppercase;
     color:rgba(255,255,255,.78);
-    margin-bottom:6px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
+    margin-bottom:8px;
   }
-  .caBtn .mono{
+  .caBig{
     font-family:var(--mono);
     font-weight:1000;
-    font-size:14px;
-    letter-spacing:.2px;
-    line-height:1.2;
+    font-size:16px;            /* bigger than before */
+    letter-spacing:.25px;
+    line-height:1.22;
     overflow-wrap:anywhere;
   }
-  .caBtn::after{
-    content:"";
-    position:absolute;inset:-40px;
-    background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.16) 45%, rgba(255,255,255,0) 70%);
-    transform:translateX(-60%) rotate(10deg);
-    animation:shine 2.8s steps(10,end) infinite;
-    opacity:.65;
-    pointer-events:none;
-  }
-  @keyframes shine{
-    0%{transform:translateX(-70%) rotate(10deg)}
-    60%{transform:translateX(10%) rotate(10deg)}
-    100%{transform:translateX(70%) rotate(10deg)}
-  }
-  .caHint{
+
+  .tapHint{
+    font-family:var(--mono);
     font-size:11px;
     color:var(--muted);
-    font-family:var(--mono);
     letter-spacing:.2px;
     text-transform:uppercase;
   }
+
   .caToast{
-    position:absolute;
-    top:10px; right:10px;
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:11px;
-    letter-spacing:.6px;
-    text-transform:uppercase;
-    background:rgba(0,0,0,.68);
-    border:1px solid var(--line);
-    padding:6px 8px;
-    border-radius:999px;
-    opacity:0;
-    transform:translateY(-4px);
+    position:absolute;top:10px;right:10px;
+    font-family:var(--mono);font-weight:1000;font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+    background:rgba(0,0,0,.68);border:1px solid var(--line);padding:6px 8px;border-radius:999px;
+    opacity:0;transform:translateY(-4px);
     transition:opacity .14s ease, transform .14s ease;
-    pointer-events:none;
-    color:var(--warn);
+    pointer-events:none;color:var(--warn);
   }
   .caToast.show{opacity:1; transform:translateY(0)}
 
-  /* Jackpot overlay + coin rain (from original vibe) */
-  .coin-rain{
-    position:fixed; inset:0;
-    pointer-events:none;
-    overflow:hidden;
-    z-index:9998;
-  }
+  /* pulse targets (requested) */
+  .caBtn.pulse{animation:hotPulse 1s steps(6,end) infinite;}
+  /* use same hotPulse for CA & pump */
+
+  /* Jackpot overlay + coin rain (kept as surprise) */
+  .coin-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
   .coin{
-    position:absolute;
-    top:-18px;
-    width:12px;height:12px;
-    border:2px solid rgba(0,0,0,.65);
+    position:absolute;top:-18px;width:12px;height:12px;border:2px solid rgba(0,0,0,.65);
     background:var(--warn);
     box-shadow:2px 2px 0 rgba(0,0,0,.65), 0 0 10px rgba(200,255,47,.18);
-    image-rendering:pixelated;
-    opacity:0;
-    will-change:transform, opacity;
+    image-rendering:pixelated;opacity:0;will-change:transform, opacity;
   }
-  .coin::after{
-    content:"";
-    position:absolute;inset:2px;
-    border:1px solid rgba(0,0,0,.25);
-  }
-
+  .coin::after{content:"";position:absolute;inset:2px;border:1px solid rgba(0,0,0,.25)}
   .jackpot{
-    position:fixed;inset:0;
-    display:flex;align-items:center;justify-content:center;
-    pointer-events:none;
-    opacity:0;
-    z-index:9999;
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;opacity:0;z-index:9999;
   }
-  .jackpot.show{
-    opacity:1;
-    animation:jackFlash 1200ms steps(6,end) 1;
-  }
+  .jackpot.show{opacity:1; animation:jackFlash 1200ms steps(6,end) 1;}
   .jackpot::before{
-    content:"";
-    position:absolute;inset:0;
+    content:"";position:absolute;inset:0;
     background:radial-gradient(circle at 50% 45%, rgba(200,255,47,.22) 0%, rgba(45,255,106,.12) 35%, rgba(0,0,0,.0) 70%);
-    opacity:0;
-    animation:jackGlow 1200ms steps(6,end) 1;
+    opacity:0;animation:jackGlow 1200ms steps(6,end) 1;
   }
   @keyframes jackFlash{
     0%{filter:brightness(1); transform:translate(0,0)}
@@ -739,70 +477,35 @@
     100%{opacity:0}
   }
   .jackpot-inner{
-    position:relative;
-    padding:18px 22px;
+    position:relative;padding:18px 22px;
     border:1px solid rgba(200,255,47,.28);
-    box-shadow: 0 0 0 1px rgba(0,0,0,.45) inset, 0 0 48px rgba(200,255,47,.18);
+    box-shadow:0 0 0 1px rgba(0,0,0,.45) inset, 0 0 48px rgba(200,255,47,.18);
     background:rgba(0,0,0,.55);
-    text-align:center;
-    border-radius:18px;
-    overflow:hidden;
-    backdrop-filter: blur(6px);
+    text-align:center;border-radius:18px;overflow:hidden;backdrop-filter: blur(6px);
   }
   .jackpot-nums{
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:64px;
-    letter-spacing:6px;
-    color:var(--warn);
-    text-shadow:0 0 14px rgba(200,255,47,.35), 0 0 34px rgba(200,255,47,.18);
+    font-family:var(--mono);font-weight:1000;font-size:64px;letter-spacing:6px;
+    color:var(--warn);text-shadow:0 0 14px rgba(200,255,47,.35), 0 0 34px rgba(200,255,47,.18);
     line-height:1;
   }
   .jackpot-text{
-    margin-top:6px;
-    font-family:var(--mono);
-    font-weight:1000;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:#eaeaea;
-    font-size:13px;
+    margin-top:6px;font-family:var(--mono);font-weight:1000;letter-spacing:2px;text-transform:uppercase;
+    color:#eaeaea;font-size:13px;
   }
   .jackpot-sub{
-    margin-top:6px;
-    font-family:var(--mono);
-    font-weight:1000;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--warn);
-    font-size:12px;
-    opacity:.92;
+    margin-top:6px;font-family:var(--mono);font-weight:1000;letter-spacing:1px;text-transform:uppercase;
+    color:var(--warn);font-size:12px;opacity:.92;
   }
 
-  /* Mobile: less overwhelming */
-  @media (max-width: 820px){
-    body{overflow:hidden;}
-    .content{grid-template-columns:1fr; gap:12px;}
-    .pill{min-width:140px}
-    .heroRow{grid-template-columns: 110px 1fr;}
-    .heroLogo{width:110px;height:110px;border-radius:14px}
-    .sparkBox{min-width:200px;height:110px}
-  }
-  @media (max-width: 420px){
-    header{padding:8px 10px}
-    .avatar{width:40px;height:40px;border-radius:12px}
-    .pill{min-width:130px;padding:7px 9px}
-    .btn{min-width:150px}
-    .jackpot-nums{font-size:52px;letter-spacing:4px}
-    .linkBtn{min-width:130px}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    body::after{animation:none !important;}
-    .btn.pulseAlways{animation:none !important;}
-    .btn.pulseAlways::after{animation:none !important; opacity:.25;}
-    .cursor{animation:none !important; opacity:1}
-    .caBtn::after{animation:none !important; opacity:.25;}
-    .jackReady.flash{animation:none !important; opacity:1;}
+  /* shake */
+  .shake{ animation: shake .32s linear 1; }
+  @keyframes shake{
+    0%{transform:translate(0,0)}
+    20%{transform:translate(-6px, 2px)}
+    40%{transform:translate(6px, -2px)}
+    60%{transform:translate(-5px, -1px)}
+    80%{transform:translate(5px, 1px)}
+    100%{transform:translate(0,0)}
   }
 </style>
 </head>
@@ -820,14 +523,11 @@
 
   <div class="stage">
     <div class="frame" id="frame">
-
       <header>
         <div class="leftHead">
           <div class="avatar" aria-hidden="true">
-            <!-- optional: put a tiny icon/logo here if you want -->
             <img src="logo.png" alt="">
           </div>
-
           <div class="brand">
             <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
             <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
@@ -839,12 +539,10 @@
             <div class="k">COINS INSERTED</div>
             <div class="v"><span id="coinsInserted">0</span> <small>clicks</small></div>
           </div>
-
           <div class="pill" aria-label="Rank">
             <div class="k">RANK</div>
             <div class="v"><span id="rank">paperhands</span></div>
           </div>
-
           <div class="pill soundPill" aria-label="Sound">
             <div class="k">SOUND</div>
             <div class="soundRow">
@@ -856,7 +554,6 @@
       </header>
 
       <div class="content">
-
         <!-- LEFT -->
         <section class="card" aria-label="Fake chart that pumps on clicks">
           <h2>📉 Fake Chart (Pumps on Clicks)</h2>
@@ -892,13 +589,13 @@
 
             <div class="actions">
               <div class="btnRow">
-                <button class="btn primary pulseAlways" id="btnInsert" aria-label="Insert coins">
-                  <img class="ico" src="pump.png" alt="" aria-hidden="true">
+                <button class="btn insert pulseAlways" id="btnInsert" aria-label="Insert coins">
+                  <span class="icoEmoji" aria-hidden="true">🪙</span>
                   INSERT COINS
                 </button>
 
-                <button class="btn degen" id="btnDegen" aria-label="Activate degen">
-                  <span style="filter:drop-shadow(0 0 10px rgba(200,255,47,.12));">⚡</span>
+                <button class="btn degenBtn" id="btnDegen" aria-label="Activate degen">
+                  <span class="icoEmoji" aria-hidden="true">⚡</span>
                   ACTIVATE DEGEN
                 </button>
               </div>
@@ -912,13 +609,14 @@
           <div class="caCard">
             <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
               <span class="caToast" id="caToast">COPIED</span>
-              <div class="label">
-                <span>CONTRACT ADDRESS (TAP TO COPY)</span>
-                <span style="color:var(--warn);font-weight:1000;font-family:var(--mono);">CA</span>
+              <div class="caTop">
+                <span>CA</span>
+                <span style="color:var(--warn)">GBARON</span>
               </div>
-              <div class="mono" id="caText"></div>
+              <div class="caBig" id="caText"></div>
             </button>
-            <div class="caHint">THE BARON APPROVES • SEE YA AT ATH!</div>
+
+            <div class="tapHint">Tap to copy</div>
           </div>
         </section>
 
@@ -933,14 +631,11 @@
               <div><span class="prompt">&gt;</span> <span class="dim" id="term3">ready for coins... insert to begin</span><span class="cursor"></span></div>
             </div>
 
-            <!-- Smaller panel that connects to lottery -->
-            <div class="jackPanel" aria-label="Jackpot panel">
-              <div class="jackLeft">
-                <div class="t">JACKPOT PROGRESS</div>
-                <div class="v"><span id="jpCount">1/5</span> <span style="color:rgba(255,255,255,.65)">•</span> <span id="jpMode">random + combo</span></div>
-              </div>
-              <div class="jackReady" id="jpReady">JACKPOT READY!</div>
-            </div>
+            <!-- replaced jackpot progress with pump.fun long button -->
+            <a class="pumpBtn" id="pumpBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Open pump.fun">
+              <img class="ico" src="pump.png" alt="" aria-hidden="true">
+              PUMP.FUN
+            </a>
 
             <div class="linkRow" aria-label="Links">
               <a class="linkBtn dex" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer">
@@ -965,7 +660,6 @@
             </div>
           </div>
         </aside>
-
       </div>
     </div>
   </div>
@@ -975,17 +669,15 @@
  * CONFIG
  * ========================= */
 const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-const INSERT_URL = "https://pump.fun";          // if you want Insert Coins to open pump.fun, uncomment below
-const DEX_URL    = "https://dexscreener.com";   // replace with your pair link later
-const X_URL      = "https://x.com/";            // replace with your profile later
-const TICKER     = "$GBARON";
+const PUMP_URL = "https://pump.fun";
+const DEX_URL  = "https://dexscreener.com";
+const X_URL    = "https://x.com/";
+const TICKER   = "$GBARON";
 
-// JACKPOT logic
-const JACKPOT_CHANCE = 0.02; // 2% random chance on DEGEN press (only when not combo-hit)
-const COMBO_TARGET   = 5;    // guaranteed every 5 DEGEN presses
-const COMBO_KEY      = "gbaron_comboProgress_v1";
+/* jackpot is a SURPRISE now */
+const JACKPOT_CHANCE = 0.02; // 2% chance on DEGEN
 
-// rank titles (coins inserted drives rank)
+/* rank titles (coins inserted drives rank) */
 const RANKS = [
   {at:0,  name:"paperhands"},
   {at:5,  name:"bagholder"},
@@ -1006,33 +698,32 @@ const elPct   = document.getElementById("pct");
 const elPriceNote = document.getElementById("priceNote");
 const elLine  = document.getElementById("sparkLine");
 const elFill  = document.getElementById("sparkFill");
-const elLog   = document.getElementById("log");
+
+const elLog = document.getElementById("log");
 const elLogCount = document.getElementById("logCount");
 
 const btnInsert = document.getElementById("btnInsert");
 const btnDegen  = document.getElementById("btnDegen");
 const btnRug    = document.getElementById("btnRug");
-const dexBtn    = document.getElementById("dexBtn");
-const xBtn      = document.getElementById("xBtn");
 
-const elCA = document.getElementById("caText");
-const caBtn = document.getElementById("caBtn");
-const caToast = document.getElementById("caToast");
+const dexBtn = document.getElementById("dexBtn");
+const xBtn   = document.getElementById("xBtn");
+const pumpBtn = document.getElementById("pumpBtn");
 
-const frame = document.getElementById("frame");
+const elCA   = document.getElementById("caText");
+const caBtn  = document.getElementById("caBtn");
+const caToast= document.getElementById("caToast");
 
-// right panel jackpot
-const jpCount = document.getElementById("jpCount");
-const jpReady = document.getElementById("jpReady");
+const frame  = document.getElementById("frame");
 
-// fx layers
+/* FX layers */
 const jackpotEl = document.getElementById("jackpot");
-const jackpotSub = document.getElementById("jackpotSub");
-const coinRain = document.getElementById("coinRain");
+const jackpotSub= document.getElementById("jackpotSub");
+const coinRain  = document.getElementById("coinRain");
 
-// sound
+/* sound */
 const soundToggle = document.getElementById("soundToggle");
-const soundState = document.getElementById("soundState");
+const soundState  = document.getElementById("soundState");
 
 /** =========================
  * STATE (persist)
@@ -1043,8 +734,8 @@ if (!Number.isFinite(coinsInserted) || coinsInserted < 0) coinsInserted = 0;
 let basePrice = 0.000001;
 let price = Number(sessionStorage.getItem("gbaron_price") || String(basePrice));
 if (!Number.isFinite(price) || price <= 0) price = basePrice;
-let lastPrice = price;
 
+let lastPrice = price;
 let series = [];
 const seriesLen = 34;
 
@@ -1052,12 +743,12 @@ let ath = Number(sessionStorage.getItem("gbaron_ath") || String(price));
 if (!Number.isFinite(ath) || ath <= 0) ath = price;
 
 /** =========================
- * SOUND (no overlap with other mp3)
- * - Click sound plays on every button
- * - It will NOT overlap with laugh/baron/jackpot; we stop those first
- * - Laugh only for rug button
+ * SOUND
+ * - Click sound on every click
+ * - Insert: play baron AFTER click so it does NOT overlap the arcade beep
  * ========================= */
 let isMuted = (localStorage.getItem("gbaron_muted") === "1");
+
 function renderSoundUI(){
   soundState.textContent = isMuted ? "off" : "on";
   soundToggle.classList.toggle("on", !isMuted);
@@ -1077,12 +768,12 @@ soundToggle.addEventListener("keydown", (e)=>{
   }
 });
 
-// Audio pools
 const CLICK_POOL_SIZE = 6;
 const clickPool = [];
 let clickIdx = 0;
 
 let baronAudio = null;
+
 const laughPool = [];
 let laughIdx = 0;
 
@@ -1119,6 +810,7 @@ function initJackpotPool(){
 
 let audioUnlocked = false;
 let audioCtx = null;
+
 function unlockAudio(){
   if(audioUnlocked) return;
   audioUnlocked = true;
@@ -1131,12 +823,21 @@ function unlockAudio(){
   initJackpotPool();
 }
 window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
-window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
 
-// hard stop helpers (so mp3 do not overlap each other)
-function stopBaron(){ try{ if(baronAudio){ baronAudio.pause(); baronAudio.currentTime = 0; } }catch(e){} }
-function stopLaugh(){ try{ laughPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){} }
-function stopJackpot(){ try{ jackpotPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){} }
+function stopBaron(){
+  try{
+    if(baronAudio){
+      baronAudio.pause();
+      baronAudio.currentTime = 0;
+    }
+  }catch(e){}
+}
+function stopLaugh(){
+  try{ laughPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){}
+}
+function stopJackpot(){
+  try{ jackpotPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){}
+}
 
 function beepFallback(){
   if(isMuted) return;
@@ -1148,8 +849,7 @@ function beepFallback(){
     o.type = "square";
     o.frequency.value = 740;
     g.gain.value = 0.05;
-    o.connect(g);
-    g.connect(audioCtx.destination);
+    o.connect(g); g.connect(audioCtx.destination);
     o.start();
     setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
   }catch(e){}
@@ -1158,8 +858,10 @@ function beepFallback(){
 function playClick(){
   if(isMuted) return;
   unlockAudio();
-  // do not overlap with other mp3
+
+  /* click should NOT overlap with other mp3 */
   stopLaugh(); stopBaron(); stopJackpot();
+
   try{
     initClickPool();
     const a = clickPool[clickIdx % clickPool.length];
@@ -1167,14 +869,18 @@ function playClick(){
     a.pause(); a.currentTime = 0;
     const p = a.play();
     if(p && p.catch) p.catch(()=>beepFallback());
-  }catch(e){ beepFallback(); }
+  }catch(e){
+    beepFallback();
+  }
 }
 
 function playBaron(){
   if(isMuted) return;
   unlockAudio();
-  // no overlap
+
+  /* baron should not overlap with laugh/jackpot */
   stopLaugh(); stopJackpot();
+
   try{
     stopBaron();
     baronAudio = new Audio("baron.mp3");
@@ -1185,12 +891,17 @@ function playBaron(){
   }catch(e){}
 }
 
+/* IMPORTANT: for INSERT COINS, baron must NOT overlap the arcade beep */
+function playBaronAfter(ms){
+  if(isMuted) return;
+  setTimeout(()=>{ if(!isMuted) playBaron(); }, ms);
+}
+
 function playLaughAfter(ms){
   if(isMuted) return;
   unlockAudio();
   setTimeout(()=>{
     if(isMuted) return;
-    // ensure no overlap with click (and anything else)
     stopBaron(); stopJackpot();
     try{
       initLaughPool();
@@ -1206,7 +917,6 @@ function playLaughAfter(ms){
 function playJackpot(){
   if(isMuted) return;
   unlockAudio();
-  // no overlap
   stopLaugh(); stopBaron();
   try{
     initJackpotPool();
@@ -1222,13 +932,10 @@ function playJackpot(){
  * UI helpers
  * ========================= */
 function fmtPrice(n){
-  // meme but readable
   if (n < 0.01) return "$" + n.toFixed(6);
-  if (n < 1)    return "$" + n.toFixed(4);
+  if (n < 1) return "$" + n.toFixed(4);
   return "$" + n.toFixed(2);
 }
-function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-
 function getRankName(c){
   let name = RANKS[0].name;
   for(const r of RANKS){
@@ -1236,7 +943,6 @@ function getRankName(c){
   }
   return name;
 }
-
 function ensureSeries(){
   if(series.length === 0){
     for(let i=0;i<seriesLen;i++) series.push(price);
@@ -1258,19 +964,17 @@ function sparkPath(values){
   return {d,dFill};
 }
 
-function addLog(msg){
+function addLog(msgHtml){
   const p = document.createElement("p");
   const t = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
-  p.innerHTML = `<b>[${t}]</b> ${msg}`;
+  p.innerHTML = `<b>[${t}]</b> ${msgHtml}`;
   elLog.prepend(p);
-
-  const count = Number(elLogCount.textContent || "0") + 1;
-  elLogCount.textContent = String(count);
+  elLogCount.textContent = String(Number(elLogCount.textContent || "0") + 1);
 }
 
 function updateUI(){
   elCoins.textContent = String(coinsInserted);
-  elRank.textContent = getRankName(coinsInserted);
+  elRank.textContent  = getRankName(coinsInserted);
 
   elPrice.textContent = fmtPrice(price);
 
@@ -1295,32 +999,13 @@ function updateUI(){
   elFill.setAttribute("d", paths.dFill);
 }
 
-// set CA
-elCA.textContent = CA;
-
-// wire links
-dexBtn.href = DEX_URL;
-xBtn.href = X_URL;
-
 /** =========================
- * Jackpot progress
+ * CA + links
  * ========================= */
-function safeGetCombo(){
-  const raw = Number(sessionStorage.getItem(COMBO_KEY) || "0");
-  if(!Number.isFinite(raw) || raw < 0 || raw > (COMBO_TARGET - 1)){
-    sessionStorage.setItem(COMBO_KEY, "0");
-    return 0;
-  }
-  return raw;
-}
-function renderJackpot(){
-  const progress = safeGetCombo();     // 0..4
-  const shown = progress + 1;          // 1..5
-  jpCount.textContent = `${shown}/${COMBO_TARGET}`;
-  const ready = (shown === COMBO_TARGET);
-  jpReady.classList.toggle("flash", ready);
-}
-renderJackpot();
+elCA.textContent = CA;
+pumpBtn.href = PUMP_URL;
+dexBtn.href  = DEX_URL;
+xBtn.href    = X_URL;
 
 /** =========================
  * FX: coin rain + jackpot overlay
@@ -1331,23 +1016,26 @@ function spawnCoinRain(count = 38){
   coinRain.innerHTML = "";
   const W = window.innerWidth || 520;
   const H = window.innerHeight || 700;
+
   for(let i=0;i<count;i++){
     const c = document.createElement("span");
     c.className = "coin";
     const left = Math.random() * W;
     const size = 8 + Math.random() * 10;
-    const dur = 900 + Math.random() * 900;
-    const delay = Math.random() * 240;
-    const rot = 240 + Math.random() * 360;
+    const dur  = 900 + Math.random() * 900;
+    const delay= Math.random() * 240;
+    const rot  = 240 + Math.random() * 360;
+
     c.style.left = left + "px";
     c.style.width = size + "px";
     c.style.height = size + "px";
     coinRain.appendChild(c);
+
     c.animate(
       [
         { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
         { opacity: 1, offset: 0.12 },
-        { transform: "translateY(" + (H + 80) + "px) rotate(" + rot + "deg)", opacity: 0 }
+        { transform: `translateY(${H + 80}px) rotate(${rot}deg)`, opacity: 0 }
       ],
       { duration: dur, delay, easing: "linear", fill: "forwards" }
     );
@@ -1355,12 +1043,10 @@ function spawnCoinRain(count = 38){
   setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
 }
 
-function triggerJackpot(reason){
-  jackpotSub.textContent = (reason === "combo")
-    ? ("COMBO WIN! YOU WON: 777 " + TICKER)
-    : ("YOU WON: 777 " + TICKER);
-
+function triggerJackpot(){
+  jackpotSub.textContent = `YOU WON: 777 ${TICKER}`;
   spawnCoinRain(44);
+
   jackpotEl.classList.remove("show");
   void jackpotEl.offsetWidth;
   jackpotEl.classList.add("show");
@@ -1373,6 +1059,15 @@ function triggerJackpot(reason){
 }
 
 /** =========================
+ * Pulse targets (requested)
+ * ========================= */
+function pulseEl(el, ms=1600){
+  el.classList.add("pulse");
+  clearTimeout(el._pulseT);
+  el._pulseT = setTimeout(()=> el.classList.remove("pulse"), ms);
+}
+
+/** =========================
  * Gameplay actions
  * ========================= */
 function persist(){
@@ -1382,47 +1077,35 @@ function persist(){
 }
 
 function pumpFromInsert(){
-  // coins + chart pump
   coinsInserted += 1;
   lastPrice = price;
 
-  // small-ish biased pump
-  const base = 0.003;          // 0.3%
-  const vol  = 0.018;          // mild random
+  const base = 0.003;   // 0.3%
+  const vol  = 0.018;   // mild random
   const jitter = (Math.random() * vol) - (vol * 0.22);
   const pctMove = base + jitter;
 
   price = Math.max(0.000001, price * (1 + pctMove));
-
   series.push(price);
   if(series.length > seriesLen) series.shift();
 
   addLog(`<span style="color:var(--warn);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
+
+  /* requested: on INSERT COINS -> CA starts pulsing */
+  pulseEl(caBtn, 1800);
+
   persist();
   updateUI();
 }
 
 let degenLock = false;
-function comboStepAndCheckHit(){
-  let progress = safeGetCombo(); // 0..4
-  const willHitNow = (progress === (COMBO_TARGET - 1));
-  if(willHitNow){
-    sessionStorage.setItem(COMBO_KEY, "0");
-    return true;
-  }else{
-    progress += 1;
-    sessionStorage.setItem(COMBO_KEY, String(progress));
-    return false;
-  }
-}
-
 function degenActivate(){
   if(degenLock) return;
   degenLock = true;
   setTimeout(()=>{ degenLock = false; }, 320);
 
-  // pump the chart more violently (but do NOT increment coins)
   lastPrice = price;
+
   const base = 0.007;
   const vol  = 0.040;
   const jitter = (Math.random() * vol) - (vol * 0.25);
@@ -1432,16 +1115,16 @@ function degenActivate(){
   series.push(price);
   if(series.length > seriesLen) series.shift();
 
-  addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN BUTTON</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
+  addLog(`<span style="color:var(--good);font-weight:1000;">DEGEN BUTTON</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
 
-  // jackpot logic
-  const comboHit = comboStepAndCheckHit();
-  const randomHit = (!comboHit && (Math.random() < JACKPOT_CHANCE));
-  renderJackpot();
+  /* requested: on DEGEN -> pump.fun button starts pulsing */
+  pulseEl(pumpBtn, 1800);
 
-  if(comboHit || randomHit){
-    triggerJackpot(comboHit ? "combo" : "random");
-  }else{
+  /* surprise jackpot */
+  if(Math.random() < JACKPOT_CHANCE){
+    triggerJackpot();
+  } else {
+    /* keep baron line sometimes */
     playBaron();
     addLog(`<span style="color:rgba(255,255,255,.85);font-weight:800;">BARON</span> — voice line`);
   }
@@ -1451,9 +1134,7 @@ function degenActivate(){
 }
 
 function rugPull(){
-  // nuke the chart + laugh.mp3
   lastPrice = price;
-
   const nuked = Math.max(basePrice * 0.25, price * (0.06 + Math.random()*0.05));
   price = nuked;
 
@@ -1468,27 +1149,13 @@ function rugPull(){
   setTimeout(()=>frame.classList.remove("shake"), 360);
 
   addLog(`<span style="color:var(--bad);font-weight:1000;">RUG PULL</span> — villain arc initiated ☠️`);
+
   persist();
   updateUI();
 
-  // laugh must be kept for rug; ensure no overlap with click:
+  /* laugh on rug; do not overlap with click (click handler stops others already) */
   playLaughAfter(160);
 }
-
-// shake animation class (small)
-const style = document.createElement("style");
-style.textContent = `
-  .shake{ animation: shake .32s linear 1; }
-  @keyframes shake{
-    0%{transform:translate(0,0)}
-    20%{transform:translate(-6px, 2px)}
-    40%{transform:translate(6px, -2px)}
-    60%{transform:translate(-5px, -1px)}
-    80%{transform:translate(5px, 1px)}
-    100%{transform:translate(0,0)}
-  }
-`;
-document.head.appendChild(style);
 
 /** =========================
  * CA copy
@@ -1500,7 +1167,6 @@ function showCaToast(){
 }
 
 const canClipboard = !!(navigator.clipboard && window.isSecureContext);
-
 async function copyCA(){
   try{
     if(canClipboard){
@@ -1521,7 +1187,7 @@ async function copyCA(){
     }
   }
   showCaToast();
-  addLog(`<span style="color:var(--warn);font-weight:1000;">CA</span> — copied • THE BARON APPROVES SEE YA AT ATH!`);
+  addLog(`<span style="color:var(--warn);font-weight:1000;">CA</span> — copied`);
 }
 
 /** =========================
@@ -1535,26 +1201,28 @@ function withClick(fn){
   };
 }
 
-btnInsert.addEventListener("click", withClick(()=> {
-  // (optional) if you want INSERT COINS to open pump.fun instead of just pumping:
-  // window.open(INSERT_URL, "_blank", "noopener,noreferrer");
+/* INSERT: baron must NOT overlap click -> play baron AFTER click */
+btnInsert.addEventListener("click", withClick(()=>{
   pumpFromInsert();
+  playBaronAfter(140);
 }));
 
-btnDegen.addEventListener("click", withClick(()=> {
-  degenActivate();
-}));
+btnDegen.addEventListener("click", withClick(()=> degenActivate()));
+btnRug.addEventListener("click",  withClick(()=> rugPull()));
 
-btnRug.addEventListener("click", withClick(()=> {
-  rugPull();
-}));
-
-dexBtn.addEventListener("click", ()=>{ unlockAudio(); playClick(); addLog(`<span style="color:var(--good);font-weight:1000;">OPEN</span> — dexscreener`); });
-xBtn.addEventListener("click",   ()=>{ unlockAudio(); playClick(); addLog(`<span style="color:var(--warn);font-weight:1000;">OPEN</span> — twitter`); });
-
-caBtn.addEventListener("click", withClick(()=> {
-  copyCA();
-}));
+dexBtn.addEventListener("click", ()=>{
+  unlockAudio(); playClick();
+  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — dexscreener`);
+});
+xBtn.addEventListener("click", ()=>{
+  unlockAudio(); playClick();
+  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — twitter`);
+});
+pumpBtn.addEventListener("click", ()=>{
+  unlockAudio(); playClick();
+  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — pump.fun`);
+});
+caBtn.addEventListener("click", withClick(()=> copyCA()));
 
 /** =========================
  * Terminal loop (keeps the Baron line alive)
@@ -1565,17 +1233,17 @@ const term3 = document.getElementById("term3");
 
 const STATUS_LINES = [
   "loading greenback protocol v0.0.1",
-  "syncing liquidity routes... OK",
-  "scanning degen index... OK",
+  "syncing liquidity routes",
+  "scanning degen index",
   "checking rugs... NOT FOUND",
-  "loading memes... OK",
-  "routing orders... STABLE"
+  "loading memes",
+  "routing orders"
 ];
 let statusIdx = 0;
 
 function rotateTerminal(){
   term1.textContent = "THE BARON ALWAYS EXITS FIRST";
-  term2.textContent = STATUS_LINES[statusIdx % STATUS_LINES.length] + " — OK";
+  term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]} — OK`;
   term3.textContent = "ready for coins... insert to begin";
   statusIdx++;
 }
@@ -1588,7 +1256,6 @@ setInterval(rotateTerminal, 9000);
 ensureSeries();
 updateUI();
 addLog(`Booted terminal — <b>THE BARON ALWAYS EXITS FIRST</b>`);
-renderJackpot();
 </script>
 </body>
 </html>
