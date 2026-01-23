@@ -1,1157 +1,644 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Greenback ($GBACK)</title>
-<style>
-*,*::before,*::after{box-sizing:border-box}
-:root{
-  --bg:#0b0b0b;
-  --card:#101010;
-  --ink:#eaeaea;
-  --muted:#bdbdbd;
-  --yellow:#c8ff2f;
-  --green:#2dff6a;
-}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Greenback ($GBACK)</title>
+  <style>
+    :root{
+      --bg:#070b10;
+      --panel:#0d1320;
+      --panel2:#0b111c;
+      --text:#eaf2ff;
+      --muted:#93a4c7;
+      --line:rgba(255,255,255,.10);
+      --good:#33d17a;
+      --warn:#ffb000;
+      --bad:#ff4d6d;
+      --accent:#6ee7ff;
+      --accent2:#a78bfa;
+      --shadow: 0 14px 40px rgba(0,0,0,.55);
+      --r:18px;
+    }
 
-html,body{height:100%; margin:0;}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:Arial, Helvetica, sans-serif;
-  /* Prevent “bottom cut off” on mobile + allow scrolling */
-  overflow-x:hidden;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  padding-bottom:env(safe-area-inset-bottom);
-}
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(110,231,255,.18), transparent 55%),
+        radial-gradient(900px 500px at 85% 10%, rgba(167,139,250,.18), transparent 60%),
+        radial-gradient(700px 500px at 50% 110%, rgba(51,209,122,.12), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      overflow:hidden; /* prevents mobile scroll */
+    }
 
-/* CRT overlay */
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
-  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
-  opacity:.08;mix-blend-mode:overlay;
-}
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
-  background:rgba(255,255,255,.02);opacity:0;
-  animation:crtFlicker 7s steps(1,end) infinite;
-}
-@keyframes crtFlicker{
-  0%,52%,100%{opacity:0}
-  53%{opacity:.05}
-  54%{opacity:0}
-  78%{opacity:.03}
-  79%{opacity:0}
-}
+    /* Full-screen frame that ALWAYS fits mobile */
+    .stage{
+      height:100dvh; /* dynamic viewport height (mobile safe) */
+      min-height:100svh;
+      width:100%;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding:
+        calc(12px + env(safe-area-inset-top))
+        12px
+        calc(12px + env(safe-area-inset-bottom))
+        12px;
+    }
 
-/* keep content above CRT */
-.wrap,.card{position:relative;z-index:5}
+    .frame{
+      width:min(980px, 100%);
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow: var(--shadow);
+      padding:14px;
+      overflow:hidden; /* keep everything inside */
+    }
 
-/*
-  ✅ KEY FIX:
-  Use a fixed, viewport-bound wrapper that *always* matches the visible screen.
-  This avoids iOS/Safari “100vh” bugs and ensures the bottom is reachable.
-*/
-.wrap{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  padding-top:calc(18px + env(safe-area-inset-top));
-  padding-bottom:calc(24px + env(safe-area-inset-bottom));
-  overflow-y:auto;
-  overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-}
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      background:rgba(0,0,0,.25);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
 
-/*
-  ✅ Card is capped to the available viewport height.
-  If content ever exceeds, the wrapper scrolls — never gets cut off.
-*/
-.card{
-  width:100%;
-  max-width:520px;
-  background:var(--card);
-  border:4px solid #000;
-  box-shadow:0 0 0 4px #1a1a1a;
-  padding:18px;
-  text-align:center;
-  position:relative;
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
 
-  /* keep fully visible within viewport padding */
-  max-height:calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-}
+    .brand .title{
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size:clamp(16px, 2.2vw, 22px);
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      font-size:clamp(11px, 1.6vw, 13px);
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-/* FULL-SCREEN COIN RAIN LAYER */
-.coin-rain{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  overflow:hidden;
-  z-index:9998;
-}
-.coin{
-  position:absolute;
-  top:-18px;
-  width:12px;height:12px;
-  border:2px solid #000;
-  background:var(--yellow);
-  box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
-  image-rendering:pixelated;
-  opacity:0;
-  will-change:transform, opacity;
-}
-.coin::after{
-  content:"";
-  position:absolute;inset:2px;
-  border:1px solid rgba(0,0,0,.25);
-}
+    .stats{
+      display:flex;
+      align-items:stretch;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
-/* JACKPOT OVERLAY */
-.jackpot{
-  position:fixed;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;
-  opacity:0;
-  z-index:9999;
-}
-.jackpot.show{
-  opacity:1;
-  animation:jackFlash 1200ms steps(6,end) 1;
-}
-.jackpot::before{
-  content:"";
-  position:absolute;inset:0;
-  background:radial-gradient(circle at 50% 45%, rgba(200,255,47,.22) 0%, rgba(45,255,106,.12) 35%, rgba(0,0,0,.0) 70%);
-  opacity:0;
-  animation:jackGlow 1200ms steps(6,end) 1;
-}
-@keyframes jackFlash{
-  0%{filter:brightness(1); transform:translate(0,0)}
-  10%{filter:brightness(1.9); transform:translate(-1px,-1px)}
-  20%{filter:brightness(1.1); transform:translate(0,0)}
-  30%{filter:brightness(2.2); transform:translate(-2px,0)}
-  45%{filter:brightness(1.0); transform:translate(0,0)}
-  60%{filter:brightness(2.4); transform:translate(1px,-1px)}
-  75%{filter:brightness(1.05); transform:translate(0,0)}
-  100%{filter:brightness(1); transform:translate(0,0)}
-}
-@keyframes jackGlow{
-  0%{opacity:0}
-  18%{opacity:1}
-  40%{opacity:.15}
-  60%{opacity:.85}
-  85%{opacity:.08}
-  100%{opacity:0}
-}
-.jackpot-inner{
-  position:relative;
-  padding:18px 22px;
-  border:4px solid #000;
-  box-shadow:6px 6px 0 #000, 0 0 48px rgba(200,255,47,.22);
-  background:#0b0b0b;
-  text-align:center;
-  transform:translateY(2px);
-  overflow:hidden;
-}
-.jackpot-nums{
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;
-  font-size:68px;
-  letter-spacing:6px;
-  color:var(--yellow);
-  text-shadow:0 0 14px rgba(200,255,47,.35), 0 0 34px rgba(200,255,47,.18);
-  line-height:1;
-}
-.jackpot-text{
-  margin-top:6px;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:#eaeaea;
-  font-size:14px;
-}
-.jackpot-sub{
-  margin-top:6px;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  color:var(--yellow);
-  font-size:12px;
-  opacity:.9;
-}
+    .pill{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:2px;
+      padding:8px 10px;
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      min-width:120px;
+    }
+    .pill .k{font-size:11px;color:var(--muted)}
+    .pill .v{
+      font-size:clamp(14px, 2vw, 18px);
+      font-weight:800;
+      line-height:1.1;
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .pill .v small{font-size:11px;color:var(--muted);font-weight:700}
 
-/* Mute toggle */
-.mute{
-  position:absolute;top:10px;right:10px;
-  width:44px;height:36px;
-  border:3px solid #000;
-  box-shadow:3px 3px 0 #000;
-  background:#0b0b0b;color:var(--yellow);
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  user-select:none;
-}
-.mute:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+    .content{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+      overflow:hidden;
+    }
 
-.logo{
-  width:240px;height:240px;max-width:100%;
-  border:4px solid #000;background:#0b0b0b;
-  image-rendering:pixelated;
-  display:block;margin:0 auto;
-  animation:bob 2.4s steps(2,end) infinite;
-  will-change:transform;
-}
-@keyframes bob{
-  0%,50%,100%{transform:translateY(0)}
-  25%,75%{transform:translateY(-2px)}
-}
-h1{margin:12px 0 4px;font-size:34px}
-.ticker{color:var(--muted);margin-bottom:8px}
+    @media (max-width: 820px){
+      .content{grid-template-columns:1fr; gap:12px;}
+      .pill{min-width:140px}
+    }
 
-/* ACTIVATE DEGEN! (KEEP FLICKER) */
-.degen{
-  display:inline-block;
-  margin:6px 0 6px;
-  padding:7px 12px;
-  border:4px solid #000;
-  background:#0b0b0b;
-  box-shadow:4px 4px 0 #000, 0 0 14px rgba(200,255,47,.18);
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  color:var(--yellow);
-  user-select:none;
-  cursor:pointer;
-  animation:blink 1s steps(1,end) infinite;
-  pointer-events:auto;
-  position:relative;
-  z-index:50;
-  appearance:none;
-  outline:none;
-}
-.degen:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000, 0 0 14px rgba(200,255,47,.12)}
-@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-.degen.activated{
-  animation:none !important;
-  background:var(--yellow);
-  color:#0b0b0b;
-  box-shadow:4px 4px 0 #000, 0 0 18px rgba(200,255,47,.25);
-}
+    .card{
+      background:rgba(0,0,0,.22);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
 
-/* Jackpot countdown line (small) */
-.jackpot-countdown{
-  margin:0 0 10px;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:10px;
-  color:#7f7f7f;
-  letter-spacing:.6px;
-  text-transform:uppercase;
-  user-select:none;
-  line-height:1.2;
-}
-.jackpot-countdown b{color:var(--yellow);font-weight:900}
-.jackpot-countdown.blink{animation:countBlink 220ms steps(2,end) 1;}
-@keyframes countBlink{
-  0%{filter:brightness(1)}
-  50%{filter:brightness(1.65)}
-  100%{filter:brightness(1)}
-}
-.jp-ready{
-  margin-left:8px;
-  display:inline-block;
-  color:var(--yellow);
-  font-weight:900;
-  letter-spacing:1px;
-  opacity:.9;
-}
-.jp-ready.flash{animation:readyFlash 700ms steps(2,end) infinite;}
-@keyframes readyFlash{
-  0%,49%{opacity:1; filter:brightness(1.2)}
-  50%,100%{opacity:.15; filter:brightness(0.9)}
-}
+    .card h2{
+      margin:0;
+      padding:10px 12px;
+      font-size:13px;
+      letter-spacing:.25px;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      text-transform:uppercase;
+    }
 
-.terminal{
-  margin:0 auto 12px;width:100%;
-  border:3px solid #000;box-shadow:3px 3px 0 #000;background:#0b0b0b;
-  padding:10px 12px;text-align:left;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:12px;line-height:1.45;
-  color:#cfcfcf;user-select:none;
-  position:relative;
-  overflow:hidden;
-}
-.prompt{color:var(--yellow);font-weight:900}
-.dim{color:#9a9a9a}
-.ready{
-  color:var(--yellow);
-  font-weight:900;
-  animation:readyFlicker 1s steps(1,end) infinite;
-}
-@keyframes readyFlicker{
-  0%,76%{opacity:1}
-  77%{opacity:.2}
-  78%{opacity:1}
-  92%{opacity:.35}
-  93%{opacity:1}
-}
-.cursor{
-  display:inline-block;width:8px;height:12px;background:var(--yellow);
-  margin-left:6px;transform:translateY(2px);
-  animation:cursorBlink .8s steps(1,end) infinite;
-}
-@keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+    /* Fake chart area */
+    .chartWrap{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
 
-.btn{
-  width:100%;
-  display:flex;align-items:center;justify-content:center;gap:14px;
-  margin:12px 0;padding:16px 14px;min-height:56px;
-  font-weight:900;text-transform:uppercase;text-decoration:none;
-  border:4px solid #000;box-shadow:4px 4px 0 #000;
-  user-select:none;cursor:pointer;
-  position:relative;
-  overflow:visible;
-}
-.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-button.btn{background:none;font:inherit;outline:none;appearance:none}
-.btn-yellow{background:var(--yellow);color:#0b0b0b}
-.btn-green{background:var(--green);color:#0b0b0b}
+    .chartTop{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
 
-/* INSERT COINS pulse highlight */
-.btn.pulse{
-  outline:3px solid var(--yellow);
-  box-shadow: 4px 4px 0 #000, 0 0 0 3px #000, 0 0 26px rgba(200,255,47,.45), 0 0 44px rgba(200,255,47,.22);
-  animation:btnPulse 900ms steps(6,end) 6;
-}
-.btn.pulse::after{
-  content:"";
-  position:absolute;
-  inset:-10px;
-  border:3px solid rgba(200,255,47,.65);
-  box-shadow:0 0 24px rgba(200,255,47,.45);
-  opacity:0;
-  pointer-events:none;
-  animation:pulseHalo 900ms steps(6,end) 6;
-}
-@keyframes btnPulse{
-  0%{filter:brightness(1); transform:translate(0,0)}
-  25%{filter:brightness(1.35); transform:translate(-1px,-1px)}
-  50%{filter:brightness(1.05); transform:translate(0,0)}
-  75%{filter:brightness(1.45); transform:translate(-1px,-1px)}
-  100%{filter:brightness(1); transform:translate(0,0)}
-}
-@keyframes pulseHalo{
-  0%{opacity:0}
-  30%{opacity:.85}
-  60%{opacity:.15}
-  100%{opacity:0}
-}
+    .price{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .price .big{
+      font-weight:900;
+      font-size:clamp(20px, 3.2vw, 30px);
+      line-height:1;
+      display:flex;
+      align-items:baseline;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .price .big .pct{
+      font-size:12px;
+      font-weight:800;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(51,209,122,.10);
+      color:var(--good);
+    }
+    .price .small{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-/* CA BUTTON */
-.btn-ca{
-  background:#fff !important;
-  color:#0b0b0b !important;
-  border:4px solid #000 !important;
-  box-shadow: 4px 4px 0 #000, 0 0 16px rgba(200,255,47,.14) !important;
-}
-.btn-ca:hover{
-  box-shadow: 4px 4px 0 #000, 0 0 22px rgba(200,255,47,.22) !important;
-}
-.btn-ca .mono{
-  color:#0b0b0b !important;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:15px;
-  font-weight:900;
-  letter-spacing:.2px;
-  text-transform:none;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
-  overflow-wrap:anywhere;
-  line-height:1.18;
-  text-align:center;
-}
+    .sparkBox{
+      flex:1;
+      min-width:220px;
+      max-width:460px;
+      height:110px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(110,231,255,.10), rgba(0,0,0,0));
+      overflow:hidden;
+      position:relative;
+    }
+    .sparkBox svg{width:100%; height:100%}
+    .sparkGlow{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:radial-gradient(280px 140px at 85% 35%, rgba(110,231,255,.25), transparent 60%);
+      opacity:.6;
+      mix-blend-mode:screen;
+    }
 
-.icon{width:36px;height:36px;image-rendering:pixelated;flex:0 0 auto}
-.hint{
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:11px;color:#8d8d8d;
-  margin-top:-6px;margin-bottom:8px;
-  user-select:none;
-}
+    .actions{
+      margin-top:auto;
+      padding:12px;
+      border-top:1px solid var(--line);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+      justify-content:space-between;
+      background:rgba(255,255,255,.02);
+    }
 
-/* COINS INSERTED counter */
-.coin-counter{
-  margin-top:-4px;
-  margin-bottom:8px;
-  text-align:center;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:11px;
-  color:#8d8d8d;
-  user-select:none;
-  letter-spacing:.4px;
-  text-transform:uppercase;
-}
-.coin-counter b{color:var(--yellow);font-weight:900}
+    .btnRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      flex:1;
+      min-width:0;
+    }
 
-.ca-wrap{position:relative}
-.tooltip{
-  position:absolute;top:-38px;left:50%;transform:translateX(-50%);
-  background:#0b0b0b;color:var(--yellow);
-  border:3px solid #000;box-shadow:3px 3px 0 #000;
-  padding:6px 10px;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-weight:900;letter-spacing:1px;text-transform:uppercase;
-  opacity:0;pointer-events:none;
-  transition:opacity .12s steps(1,end), transform .12s steps(1,end);
-  white-space:pre-line;
-  text-align:center;
-}
-.tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+    button{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:900;
+      letter-spacing:.3px;
+      cursor:pointer;
+      color:var(--text);
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      transition: transform .06s ease, filter .2s ease, background .2s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      flex:1;
+      min-width:160px;
+    }
+    button:active{transform:translateY(1px) scale(.99)}
+    button:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-.baron-line{
-  margin-top:8px;width:100%;
-  text-align:left;position:relative;
-  font-family:ui-monospace, Menlo, Consolas, monospace;
-  font-size:12px;line-height:1.45;
-  user-select:none;
-}
-.glitchwipe{
-  position:absolute;left:-10%;top:2px;width:120%;height:16px;
-  pointer-events:none;opacity:0;
-  background:linear-gradient(90deg, rgba(45,255,106,0) 0%, rgba(45,255,106,.35) 10%, rgba(200,255,47,.70) 45%, rgba(255,255,255,.35) 55%, rgba(45,255,106,.25) 75%, rgba(45,255,106,0) 100%);
-  mix-blend-mode:screen;filter:contrast(1.15);
-}
-.baron-line.glitch .glitchwipe{opacity:1;animation:glitchWipe 220ms steps(6,end) 1;}
-@keyframes glitchWipe{
-  0%{transform:translateX(-40%) skewX(-18deg)}
-  35%{transform:translateX(5%) skewX(22deg)}
-  70%{transform:translateX(35%) skewX(-12deg)}
-  100%{transform:translateX(55%) skewX(18deg);opacity:0}
-}
+    .primary{
+      background:linear-gradient(135deg, rgba(110,231,255,.22), rgba(167,139,250,.18));
+      border-color:rgba(110,231,255,.25);
+    }
+    .danger{
+      background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
+      border-color:rgba(255,77,109,.28);
+    }
+    .ghost{
+      background:rgba(255,255,255,.04);
+    }
 
-@media (max-width:420px){
-  .wrap{
-    align-items:flex-start;
-    padding:12px;
-    padding-top:calc(12px + env(safe-area-inset-top));
-    padding-bottom:calc(18px + env(safe-area-inset-bottom));
-  }
-  .card{
-    padding:12px;
-    margin-top:6px;
-    /* allow a bit more breathing room */
-    max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-  .logo{
-    width:clamp(128px, 22dvh, 165px);
-    height:clamp(128px, 22dvh, 165px);
-  }
-  h1{font-size:clamp(24px, 3.8dvh, 28px);margin:7px 0 2px}
-  .ticker{margin-bottom:7px}
-  .degen{margin:7px 0 5px;padding:7px 11px;font-size:13px;}
-  .jackpot-countdown{font-size:9.5px;margin-bottom:9px}
-  .terminal{font-size:clamp(10.5px, 1.65dvh, 11.5px);padding:9px 10px;line-height:1.34;margin-bottom:9px;}
-  .btn{margin:7px 0;padding:12px 10px;min-height:46px;gap:12px;font-size:13.2px;}
-  .icon{width:27px;height:27px}
-  .hint{margin-top:-4px;margin-bottom:7px;font-size:10.5px;}
-  .coin-counter{font-size:10.5px;margin-top:-2px;margin-bottom:7px;}
-  .baron-line{font-size:clamp(10.5px, 1.6dvh, 11.5px);margin-top:4px;line-height:1.25;}
-  .mute{top:8px;right:8px}
-  .btn-ca .mono{font-size:13px}
-  .jackpot-nums{font-size:54px; letter-spacing:4px;}
-}
+    .rightCol{
+      min-height:0;
+    }
 
-@media (prefers-reduced-motion: reduce){
-  .logo{animation:bob 2.4s steps(2,end) infinite !important;}
-  .degen{animation:blink 1s steps(1,end) infinite !important;}
-  .cursor{animation:cursorBlink .8s steps(1,end) infinite !important;}
-  .ready{animation:readyFlicker 1s steps(1,end) infinite !important;}
-  .jp-ready.flash{animation:none !important; opacity:1;}
-  .jackpot-countdown.blink{animation:none !important;}
-}
-</style>
+    .panel{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+
+    .log{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      padding:10px;
+    }
+    .log p{
+      margin:0 0 8px 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .log p b{color:var(--text)}
+    .log::-webkit-scrollbar{width:10px}
+    .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10); border-radius:999px}
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:calc(16px + env(safe-area-inset-bottom));
+      background:rgba(0,0,0,.78);
+      border:1px solid var(--line);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:12px;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      box-shadow: var(--shadow);
+      max-width:min(520px, calc(100% - 24px));
+      text-align:center;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(-4px);
+    }
+
+    .shake{
+      animation: shake .32s linear 1;
+    }
+    @keyframes shake{
+      0%{transform:translate(0,0)}
+      20%{transform:translate(-6px, 2px)}
+      40%{transform:translate(6px, -2px)}
+      60%{transform:translate(-5px, -1px)}
+      80%{transform:translate(5px, 1px)}
+      100%{transform:translate(0,0)}
+    }
+
+    .blinkRed{
+      animation: blinkRed .55s ease 1;
+    }
+    @keyframes blinkRed{
+      0%{filter:none}
+      35%{filter: drop-shadow(0 0 14px rgba(255,77,109,.55))}
+      100%{filter:none}
+    }
+  </style>
 </head>
+
 <body>
+  <div class="stage">
+    <div class="frame" id="frame">
+      <header>
+        <div class="brand">
+          <div class="title">Greenback <span style="opacity:.85">($GBACK)</span></div>
+          <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
+        </div>
 
-<div class="coin-rain" id="coinRain" aria-hidden="true"></div>
+        <div class="stats">
+          <div class="pill" aria-label="Coins inserted">
+            <div class="k">COINS INSERTED</div>
+            <div class="v"><span id="coinsInserted">0</span> <small>clicks</small></div>
+          </div>
+          <div class="pill" aria-label="Rank">
+            <div class="k">RANK</div>
+            <div class="v"><span id="rank">0</span> <small>lvl</small></div>
+          </div>
+          <div class="pill" aria-label="Degen mode">
+            <div class="k">DEGEN MODE</div>
+            <div class="v"><span id="degen">OFF</span> <small id="degenNote">—</small></div>
+          </div>
+        </div>
+      </header>
 
-<div class="jackpot" id="jackpot" aria-hidden="true">
-  <div class="jackpot-inner">
-    <div class="jackpot-nums">777</div>
-    <div class="jackpot-text">GBARON JACKPOT</div>
-    <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
+      <div class="content">
+        <!-- Left: Fake pumping chart -->
+        <section class="card" aria-label="Fake chart that pumps on clicks">
+          <h2>📉 Fake Chart (Pumps on Clicks)</h2>
+
+          <div class="chartWrap">
+            <div class="chartTop">
+              <div class="price">
+                <div class="big">
+                  <span id="price">$0.000420</span>
+                  <span class="pct" id="pct">+0.00%</span>
+                </div>
+                <div class="small" id="priceNote">Totally organic growth (trust me bro)</div>
+              </div>
+
+              <div class="sparkBox" aria-label="Sparkline chart">
+                <div class="sparkGlow"></div>
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Price line">
+                  <path id="sparkFill" d="" fill="rgba(110,231,255,.10)"></path>
+                  <path id="sparkLine" d="" fill="none" stroke="rgba(110,231,255,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="btnRow">
+                <!-- Main requirement: coins increase on INSERT COINS -->
+                <button class="primary" id="btnInsert" aria-label="Insert coins">
+                  INSERT COINS
+                </button>
+
+                <!-- Keep a degen toggle so we "don't break anything" logically -->
+                <button class="ghost" id="btnDegen" aria-label="Activate degen mode">
+                  ACTIVATE DEGEN
+                </button>
+              </div>
+
+              <!-- Meme Rug Pull button -->
+              <button class="danger" id="btnRug" aria-label="Rug pull (meme)">
+                💀 RUG PULL
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Feed / info -->
+        <aside class="card rightCol" aria-label="Activity">
+          <h2>Activity Feed</h2>
+          <div class="panel">
+            <div class="hint">
+              • Each <b>INSERT COINS</b> pumps the fake chart and increases your <b>Rank</b>.<br/>
+              • <b>DEGEN</b> makes pumps wilder (still fake).<br/>
+              • <b>RUG PULL</b> is just memes (but it *will* nuke the chart 💀).
+            </div>
+
+            <div class="log" id="log" aria-live="polite"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="wrap">
-  <div class="card">
-    <button class="mute" id="muteBtn" type="button" aria-label="Toggle sound">🔊</button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <img class="logo" src="logo.png" alt="Greenback logo" />
-    <h1>Baron Greenback</h1>
-    <div class="ticker">$GBARON</div>
+  <script>
+    // ====== State ======
+    const state = {
+      coinsInserted: 0,
+      rank: 0,
+      degen: false,
+      basePrice: 0.000420,
+      price: 0.000420,
+      lastPrice: 0.000420,
+      series: [],        // values for sparkline
+      seriesLen: 30,
+      allTimeHigh: 0.000420
+    };
 
-    <button class="degen" id="degenBtn" type="button" aria-label="Activate degen">ACTIVATE DEGEN!</button>
+    // ====== Elements ======
+    const elCoins = document.getElementById('coinsInserted');
+    const elRank  = document.getElementById('rank');
+    const elDegen = document.getElementById('degen');
+    const elDegenNote = document.getElementById('degenNote');
 
-    <div class="jackpot-countdown" id="jpWrap" aria-label="jackpot countdown">
-      JACKPOT: <b id="jpCountText">1/5</b>
-      <span class="jp-ready" id="jpReady" aria-hidden="true">JACKPOT READY!</span>
-    </div>
+    const elPrice = document.getElementById('price');
+    const elPct   = document.getElementById('pct');
+    const elPriceNote = document.getElementById('priceNote');
 
-    <div class="terminal" id="terminal" aria-label="status terminal">
-      <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
-      <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
-      <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
-    </div>
+    const elLine  = document.getElementById('sparkLine');
+    const elFill  = document.getElementById('sparkFill');
 
-    <a class="btn btn-yellow" id="insertBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
-      <img class="icon" id="pumpIcon" src="pump.png" alt="" aria-hidden="true">
-      INSERT COINS
-    </a>
+    const elLog   = document.getElementById('log');
+    const elToast = document.getElementById('toast');
+    const elFrame = document.getElementById('frame');
 
-    <div class="coin-counter" aria-label="coins inserted counter">
-      COINS INSERTED: <b id="coinCount">00</b>
-    </div>
+    const btnInsert = document.getElementById('btnInsert');
+    const btnDegen  = document.getElementById('btnDegen');
+    const btnRug    = document.getElementById('btnRug');
 
-    <a class="btn btn-green" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer" aria-label="Open Dexscreener">
-      <img class="icon" id="dexIcon" src="dex.png" alt="" aria-hidden="true">
-      DEXSCREENER
-    </a>
+    // ====== Helpers ======
+    function fmtPrice(n){
+      // keep it meme-y, but readable
+      if (n < 0.01) return '$' + n.toFixed(6);
+      if (n < 1)    return '$' + n.toFixed(4);
+      return '$' + n.toFixed(2);
+    }
 
-    <a class="btn btn-yellow" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="Open X profile">
-      <img class="icon" id="xIcon" src="x.png" alt="" aria-hidden="true">
-      TWITTER
-    </a>
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
-    <div class="ca-wrap">
-      <button class="btn btn-ca" id="caBtn" type="button" aria-label="Copy contract address">
-        <span class="tooltip" id="tip">BARON APPROVES SEE YOU AT ATH!</span>
-        <span class="mono" id="caText"></span>
-      </button>
-    </div>
+    function showToast(msg){
+      elToast.textContent = msg;
+      elToast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => elToast.classList.remove('show'), 1100);
+    }
 
-    <div class="hint">click to copy</div>
+    function logLine(msg){
+      const p = document.createElement('p');
+      const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      p.innerHTML = `<b>${time}</b> — ${msg}`;
+      elLog.prepend(p);
+    }
 
-    <div class="baron-line" id="baronLine" aria-label="baron terminal line">
-      <span class="glitchwipe" aria-hidden="true"></span>
-      <span class="prompt">&gt;</span>
-      <span id="baronTyped"></span><span id="baronCursor" class="cursor"></span>
-    </div>
-  </div>
-</div>
-
-<audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
-<audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
-<audio id="laughSfx" src="laugh.mp3" preload="auto"></audio>
-<audio id="jackpotSfx" src="jackpot.mp3" preload="auto"></audio>
-
-<script>
-const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-const INSERT_URL = "https://pump.fun";
-const DEX_URL = "https://dexscreener.com";
-const TICKER = "$GBARON";
-
-const JACKPOT_CHANCE = 0.02; // 2% random
-const COMBO_TARGET = 5; // guaranteed every 5 presses
-const COMBO_KEY = "gb_comboCount_fixed";
-
-const LAUGH_DELAY_MS = 170;
-
-const STATUS_LINES = [
-  "loading greenback protocol v0.0.1",
-  "syncing liquidity routes... OK",
-  "scanning degen index... OK",
-  "checking rugs... NOT FOUND",
-  "loading memes... OK",
-  "routing orders... STABLE"
-];
-
-let statusIdx = 0;
-
-// wire URLs
-const insertBtn = document.getElementById("insertBtn");
-const dexBtn = document.getElementById("dexBtn");
-insertBtn.href = INSERT_URL;
-dexBtn.href = DEX_URL;
-
-// CA on button
-document.getElementById("caText").textContent = CA;
-
-// jackpot countdown UI
-const jpWrap = document.getElementById("jpWrap");
-const jpCountText = document.getElementById("jpCountText");
-const jpReady = document.getElementById("jpReady");
-
-function safeGetCombo(){
-  const raw = Number(sessionStorage.getItem(COMBO_KEY) || "0");
-  if(!Number.isFinite(raw) || raw < 0 || raw > (COMBO_TARGET - 1)){
-    sessionStorage.setItem(COMBO_KEY, "0");
-    return 0;
-  }
-  return raw;
-}
-
-function renderJackpotCountdown(){
-  const progress = safeGetCombo(); // 0..4
-  const shown = progress + 1; // 1..5
-  jpCountText.textContent = String(shown) + "/" + String(COMBO_TARGET);
-  const ready = (shown === COMBO_TARGET);
-  jpReady.style.display = ready ? "inline-block" : "none";
-  jpReady.classList.toggle("flash", ready);
-}
-
-function blinkCountdown(){
-  jpWrap.classList.remove("blink");
-  void jpWrap.offsetWidth;
-  jpWrap.classList.add("blink");
-}
-
-renderJackpotCountdown();
-
-// session coin count
-const coinCountEl = document.getElementById("coinCount");
-let coinCount = Number(sessionStorage.getItem("gb_coinCount") || "0");
-
-function renderCoinCount(){
-  coinCountEl.textContent = String(coinCount).padStart(2, "0");
-}
-function bumpCoinCount(){
-  coinCount = Math.min(99, coinCount + 1);
-  sessionStorage.setItem("gb_coinCount", String(coinCount));
-  renderCoinCount();
-}
-renderCoinCount();
-
-// AUDIO
-const muteBtn = document.getElementById("muteBtn");
-const preloadClick = document.getElementById("clickSfx");
-const preloadBaron = document.getElementById("baronVoice");
-const preloadLaugh = document.getElementById("laughSfx");
-const preloadJackpot = document.getElementById("jackpotSfx");
-
-let isMuted = (localStorage.getItem("gb_muted") === "1");
-function renderMute(){
-  muteBtn.textContent = isMuted ? "🔇" : "🔊";
-}
-renderMute();
-
-muteBtn.addEventListener("click", ()=>{
-  isMuted = !isMuted;
-  localStorage.setItem("gb_muted", isMuted ? "1" : "0");
-  renderMute();
-});
-
-let audioUnlocked = false;
-let audioCtx = null;
-
-function unlockAudio(){
-  if(audioUnlocked) return;
-  audioUnlocked = true;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-  }catch(e){}
-
-  [preloadClick, preloadBaron, preloadLaugh, preloadJackpot].forEach(a=>{
-    if(!a) return;
-    try{
-      const wasMuted = a.muted;
-      a.muted = true;
-      const p = a.play();
-      if(p && p.then){
-        p.then(()=>{
-          a.pause(); a.currentTime = 0; a.muted = wasMuted;
-        }).catch(()=>{
-          a.muted = wasMuted;
-        });
-      }else{
-        a.pause(); a.currentTime = 0; a.muted = wasMuted;
+    function ensureSeries(){
+      if (state.series.length === 0){
+        for (let i=0;i<state.seriesLen;i++){
+          state.series.push(state.price);
+        }
       }
-    }catch(e){}
-  });
-
-  initClickPool();
-  initLaughPool();
-  initJackpotPool();
-}
-
-window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
-window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
-
-function beepFallback(){
-  if(isMuted) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = "square";
-    o.frequency.value = 740;
-    g.gain.value = 0.05;
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start();
-    setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
-  }catch(e){}
-}
-
-// click pool
-const CLICK_POOL_SIZE = 6;
-const clickPool = [];
-let clickPoolIdx = 0;
-
-function initClickPool(){
-  if(clickPool.length) return;
-  for(let i=0;i<CLICK_POOL_SIZE;i++){
-    const a = new Audio("arcade.mp3");
-    a.preload = "auto";
-    a.volume = 0.85;
-    clickPool.push(a);
-  }
-}
-
-function playClick(volume=0.85){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initClickPool();
-    const a = clickPool[clickPoolIdx % clickPool.length];
-    clickPoolIdx++;
-    a.pause();
-    a.currentTime = 0;
-    a.volume = volume;
-    const p = a.play();
-    if(p && typeof p.catch === "function"){
-      p.catch(()=>{ beepFallback(); });
+      while (state.series.length > state.seriesLen) state.series.shift();
+      while (state.series.length < state.seriesLen) state.series.unshift(state.price);
     }
-  }catch{
-    beepFallback();
-  }
-}
 
-// baron voice: only played when NOT jackpot and only on valid activation
-function playBaron(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    const a = new Audio("baron.mp3");
-    a.preload = "auto";
-    a.volume = 0.75;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
+    function sparkPath(values){
+      // normalize to 0..100 box
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const span = (max - min) || 1;
 
-// laugh pool
-const LAUGH_POOL_SIZE = 2;
-const laughPool = [];
-let laughPoolIdx = 0;
+      const pts = values.map((v, i) => {
+        const x = (i/(values.length-1))*100;
+        const y = 100 - ((v - min)/span)*92 - 4; // keep margins
+        return [x, y];
+      });
 
-function initLaughPool(){
-  if(laughPool.length) return;
-  for(let i=0;i<LAUGH_POOL_SIZE;i++){
-    const a = new Audio("laugh.mp3");
-    a.preload = "auto";
-    a.volume = 0.9;
-    laughPool.push(a);
-  }
-}
-
-function stopLaugh(){
-  try{
-    laughPool.forEach(a=>{ a.pause(); a.currentTime = 0; });
-  }catch(e){}
-}
-
-function playLaugh(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initLaughPool();
-    stopLaugh();
-    const a = laughPool[laughPoolIdx % laughPool.length];
-    laughPoolIdx++;
-    a.currentTime = 0;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
-
-// jackpot sound pool
-const JACKPOT_POOL_SIZE = 2;
-const jackpotPool = [];
-let jackpotPoolIdx = 0;
-
-function initJackpotPool(){
-  if(jackpotPool.length) return;
-  for(let i=0;i<JACKPOT_POOL_SIZE;i++){
-    const a = new Audio("jackpot.mp3");
-    a.preload = "auto";
-    a.volume = 0.95;
-    jackpotPool.push(a);
-  }
-}
-
-function stopJackpot(){
-  try{
-    jackpotPool.forEach(a=>{ a.pause(); a.currentTime = 0; });
-  }catch(e){}
-}
-
-function playJackpot(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initJackpotPool();
-    stopJackpot();
-    const a = jackpotPool[jackpotPoolIdx % jackpotPool.length];
-    jackpotPoolIdx++;
-    a.currentTime = 0;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
-
-["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  el.addEventListener("click", ()=>{
-    playClick();
-
-    if(id === "insertBtn"){
-      bumpCoinCount();      // ✅ coin count increments here
-      pulseInsertCoins();   // optional: feels good
+      const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' ');
+      const dFill = d + ` L 100 100 L 0 100 Z`;
+      return { d, dFill, min, max };
     }
-  });
-});
 
-// COPY CA
-const tip = document.getElementById("tip");
-let tipTimer;
+    function updateUI(){
+      elCoins.textContent = String(state.coinsInserted);
+      elRank.textContent  = String(state.rank);
 
-function showTip(text){
-  tip.textContent = text;
-  tip.classList.add("show");
-  clearTimeout(tipTimer);
-  tipTimer = setTimeout(()=> tip.classList.remove("show"), 900);
-}
+      elDegen.textContent = state.degen ? 'ON' : 'OFF';
+      elDegenNote.textContent = state.degen ? 'wilder pumps' : 'safe-ish';
 
-const canClipboard = !!(navigator.clipboard && window.isSecureContext);
+      elPrice.textContent = fmtPrice(state.price);
 
-function getCopyMessage(){
-  return "BARON APPROVES\nSEE YOU AT ATH!";
-}
+      const pct = ((state.price - state.lastPrice) / state.lastPrice) * 100;
+      const pctText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      elPct.textContent = pctText;
 
-let laughTimer = null;
-
-document.getElementById("caBtn").addEventListener("click", async ()=>{
-  playClick();
-  try{
-    if(canClipboard){
-      await navigator.clipboard.writeText(CA);
-    }else{
-      throw new Error("clipboard not available");
-    }
-  }catch{
-    try{
-      const t=document.createElement("textarea");
-      t.value=CA;
-      document.body.appendChild(t);
-      t.select();
-      document.execCommand("copy");
-      document.body.removeChild(t);
-    }catch{
-      window.prompt("Copy CA:", CA);
-    }
-  }
-  showTip(getCopyMessage());
-  clearTimeout(laughTimer);
-  laughTimer = setTimeout(()=> playLaugh(), LAUGH_DELAY_MS);
-});
-
-// ACTIVATE DEGEN + JACKPOT
-const degenBtn = document.getElementById("degenBtn");
-let easterMode = false;
-let degenResetTimer = null;
-let pulseTimer = null;
-
-function pulseInsertCoins(){
-  insertBtn.classList.remove("pulse");
-  clearTimeout(pulseTimer);
-  void insertBtn.offsetWidth;
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      insertBtn.classList.add("pulse");
-      pulseTimer = setTimeout(()=> insertBtn.classList.remove("pulse"), 6500);
-    });
-  });
-}
-function extraPulse(){
-  setTimeout(()=> pulseInsertCoins(), 140);
-  setTimeout(()=> pulseInsertCoins(), 320);
-}
-function setDegenActivatedTemp(){
-  degenBtn.classList.add("activated");
-  degenBtn.textContent = "ACTIVATED";
-  clearTimeout(degenResetTimer);
-  degenResetTimer = setTimeout(()=>{
-    degenBtn.classList.remove("activated");
-    degenBtn.textContent = "ACTIVATE DEGEN!";
-  }, 10000);
-}
-
-const jackpotEl = document.getElementById("jackpot");
-const jackpotSub = document.getElementById("jackpotSub");
-const coinRain = document.getElementById("coinRain");
-let jackpotTimer = null;
-
-function spawnCoinRain(count = 36){
-  coinRain.innerHTML = "";
-  const W = window.innerWidth || 520;
-  const H = window.innerHeight || 700;
-  for(let i=0;i<count;i++){
-    const c = document.createElement("span");
-    c.className = "coin";
-    const left = Math.random() * W;
-    const size = 8 + Math.random() * 10;
-    const dur = 900 + Math.random() * 900;
-    const delay = Math.random() * 240;
-    const rot = 240 + Math.random() * 360;
-    c.style.left = left + "px";
-    c.style.width = size + "px";
-    c.style.height = size + "px";
-    coinRain.appendChild(c);
-    c.animate(
-      [
-        { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
-        { opacity: 1, offset: 0.12 },
-        { transform: "translateY(" + (H + 80) + "px) rotate(" + rot + "deg)", opacity: 0 }
-      ],
-      { duration: dur, delay, easing: "linear", fill: "forwards" }
-    );
-  }
-  setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
-}
-
-function triggerJackpot(reason){
-  jackpotSub.textContent = (reason === "combo")
-    ? ("COMBO WIN! YOU WON: 777 " + TICKER)
-    : ("YOU WON: 777 " + TICKER);
-
-  spawnCoinRain(42);
-  jackpotEl.classList.remove("show");
-  void jackpotEl.offsetWidth;
-  jackpotEl.classList.add("show");
-  clearTimeout(jackpotTimer);
-  jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
-
-  playJackpot();
-  extraPulse();
-}
-
-// guaranteed 5-click logic
-function comboStepAndCheckHit(){
-  let progress = safeGetCombo(); // 0..4
-  const willHitNow = (progress === (COMBO_TARGET - 1));
-  if(willHitNow){
-    sessionStorage.setItem(COMBO_KEY, "0");
-    return true;
-  }else{
-    progress += 1;
-    sessionStorage.setItem(COMBO_KEY, String(progress));
-    return false;
-  }
-}
-
-// LOOP (terminal)
-const line1 = document.getElementById("termLine1");
-const line2 = document.getElementById("termLine2");
-const line3 = document.getElementById("termLine3");
-
-const LOOP_MS = 10000;
-
-const baronTextNormal = "THE BARON ALWAYS EXITS FIRST";
-const baronTextDegen = "DEGEN OVERDRIVE ENABLED";
-const baronTextAttract = "INSERT COINS TO BEGIN";
-
-const baronTyped = document.getElementById("baronTyped");
-const baronCursor = document.getElementById("baronCursor");
-const baronLine = document.getElementById("baronLine");
-
-let cycleTimers = [];
-
-function addTimeout(fn, ms){
-  const t = setTimeout(fn, ms);
-  cycleTimers.push(t);
-  return t;
-}
-
-function typeText(el, text, speed, done){
-  let i = 0;
-  el.textContent = "";
-  const t = setInterval(()=>{
-    el.textContent += (text[i++] || "");
-    if(i >= text.length){
-      clearInterval(t);
-      done && done();
-    }
-  }, speed);
-  cycleTimers.push(t);
-}
-
-function typeBaronOnce(text){
-  baronLine.classList.remove("glitch");
-  void baronLine.offsetWidth;
-  baronLine.classList.add("glitch");
-  baronTyped.textContent = "";
-  baronCursor.style.display = "inline-block";
-  addTimeout(()=>{
-    let i = 0;
-    const t = setInterval(()=>{
-      baronTyped.textContent += (text[i++] || "");
-      if(i >= text.length){
-        clearInterval(t);
-        addTimeout(()=>{ baronCursor.style.display = "none"; }, 550);
+      // color-ish by changing background via inline style (no fixed palette change needed)
+      if (pct >= 0){
+        elPct.style.background = 'rgba(51,209,122,.12)';
+        elPct.style.color = 'var(--good)';
+      } else {
+        elPct.style.background = 'rgba(255,77,109,.12)';
+        elPct.style.color = 'var(--bad)';
       }
-    }, 14);
-    cycleTimers.push(t);
-  }, 90);
-}
 
-function setReadyLine(){
-  line3.textContent = "status: ";
-  const s = document.createElement("span");
-  s.className = "ready";
-  s.textContent = "READY";
-  line3.appendChild(s);
-}
+      state.allTimeHigh = Math.max(state.allTimeHigh, state.price);
+      elPriceNote.textContent = `ATH: ${fmtPrice(state.allTimeHigh)} • Liquidity: imaginary`;
 
-// Attract mode (idle demo)
-let attractMode = false;
-let attractIdleTimer = null;
-let attractPulseTimer = null;
+      ensureSeries();
+      const paths = sparkPath(state.series);
+      elLine.setAttribute('d', paths.d);
+      elFill.setAttribute('d', paths.dFill);
+    }
 
-const ATTRACT_IDLE_MS = 30000;
-const ATTRACT_PULSE_EVERY_MS = 6500;
+    // ====== Pump / Rug logic ======
+    function pump(){
+      state.coinsInserted += 1;
+      state.rank += 1;
 
-function enterAttractMode(){
-  if(attractMode) return;
-  attractMode = true;
-  clearInterval(attractPulseTimer);
-  attractPulseTimer = setInterval(()=>{
-    if(attractMode) pulseInsertCoins();
-  }, ATTRACT_PULSE_EVERY_MS);
-  runCycle();
-}
+      state.lastPrice = state.price;
 
-function exitAttractMode(){
-  if(!attractMode) return;
-  attractMode = false;
-  clearInterval(attractPulseTimer);
-  attractPulseTimer = null;
-  runCycle();
-}
+      // Pump amount (fake): small baseline + randomness; DEGEN increases volatility.
+      const base = 0.004; // ~0.4% baseline
+      const vol  = state.degen ? 0.040 : 0.018; // degen = more insane
+      const jitter = (Math.random() * vol) - (vol * 0.25); // slightly biased up
+      const pctMove = base + jitter;
 
-function resetAttractIdle(){
-  clearTimeout(attractIdleTimer);
-  attractIdleTimer = setTimeout(()=> enterAttractMode(), ATTRACT_IDLE_MS);
-}
+      state.price = Math.max(0.000001, state.price * (1 + pctMove));
 
-["pointerdown","mousedown","touchstart","keydown","wheel","scroll"].forEach(evt=>{
-  window.addEventListener(evt, ()=>{
-    resetAttractIdle();
-    if(attractMode) exitAttractMode();
-  }, {passive:true});
-});
+      // series update
+      state.series.push(state.price);
+      if (state.series.length > state.seriesLen) state.series.shift();
 
-resetAttractIdle();
+      logLine(`Inserted coin 🪙 — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
+      showToast('PUMPED 📈');
+      updateUI();
+    }
 
-function runCycle(){
-  cycleTimers.forEach(id => { clearTimeout(id); clearInterval(id); });
-  cycleTimers = [];
+    function toggleDegen(){
+      state.degen = !state.degen;
+      logLine(state.degen ? `DEGEN MODE <b>ON</b> 😈` : `DEGEN MODE <b>OFF</b> 😇`);
+      showToast(state.degen ? 'DEGEN ON 😈' : 'DEGEN OFF 😇');
+      updateUI();
+    }
 
-  const statusLine = STATUS_LINES[statusIdx % STATUS_LINES.length];
-  statusIdx++;
+    function rugPull(){
+      state.lastPrice = state.price;
 
-  line1.textContent = "";
-  line2.textContent = "";
-  line3.textContent = "";
-  baronTyped.textContent = "";
-  baronCursor.style.display = "none";
+      // nuke it
+      const nuked = Math.max(state.basePrice * 0.25, state.price * (0.06 + Math.random()*0.05));
+      state.price = nuked;
 
-  const l1 = easterMode ? "ACCESS GRANTED..." : (attractMode ? "ARCADE CABINET ONLINE..." : "initializing terminal on solana...");
-  const l2 = easterMode ? "DEGEN MODE: ACTIVE" : (attractMode ? "DEMO LOOP: RUNNING" : statusLine);
-  const baronLineText = easterMode ? baronTextDegen : (attractMode ? baronTextAttract : baronTextNormal);
+      // make the chart plunge hard (fill series with lower values quickly)
+      for (let i=0;i<4;i++){
+        state.series.push(state.price * (0.95 - Math.random()*0.05));
+      }
+      while (state.series.length > state.seriesLen) state.series.shift();
 
-  typeText(line1, l1, 18, ()=>{
-    addTimeout(()=> typeText(line2, l2, 14, ()=>{
-      addTimeout(()=> typeText(line3, "status: ", 16, ()=>{
-        setReadyLine();
-        addTimeout(()=> typeBaronOnce(baronLineText), 220);
-      }), 140);
-    }), 140);
-  });
-}
+      elFrame.classList.remove('shake');
+      void elFrame.offsetWidth; // restart animation
+      elFrame.classList.add('shake');
+      elFrame.classList.add('blinkRed');
+      setTimeout(()=>elFrame.classList.remove('blinkRed'), 560);
 
-// Handle activate
-let degenLock = false;
+      logLine(`💀 <b>RUG PULL</b> — liquidity vanished into the void`);
+      showToast('RUGGED 💀');
+      updateUI();
+    }
 
-function handleDegenActivate(e){
-  if(e) e.preventDefault?.();
-  unlockAudio();
+    // ====== Events ======
+    btnInsert.addEventListener('click', pump);
+    btnDegen.addEventListener('click', toggleDegen);
+    btnRug.addEventListener('click', rugPull);
 
-  // HARD BLOCK: clicking while ACTIVATED does nothing
-  if(degenBtn.classList.contains("activated")) return;
-
-  if(degenLock) return;
-  degenLock = true;
-  setTimeout(()=>{ degenLock = false; }, 350);
-
-  playClick();
-  setDegenActivatedTemp();
-  pulseInsertCoins();
-  // ✅ coin count no longer increments here
-
-  const comboHit = comboStepAndCheckHit();
-  const randomHit = (!comboHit && (Math.random() < JACKPOT_CHANCE));
-
-  renderJackpotCountdown();
-  blinkCountdown();
-
-  if(comboHit || randomHit){
-    triggerJackpot(comboHit ? "combo" : "random");
-  }else{
-    // Only play baron when NOT jackpot
-    playBaron();
-  }
-
-  easterMode = true;
-  runCycle(true);
-  setTimeout(()=>{ easterMode = false; }, 14000);
-  exitAttractMode();
-}
-
-degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
-degenBtn.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    handleDegenActivate(e);
-  }
-});
-
-runCycle();
-setInterval(runCycle, LOOP_MS);
-</script>
+    // ====== Init ======
+    // seed series + first render
+    ensureSeries();
+    updateUI();
+    logLine(`Booted $GBACK terminal — ready to insert coins 🪙`);
+  </script>
 </body>
 </html>
