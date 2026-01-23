@@ -31,11 +31,11 @@
       radial-gradient(700px 500px at 50% 110%, rgba(45,255,106,.10), transparent 60%),
       #070b10;
     color:var(--ink);
-    overflow:hidden; /* no page scroll on mobile */
+    overflow:hidden; /* no page scroll */
     padding-bottom:env(safe-area-inset-bottom);
   }
 
-  /* CRT overlay (from your code vibe) */
+  /* CRT overlay */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
@@ -54,7 +54,6 @@
     79%{opacity:0}
   }
 
-  /* Full-screen stage that fits mobile perfectly */
   .stage{
     height:100dvh;
     min-height:100svh;
@@ -63,12 +62,12 @@
     align-items:stretch;
     justify-content:center;
     padding:
-      calc(12px + env(safe-area-inset-top))
-      12px
-      calc(12px + env(safe-area-inset-bottom))
-      12px;
+      calc(10px + env(safe-area-inset-top))
+      10px
+      calc(10px + env(safe-area-inset-bottom))
+      10px;
     position:relative;
-    z-index:5; /* above CRT */
+    z-index:5;
   }
 
   .frame{
@@ -389,30 +388,90 @@
   button:active,.btnLink:active{transform:translateY(1px) scale(.99)}
   button:focus-visible,.btnLink:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-  .primary{
+  /* Requested colors */
+  .btnInsert{
     background:linear-gradient(135deg, rgba(200,255,47,.22), rgba(110,231,255,.16));
     border-color:rgba(200,255,47,.25);
     color:#081018;
   }
-  .primary span{color:#081018}
-  .ghost{background:rgba(255,255,255,.04)}
+  .btnInsert span{color:#081018}
+
+  .btnDegenYellow{
+    background:rgba(200,255,47,.14);
+    border-color:rgba(200,255,47,.35);
+    color:var(--yellow);
+  }
+  .btnDexGreen{
+    background:rgba(45,255,106,.14);
+    border-color:rgba(45,255,106,.35);
+    color:var(--green);
+  }
+  .btnXYellow{
+    background:rgba(200,255,47,.10);
+    border-color:rgba(200,255,47,.30);
+    color:var(--yellow);
+  }
   .danger{
     background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
     border-color:rgba(255,77,109,.28);
   }
-
-  .btnLink.primary{color:#081018}
-  .btnLink.primary:hover{filter:brightness(1.05)}
-  .danger:hover{filter:brightness(1.05)}
-  .ghost:hover{filter:brightness(1.05)}
+  .btnInsert:hover,.btnDegenYellow:hover,.btnDexGreen:hover,.btnXYellow:hover,.danger:hover{filter:brightness(1.08)}
 
   .btnIcon{
-    width:28px;height:28px;
+    width:24px;height:24px;
     image-rendering:pixelated;
     flex:0 0 auto;
   }
 
-  /* Right: terminal, CA, links */
+  /* Big CA panel (under the 3 buttons, full width) */
+  .caPanel{
+    margin:0 12px 12px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:#ffffff;
+    color:#081018;
+    padding:12px 14px;
+    cursor:pointer;
+    position:relative;
+  }
+  .caPanel .label{
+    font-size:11px;
+    font-weight:950;
+    letter-spacing:.8px;
+    opacity:.8;
+  }
+  .caPanel .value{
+    margin-top:6px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    font-size:14px;
+    overflow-wrap:anywhere;
+    line-height:1.25;
+  }
+  .tooltip{
+    position:absolute;
+    top:-42px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.85);
+    color:var(--yellow);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:8px 10px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s steps(1,end), transform .12s steps(1,end);
+    white-space:pre-line;
+    text-align:center;
+    z-index:10;
+  }
+  .tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  /* Right side */
   .side{
     padding:12px;
     display:flex;
@@ -459,8 +518,8 @@
     width:100%;
     border-radius:16px;
     padding:12px 14px;
-    border:1px solid var(--line);
-    background:rgba(0,0,0,.22);
+    border:1px solid rgba(200,255,47,.35);
+    background:rgba(200,255,47,.10);
     color:var(--yellow);
     font-family:ui-monospace, Menlo, Consolas, monospace;
     font-weight:950;
@@ -500,47 +559,6 @@
     font-family:ui-monospace, Menlo, Consolas, monospace;
   }
 
-  .caBtn{
-    width:100%;
-    border-radius:16px;
-    padding:12px 14px;
-    border:1px solid var(--line);
-    background:#ffffff;
-    color:#081018;
-    font-weight:950;
-    cursor:pointer;
-    position:relative;
-  }
-  .caMono{
-    font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-weight:950;
-    font-size:13px;
-    overflow-wrap:anywhere;
-    line-height:1.2;
-  }
-  .tooltip{
-    position:absolute;
-    top:-40px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.85);
-    color:var(--yellow);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:8px 10px;
-    font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-weight:950;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .12s steps(1,end), transform .12s steps(1,end);
-    white-space:pre-line;
-    text-align:center;
-    z-index:10;
-  }
-  .tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-
   .linkRow{
     display:flex;
     gap:10px;
@@ -548,7 +566,50 @@
   }
   .linkRow .btnLink{min-width:160px;flex:1}
 
-  /* Jackpot + Coin rain (from your code, simplified but same feel) */
+  /* Activity terminal (under links) */
+  .activity{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:rgba(0,0,0,.18);
+    padding:10px 12px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:12px;
+    line-height:1.45;
+    color:#cfcfcf;
+    min-height:0;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .activityHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .activityHead .t{
+    color:var(--muted);
+    font-weight:950;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+    font-size:11px;
+  }
+  .activityLog{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:12px;
+    padding:8px 9px;
+    background:rgba(0,0,0,.16);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    min-height:0;
+  }
+  .logLine{white-space:pre-wrap; overflow-wrap:anywhere}
+  .ts{color:var(--muted)}
+  .evt{color:var(--yellow); font-weight:900}
+
+  /* Jackpot + Coin rain */
   .coin-rain{
     position:fixed; inset:0;
     pointer-events:none;
@@ -646,7 +707,7 @@
     opacity:.92;
   }
 
-  /* Mute button */
+  /* Mute */
   .mute{
     width:44px;height:38px;
     border-radius:14px;
@@ -660,14 +721,47 @@
     user-select:none;
   }
 
-  /* Small screens tighten */
+  /* ---- Mobile: make it NOT look dogshit ---- */
+  @media (max-width: 860px){
+    body{overflow:auto;} /* allow scroll ONLY when stacked */
+    .stage{height:auto; min-height:100svh}
+    .frame{height:auto; overflow:visible}
+    .content{overflow:visible}
+    .card{min-height:auto}
+    .activity{min-height:280px} /* keep activity usable */
+  }
+
+  @media (max-width: 520px){
+    header{
+      flex-direction:column;
+      align-items:stretch;
+      gap:10px;
+    }
+    .brand{width:100%}
+    .stats{
+      width:100%;
+      justify-content:stretch;
+      gap:8px;
+    }
+    .pill{flex:1; min-width:0}
+    .content{gap:10px}
+    .hero{padding:10px}
+    .sparkBox{height:110px; min-width:0; width:100%}
+    .chartTop{flex-direction:column; align-items:stretch}
+    .actions{flex-direction:column; gap:10px}
+    button,.btnLink{min-width:0; width:100%}
+    .linkRow{flex-direction:column}
+    .linkRow .btnLink{min-width:0; width:100%}
+    .counterRow{flex-direction:column}
+    .miniPill{min-width:0}
+    .jackpot-nums{font-size:54px; letter-spacing:4px;}
+  }
+
   @media (max-width:420px){
     .frame{padding:12px}
-    header{padding:9px 10px}
-    .pill{min-width:150px}
-    .sparkBox{height:110px}
-    button,.btnLink{min-width:140px}
-    .jackpot-nums{font-size:54px; letter-spacing:4px;}
+    .brandLogo{width:42px;height:42px;border-radius:13px}
+    .bigLogo{width:120px;height:120px}
+    .headline{min-width:0}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -696,7 +790,7 @@
       <header>
         <div class="brand">
           <div class="brandLogo" title="logo">
-            <img src="logo.png" alt="Greenback logo">
+            <img src="logo.png" alt="Baron logo">
           </div>
           <div class="brandText">
             <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
@@ -711,7 +805,7 @@
           </div>
           <div class="pill" aria-label="Rank">
             <div class="k">RANK</div>
-            <div class="v"><span id="rank">00</span> <small>lvl</small></div>
+            <div class="v"><span id="rank">paperhands</span></div>
           </div>
           <div class="pill" aria-label="Sound">
             <div class="k">SOUND</div>
@@ -761,18 +855,27 @@
               </div>
 
               <div class="actions">
-                <a class="btnLink primary" id="btnInsert" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
+                <!-- NOTE: we open in new tab via JS so we can play sound first -->
+                <a class="btnLink btnInsert" id="btnInsert" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
                   <img class="btnIcon" src="pump.png" alt="" aria-hidden="true">
                   <span>INSERT COINS</span>
                 </a>
 
-                <button class="ghost" id="btnDegen" aria-label="Activate degen mode">
+                <button class="btnDegenYellow" id="btnDegen" aria-label="Activate degen mode">
+                  <img class="btnIcon" src="degen.png" alt="" aria-hidden="true">
                   ACTIVATE DEGEN
                 </button>
 
                 <button class="danger" id="btnRug" aria-label="Rug pull (meme)">
                   💀 RUG PULL
                 </button>
+              </div>
+
+              <!-- BIG CA -->
+              <div class="caPanel" id="caPanel" role="button" tabindex="0" aria-label="Copy contract address">
+                <span class="tooltip" id="tip">COPIED</span>
+                <div class="label">CONTRACT ADDRESS (TAP TO COPY)</div>
+                <div class="value" id="caText"></div>
               </div>
             </div>
           </div>
@@ -789,7 +892,7 @@
               <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
             </div>
 
-            <button class="degenBtn" id="degenBtn" type="button" aria-label="Activate degen">
+            <button class="degenBtn" id="degenBtn" type="button" aria-label="Activate degen (jackpot)">
               ACTIVATE DEGEN!
             </button>
 
@@ -804,15 +907,24 @@
               </div>
             </div>
 
-            <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
-              <span class="tooltip" id="tip">COPIED</span>
-              <div style="font-size:11px; font-weight:950; letter-spacing:.6px; opacity:.8;">CONTRACT</div>
-              <div class="caMono" id="caText"></div>
-            </button>
-
             <div class="linkRow">
-              <a class="btnLink" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer">DEXSCREENER</a>
-              <a class="btnLink" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer">TWITTER</a>
+              <a class="btnLink btnDexGreen" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer" aria-label="DEXSCREENER">
+                <img class="btnIcon" src="dexscreener.png" alt="DEXSCREENER" aria-hidden="true">
+                DEXSCREENER
+              </a>
+              <a class="btnLink btnXYellow" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="TWITTER">
+                <img class="btnIcon" src="twitter.png" alt="TWITTER" aria-hidden="true">
+                TWITTER
+              </a>
+            </div>
+
+            <!-- Activity terminal with timestamps -->
+            <div class="activity" aria-label="Activity terminal">
+              <div class="activityHead">
+                <div class="t">ACTIVITY TERMINAL</div>
+                <div class="t" style="opacity:.8" id="actCount">0 logs</div>
+              </div>
+              <div class="activityLog" id="activityLog" role="log" aria-live="polite"></div>
             </div>
 
             <div style="color:var(--muted); font-size:12px; line-height:1.35;">
@@ -832,7 +944,7 @@
 
 <script>
 /* =========================
-   CONFIG (yours)
+   CONFIG
    ========================= */
 const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
 const INSERT_URL = "https://pump.fun";
@@ -855,7 +967,57 @@ const STATUS_LINES = [
 ];
 
 /* =========================
-   WIRE DOM
+   ACTIVITY TERMINAL
+   ========================= */
+const activityLog = document.getElementById("activityLog");
+const actCount = document.getElementById("actCount");
+const ACT_KEY = "gbaron_activity_v1";
+const ACT_MAX = 80;
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function nowStamp(){
+  const d = new Date();
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+function loadActivity(){
+  try{
+    const arr = JSON.parse(sessionStorage.getItem(ACT_KEY) || "[]");
+    return Array.isArray(arr) ? arr.slice(0, ACT_MAX) : [];
+  }catch{ return []; }
+}
+function saveActivity(arr){
+  try{ sessionStorage.setItem(ACT_KEY, JSON.stringify(arr.slice(-ACT_MAX))); }catch{}
+}
+let activity = loadActivity();
+
+function renderActivity(){
+  activityLog.innerHTML = activity.map(line => `<div class="logLine">${line}</div>`).join("");
+  actCount.textContent = `${activity.length} logs`;
+  requestAnimationFrame(()=>{ activityLog.scrollTop = activityLog.scrollHeight; });
+}
+
+function logEvt(label, detail=""){
+  const ts = nowStamp();
+  const msg = `<span class="ts">[${ts}]</span> <span class="evt">${label}</span>${detail ? " — " + detail : ""}`;
+  activity.push(msg);
+  if(activity.length > ACT_MAX) activity = activity.slice(-ACT_MAX);
+  saveActivity(activity);
+  renderActivity();
+}
+
+// Ensure first line ALWAYS exists (and stays first)
+(function ensureFirstLine(){
+  const FIRST = `<span class="ts">[00:00:00]</span> <span class="evt">THE BARON ALWAYS EXITS FIRST</span>`;
+  if(!activity.length || !String(activity[0]).includes("THE BARON ALWAYS EXITS FIRST")){
+    activity.unshift(FIRST);
+    if(activity.length > ACT_MAX) activity = activity.slice(0, ACT_MAX);
+    saveActivity(activity);
+  }
+  renderActivity();
+})();
+
+/* =========================
+   DOM
    ========================= */
 const elCoins = document.getElementById("coinsInserted");
 const elRank  = document.getElementById("rank");
@@ -871,35 +1033,103 @@ const btnDegen  = document.getElementById("btnDegen");
 const btnRug    = document.getElementById("btnRug");
 
 const degenBtn = document.getElementById("degenBtn");
-const caBtn = document.getElementById("caBtn");
+const caPanel = document.getElementById("caPanel");
 const caText = document.getElementById("caText");
 const tip = document.getElementById("tip");
 
 const dexBtn = document.getElementById("dexBtn");
 const xBtn = document.getElementById("xBtn");
 
+const frame = document.getElementById("frame");
+const terminal = document.getElementById("terminal");
+const term1 = document.getElementById("termLine1");
+const term2 = document.getElementById("termLine2");
+const term3 = document.getElementById("termLine3");
+
+const muteBtn = document.getElementById("muteBtn");
+const soundNote = document.getElementById("soundNote");
+
+/* Links + CA */
 btnInsert.href = INSERT_URL;
 dexBtn.href = DEX_URL;
 xBtn.href = X_URL;
 caText.textContent = CA;
 
 /* =========================
-   COUNTERS (session)
+   SOUND
    ========================= */
-let coins = Number(sessionStorage.getItem("gb_coinCount") || "0");
-let rank  = Number(sessionStorage.getItem("gb_rankCount") || "0");
+const clickSfx = document.getElementById("clickSfx");
+const baronVoice = document.getElementById("baronVoice");
+const laughSfx = document.getElementById("laughSfx");
+const jackpotSfx = document.getElementById("jackpotSfx");
+
+let muted = (sessionStorage.getItem("gb_muted") === "1");
+function setMuted(v){
+  muted = !!v;
+  sessionStorage.setItem("gb_muted", muted ? "1" : "0");
+  muteBtn.textContent = muted ? "🔇" : "🔊";
+  soundNote.textContent = muted ? "off" : "on";
+  logEvt("SOUND", muted ? "muted" : "unmuted");
+}
+setMuted(muted);
+
+function play(audioEl, vol=1){
+  if(muted) return;
+  try{
+    audioEl.pause();
+    audioEl.currentTime = 0;
+    audioEl.volume = Math.max(0, Math.min(1, vol));
+    audioEl.play().catch(()=>{});
+  }catch{}
+}
+function playClick(){ play(clickSfx, 0.9); }
+function playLaugh(){ play(laughSfx, 0.9); }
+function playJackpot(){ play(jackpotSfx, 0.9); }
+function playBaron(){ play(baronVoice, 1); }
+
+muteBtn.addEventListener("click", ()=>{
+  setMuted(!muted);
+});
+
+/* =========================
+   RANK LABELS (NOT numbers)
+   ========================= */
+const RANKS = [
+  "paperhands",
+  "weakhands",
+  "hodler",
+  "diamondhands",
+  "ape",
+  "degen",
+  "whale",
+  "exit liquidity",
+  "baron"
+];
+function rankFromCoins(c){
+  if(c >= 90) return RANKS[8];
+  if(c >= 70) return RANKS[7];
+  if(c >= 55) return RANKS[6];
+  if(c >= 40) return RANKS[5];
+  if(c >= 28) return RANKS[4];
+  if(c >= 18) return RANKS[3];
+  if(c >= 10) return RANKS[2];
+  if(c >= 4)  return RANKS[1];
+  return RANKS[0];
+}
+
+/* =========================
+   COINS (session)
+   ========================= */
 function sane(n){ n=Number(n); return (Number.isFinite(n) && n>=0) ? Math.floor(n) : 0; }
-coins = sane(coins); rank = sane(rank);
+let coins = sane(sessionStorage.getItem("gb_coinCount") || "0");
 
 function renderCounts(){
   elCoins.textContent = String(Math.min(99, coins)).padStart(2,"0");
-  elRank.textContent  = String(Math.min(99, rank)).padStart(2,"0");
+  elRank.textContent  = rankFromCoins(coins);
 }
-function bumpCounts(){
+function bumpCoins(){
   coins = Math.min(99, coins + 1);
-  rank  = Math.min(99, rank + 1);
   sessionStorage.setItem("gb_coinCount", String(coins));
-  sessionStorage.setItem("gb_rankCount", String(rank));
   renderCounts();
 }
 renderCounts();
@@ -970,10 +1200,13 @@ function spawnCoinRain(count = 38){
   }
   setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
 }
+
 function triggerJackpot(reason){
   jackpotSub.textContent = (reason === "combo")
     ? ("COMBO WIN! YOU WON: 777 " + TICKER)
     : ("YOU WON: 777 " + TICKER);
+
+  logEvt("JACKPOT", reason === "combo" ? "combo hit" : "random hit");
 
   spawnCoinRain(42);
   jackpotEl.classList.remove("show");
@@ -998,451 +1231,268 @@ const state = {
   ath: 0.000420
 };
 
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+
 function loadChart(){
   try{
     const s = JSON.parse(sessionStorage.getItem(CHART_KEY) || "null");
     if(s && typeof s === "object"){
       if(Number.isFinite(Number(s.price)) && Number(s.price)>0) state.price = Number(s.price);
       if(Number.isFinite(Number(s.last)) && Number(s.last)>0) state.last = Number(s.last);
-      if(Number.isFinite(Number(s.ath))  && Number(s.ath)>0)  state.ath = Number(s.ath);
-      if(Array.isArray(s.series)){
-        state.series = s.series.map(Number).filter(Number.isFinite);
+      if(Number.isFinite(Number(s.ath))  && Number(s.ath)>0)  state.ath  = Number(s.ath);
+      if(Array.isArray(s.series) && s.series.length){
+        state.series = s.series.map(Number).filter(n=>Number.isFinite(n) && n>0).slice(-state.seriesLen);
       }
     }
-  }catch(e){}
-}
-function saveChart(){
-  sessionStorage.setItem(CHART_KEY, JSON.stringify({
-    price: state.price,
-    last: state.last,
-    ath: state.ath,
-    series: state.series
-  }));
-}
-function fmtPrice(n){
-  if(n < 0.01) return "$" + n.toFixed(6);
-  if(n < 1) return "$" + n.toFixed(4);
-  return "$" + n.toFixed(2);
-}
-function ensureSeries(){
+  }catch{}
   if(!state.series.length){
-    for(let i=0;i<state.seriesLen;i++) state.series.push(state.price);
+    // seed series with gentle wiggle
+    state.series = [];
+    let p = state.price;
+    for(let i=0;i<state.seriesLen;i++){
+      p *= (1 + (Math.random()*0.006 - 0.003));
+      state.series.push(p);
+    }
+    state.price = state.series[state.series.length-1];
+    state.last  = state.series[0];
+    state.ath   = Math.max(...state.series);
   }
-  while(state.series.length < state.seriesLen) state.series.unshift(state.price);
-  while(state.series.length > state.seriesLen) state.series.shift();
 }
-function sparkPath(values){
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = (max - min) || 1;
 
-  const pts = values.map((v,i)=>{
-    const x = (i/(values.length-1))*100;
-    const y = 100 - ((v - min)/span)*92 - 4;
-    return [x,y];
+function saveChart(){
+  try{
+    sessionStorage.setItem(CHART_KEY, JSON.stringify({
+      price: state.price,
+      last: state.last,
+      ath: state.ath,
+      series: state.series.slice(-state.seriesLen)
+    }));
+  }catch{}
+}
+
+function fmtPrice(p){
+  // keep the meme: 6 decimals min, but show tiny nicely
+  if(p < 0.000001) return "$" + p.toFixed(8);
+  return "$" + p.toFixed(6);
+}
+
+function renderChart(){
+  const s = state.series.slice(-state.seriesLen);
+  const min = Math.min(...s);
+  const max = Math.max(...s);
+  const span = (max - min) || (max * 0.001) || 1;
+
+  // build path in 0..100 space
+  const pts = s.map((v,i)=>{
+    const x = (i/(s.length-1))*100;
+    const y = 100 - ((v - min)/span)*92 - 4; // padding
+    return [x, y];
   });
 
-  const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ");
-  const dFill = d + " L 100 100 L 0 100 Z";
-  return {d, dFill};
-}
-function updateChartUI(){
-  ensureSeries();
+  const dLine = "M " + pts.map(p=>p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" L ");
+  const dFill = dLine + " L 100 100 L 0 100 Z";
+
+  elLine.setAttribute("d", dLine);
+  elFill.setAttribute("d", dFill);
+
   elPrice.textContent = fmtPrice(state.price);
 
-  const pct = ((state.price - state.last) / (state.last || state.price)) * 100;
-  const pctText = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-  elPct.textContent = pctText;
+  const pct = ((state.price - state.last) / state.last) * 100;
+  const pctTxt = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+  elPct.textContent = pctTxt;
   elPct.classList.toggle("down", pct < 0);
 
-  state.ath = Math.max(state.ath, state.price);
-  elPriceNote.textContent = `ATH: ${fmtPrice(state.ath)} • Liquidity: imaginary`;
-
-  const p = sparkPath(state.series);
-  elLine.setAttribute("d", p.d);
-  elFill.setAttribute("d", p.dFill);
-}
-function pumpChart(isDegen=false){
-  const baseMove = 0.006;
-  const vol = isDegen ? 0.060 : 0.030;
-  const jitter = (Math.random()*vol) - (vol*0.18);
-  const pctMove = baseMove + jitter;
-
-  state.last = state.price;
-  state.price = Math.max(0.000001, state.price * (1 + pctMove));
-
-  state.series.push(state.price);
-  if(state.series.length > state.seriesLen) state.series.shift();
-
-  saveChart();
-  updateChartUI();
-}
-function rugPull(){
-  state.last = state.price;
-  const nuked = Math.max(state.base * 0.05, state.price * (0.05 + Math.random()*0.06));
-  state.price = nuked;
-
-  for(let i=0;i<5;i++){
-    state.series.push(state.price * (0.92 - Math.random()*0.08));
+  if(state.price >= state.ath){
+    elPriceNote.textContent = "New ATH (totally real) 🚀";
+  }else{
+    elPriceNote.textContent = "Totally organic growth (trust me bro)";
   }
-  while(state.series.length > state.seriesLen) state.series.shift();
+}
 
+function pushPrice(newPrice){
+  state.series.push(newPrice);
+  state.series = state.series.slice(-state.seriesLen);
+  state.price = newPrice;
+  state.ath = Math.max(state.ath, newPrice);
   saveChart();
-  updateChartUI();
+  renderChart();
+}
 
-  const box = document.querySelector(".sparkBox");
-  box.classList.remove("shake");
-  void box.offsetWidth;
-  box.classList.add("shake");
+function pump(amount=0.012){
+  // positive meme pump
+  const drift = (Math.random()*0.004 - 0.001); // slight randomness
+  const mul = 1 + amount + drift;
+  const next = clamp(state.price * mul, 0.000001, 9);
+  pushPrice(next);
+}
 
-  elMemeStatus.textContent = "RUGGED 💀";
-  setTimeout(()=>{ elMemeStatus.textContent = "NO RUGS FOUND"; }, 1800);
+function rug(){
+  // villain dump
+  const dump = 0.28 + Math.random()*0.22; // 28%..50%
+  const next = clamp(state.price * (1 - dump), 0.000001, 9);
+  pushPrice(next);
 }
 
 loadChart();
-ensureSeries();
-updateChartUI();
+renderChart();
 
 /* =========================
-   AUDIO (your pools logic trimmed)
+   STATUS TERMINAL (include THE BARON line)
    ========================= */
-const muteBtn = document.getElementById("muteBtn");
-const soundNote = document.getElementById("soundNote");
-
-let isMuted = (localStorage.getItem("gb_muted") === "1");
-function renderMute(){
-  muteBtn.textContent = isMuted ? "🔇" : "🔊";
-  soundNote.textContent = isMuted ? "off" : "on";
+function setTerminalLines(a,b,c){
+  term1.textContent = a;
+  term2.textContent = b;
+  term3.textContent = c;
 }
-renderMute();
+(function bootTerminal(){
+  // Make sure this line appears in the terminal too (requested)
+  setTerminalLines(
+    "THE BARON ALWAYS EXITS FIRST",
+    STATUS_LINES[Math.floor(Math.random()*STATUS_LINES.length)],
+    "ready for coins... insert to begin"
+  );
+})();
 
-muteBtn.addEventListener("click", ()=>{
-  isMuted = !isMuted;
-  localStorage.setItem("gb_muted", isMuted ? "1" : "0");
-  renderMute();
-});
-
-let audioUnlocked = false;
-let audioCtx = null;
-
-function unlockAudio(){
-  if(audioUnlocked) return;
-  audioUnlocked = true;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-  }catch(e){}
-  initClickPool(); initLaughPool(); initJackpotPool();
-}
-window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
-window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
-
-function beepFallback(){
-  if(isMuted) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = "square";
-    o.frequency.value = 740;
-    g.gain.value = 0.05;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
-  }catch(e){}
-}
-
-const CLICK_POOL_SIZE = 6;
-const clickPool = [];
-let clickPoolIdx = 0;
-
-function initClickPool(){
-  if(clickPool.length) return;
-  for(let i=0;i<CLICK_POOL_SIZE;i++){
-    const a = new Audio("arcade.mp3");
-    a.preload = "auto";
-    a.volume = 0.85;
-    clickPool.push(a);
-  }
-}
-function playClick(volume=0.85){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initClickPool();
-    const a = clickPool[clickPoolIdx % clickPool.length];
-    clickPoolIdx++;
-    a.pause(); a.currentTime = 0; a.volume = volume;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>beepFallback());
-  }catch{ beepFallback(); }
-}
-
-function playBaron(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    const a = new Audio("baron.mp3");
-    a.preload = "auto"; a.volume = 0.75;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
-
-const LAUGH_POOL_SIZE = 2;
-const laughPool = [];
-let laughPoolIdx = 0;
-
-function initLaughPool(){
-  if(laughPool.length) return;
-  for(let i=0;i<LAUGH_POOL_SIZE;i++){
-    const a = new Audio("laugh.mp3");
-    a.preload = "auto";
-    a.volume = 0.9;
-    laughPool.push(a);
-  }
-}
-function stopLaugh(){
-  try{ laughPool.forEach(a=>{ a.pause(); a.currentTime = 0; }); }catch(e){}
-}
-function playLaugh(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initLaughPool();
-    stopLaugh();
-    const a = laughPool[laughPoolIdx % laughPool.length];
-    laughPoolIdx++;
-    a.currentTime = 0;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
-
-const JACKPOT_POOL_SIZE = 2;
-const jackpotPool = [];
-let jackpotPoolIdx = 0;
-
-function initJackpotPool(){
-  if(jackpotPool.length) return;
-  for(let i=0;i<JACKPOT_POOL_SIZE;i++){
-    const a = new Audio("jackpot.mp3");
-    a.preload = "auto";
-    a.volume = 0.95;
-    jackpotPool.push(a);
-  }
-}
-function stopJackpot(){
-  try{ jackpotPool.forEach(a=>{ a.pause(); a.currentTime = 0; }); }catch(e){}
-}
-function playJackpot(){
-  if(isMuted) return;
-  unlockAudio();
-  try{
-    initJackpotPool();
-    stopJackpot();
-    const a = jackpotPool[jackpotPoolIdx % jackpotPool.length];
-    jackpotPoolIdx++;
-    a.currentTime = 0;
-    const p = a.play();
-    if(p && typeof p.catch === "function") p.catch(()=>{});
-  }catch(e){}
-}
-
-/* =========================
-   TERMINAL LOOP (your vibe)
-   ========================= */
 let statusIdx = 0;
-const line1 = document.getElementById("termLine1");
-const line2 = document.getElementById("termLine2");
-const line3 = document.getElementById("termLine3");
-
-const LOOP_MS = 10000;
-let easterMode = false;
-
-function typeText(el, text, speed, done){
-  let i = 0;
-  el.textContent = "";
-  const t = setInterval(()=>{
-    el.textContent += (text[i++] || "");
-    if(i >= text.length){
-      clearInterval(t);
-      done && done();
-    }
-  }, speed);
-  return t;
-}
-function setReadyLine(){
-  line3.textContent = "status: ";
-  const s = document.createElement("span");
-  s.className = "ready";
-  s.textContent = "READY";
-  line3.appendChild(s);
-}
-let cycleTimers = [];
-function clearCycle(){
-  cycleTimers.forEach(id=>{ clearInterval(id); clearTimeout(id); });
-  cycleTimers = [];
-}
-function runCycle(){
-  clearCycle();
-
-  const statusLine = STATUS_LINES[statusIdx % STATUS_LINES.length];
-  statusIdx++;
-
-  const l1 = easterMode ? "ACCESS GRANTED..." : "initializing terminal on solana...";
-  const l2 = easterMode ? "DEGEN MODE: ACTIVE" : statusLine;
-
-  line1.textContent = "";
-  line2.textContent = "";
-  line3.textContent = "";
-
-  const t1 = typeText(line1, l1, 16, ()=>{
-    const t2 = setTimeout(()=>{
-      const t2i = typeText(line2, l2, 13, ()=>{
-        const t3 = setTimeout(()=>{
-          typeText(line3, "status: ", 14, ()=> setReadyLine());
-        }, 120);
-        cycleTimers.push(t3);
-      });
-      cycleTimers.push(t2i);
-    }, 120);
-    cycleTimers.push(t2);
-  });
-  cycleTimers.push(t1);
-}
-runCycle();
-setInterval(runCycle, LOOP_MS);
+setInterval(()=>{
+  statusIdx = (statusIdx + 1) % STATUS_LINES.length;
+  setTerminalLines(
+    "THE BARON ALWAYS EXITS FIRST",
+    STATUS_LINES[statusIdx],
+    "ready for coins... insert to begin"
+  );
+}, 2600);
 
 /* =========================
    COPY CA
    ========================= */
-let tipTimer;
-function showTip(text){
+let tipTimer = null;
+function showTip(text="COPIED"){
   tip.textContent = text;
   tip.classList.add("show");
   clearTimeout(tipTimer);
   tipTimer = setTimeout(()=> tip.classList.remove("show"), 900);
 }
-const canClipboard = !!(navigator.clipboard && window.isSecureContext);
-
-let laughTimer = null;
-caBtn.addEventListener("click", async ()=>{
+async function copyCA(){
   playClick();
+  logEvt("COPY", "contract address");
   try{
-    if(canClipboard){
-      await navigator.clipboard.writeText(CA);
-    }else{
-      throw new Error("clipboard not available");
-    }
+    await navigator.clipboard.writeText(CA);
+    showTip("COPIED");
   }catch{
-    try{
-      const t=document.createElement("textarea");
-      t.value=CA;
-      document.body.appendChild(t);
-      t.select();
-      document.execCommand("copy");
-      document.body.removeChild(t);
-    }catch{
-      window.prompt("Copy CA:", CA);
-    }
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = CA;
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); showTip("COPIED"); }
+    catch{ showTip("COPY FAILED"); }
+    ta.remove();
   }
-  showTip("BARON APPROVES\nSEE YOU AT ATH!");
-  clearTimeout(laughTimer);
-  laughTimer = setTimeout(()=> playLaugh(), LAUGH_DELAY_MS);
+}
+
+caPanel.addEventListener("click", copyCA);
+caPanel.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    copyCA();
+  }
 });
 
 /* =========================
-   BUTTON LOGIC
+   LINK CLICKS (play arcade sound too)
    ========================= */
-let degenResetTimer = null;
-
-function setDegenActivatedTemp(){
-  degenBtn.classList.add("activated");
-  degenBtn.textContent = "ACTIVATED";
-  clearTimeout(degenResetTimer);
-  degenResetTimer = setTimeout(()=>{
-    degenBtn.classList.remove("activated");
-    degenBtn.textContent = "ACTIVATE DEGEN!";
-  }, 10000);
+function openWithSound(url, label){
+  playClick();
+  logEvt(label, url.replace(/^https?:\/\//,""));
+  // open new tab without losing this tab state
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
-btnInsert.addEventListener("click", ()=>{
-  playClick();
-  bumpCounts();           // ✅ coins + rank go up on INSERT
-  pumpChart(degenBtn.classList.contains("activated")); // chart pumps
-  renderJackpotCountdown();
+btnInsert.addEventListener("click", (e)=>{
+  // prevent default so we can open ourselves after sound
+  e.preventDefault();
+  bumpCoins();
+  pump(0.020);
+  terminal.classList.remove("shake"); void terminal.offsetWidth; terminal.classList.add("shake");
+  logEvt("INSERT COINS", "chart pumped");
+  openWithSound(INSERT_URL, "OPEN");
 });
+
+dexBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  openWithSound(DEX_URL, "DEXSCREENER");
+});
+
+xBtn.addEventListener("click", (e)=>{
+  e.preventDefault();
+  openWithSound(X_URL, "TWITTER");
+});
+
+/* =========================
+   BUTTONS
+   ========================= */
+let degenArmed = false;
 
 btnDegen.addEventListener("click", ()=>{
   playClick();
-  // toggles chart volatility for clicks; degen button on right is the "event" one
-  const active = degenBtn.classList.contains("activated");
-  if(active){
-    degenBtn.classList.remove("activated");
-    degenBtn.textContent = "ACTIVATE DEGEN!";
-    easterMode = false;
-    runCycle();
-    elMemeStatus.textContent = "NO RUGS FOUND";
-  }else{
-    setDegenActivatedTemp();
-    easterMode = true;
-    runCycle();
-    elMemeStatus.textContent = "DEGEN OVERDRIVE";
-    setTimeout(()=>{ easterMode = false; }, 14000);
-  }
+  degenArmed = !degenArmed;
+  btnDegen.classList.toggle("activated", degenArmed);
+  elMemeStatus.textContent = degenArmed ? "DEGEN MODE ARMED" : "NO RUGS FOUND";
+  logEvt("ACTIVATE DEGEN", degenArmed ? "armed" : "disarmed");
+
+  // little pump when arming
+  if(degenArmed) pump(0.010);
 });
 
 btnRug.addEventListener("click", ()=>{
-  playClick(0.9);
-  rugPull();
+  playClick();
+  logEvt("RUG PULL", "villain arc");
+  elMemeStatus.textContent = "RUG DETECTED 💀";
+  frame.classList.remove("shake"); void frame.offsetWidth; frame.classList.add("shake");
+  rug();
+
+  // cackle
+  setTimeout(()=>{ playLaugh(); }, LAUGH_DELAY_MS);
 });
 
-/* Right-side DEGEN button = jackpot logic + baron voice */
-let degenLock = false;
-
-function handleDegenActivate(e){
-  if(e) e.preventDefault?.();
-  unlockAudio();
-
-  if(degenBtn.classList.contains("activated")) return;
-  if(degenLock) return;
-  degenLock = true;
-  setTimeout(()=>{ degenLock = false; }, 350);
-
+degenBtn.addEventListener("click", ()=>{
   playClick();
-  setDegenActivatedTemp();
+  logEvt("DEGEN BUTTON", "pressed");
 
+  // combo progress + random chance
   const comboHit = comboStepAndCheckHit();
-  const randomHit = (!comboHit && (Math.random() < JACKPOT_CHANCE));
-
   renderJackpotCountdown();
 
-  if(comboHit || randomHit){
-    triggerJackpot(comboHit ? "combo" : "random");
+  const randomHit = (Math.random() < JACKPOT_CHANCE);
+
+  if(comboHit){
+    triggerJackpot("combo");
+  }else if(randomHit){
+    triggerJackpot("random");
   }else{
-    playBaron();
-  }
-
-  easterMode = true;
-  runCycle();
-  setTimeout(()=>{ easterMode = false; }, 14000);
-}
-
-degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
-degenBtn.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    handleDegenActivate(e);
+    // small pump + baron voice sometimes
+    pump(degenArmed ? 0.018 : 0.012);
+    if(Math.random() < 0.18){
+      setTimeout(()=> playBaron(), 90);
+      logEvt("BARON", "voice line");
+    }
   }
 });
 
-// Also: pump chart when user clicks DEGEN (because vibes)
-degenBtn.addEventListener("click", ()=>{
-  pumpChart(true);
+/* =========================
+   EXTRA: clicking the chart pumps too
+   ========================= */
+document.querySelector(".sparkBox").addEventListener("click", ()=>{
+  playClick();
+  bumpCoins();
+  pump(0.014);
+  logEvt("CHART", "manual pump");
 });
 
+/* First boot logs */
+logEvt("BOOT", "session started");
+logEvt("THE BARON ALWAYS EXITS FIRST", "immutable rule");
 </script>
 </body>
 </html>
