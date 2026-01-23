@@ -1,644 +1,1448 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Greenback ($GBACK)</title>
-  <style>
-    :root{
-      --bg:#070b10;
-      --panel:#0d1320;
-      --panel2:#0b111c;
-      --text:#eaf2ff;
-      --muted:#93a4c7;
-      --line:rgba(255,255,255,.10);
-      --good:#33d17a;
-      --warn:#ffb000;
-      --bad:#ff4d6d;
-      --accent:#6ee7ff;
-      --accent2:#a78bfa;
-      --shadow: 0 14px 40px rgba(0,0,0,.55);
-      --r:18px;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Baron Greenback ($GBARON)</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --bg:#070b10;
+    --card:#0b111c;
+    --card2:#0d1320;
+    --ink:#eaf2ff;
+    --muted:#93a4c7;
+    --line:rgba(255,255,255,.12);
+    --yellow:#c8ff2f;
+    --green:#2dff6a;
+    --red:#ff4d6d;
+    --accent:#6ee7ff;
+    --accent2:#a78bfa;
+    --shadow:0 14px 40px rgba(0,0,0,.55);
+    --r:22px;
+  }
 
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0}
-    body{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(110,231,255,.18), transparent 55%),
-        radial-gradient(900px 500px at 85% 10%, rgba(167,139,250,.18), transparent 60%),
-        radial-gradient(700px 500px at 50% 110%, rgba(51,209,122,.12), transparent 60%),
-        var(--bg);
-      color:var(--text);
-      overflow:hidden; /* prevents mobile scroll */
-    }
+  html,body{height:100%; margin:0}
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(110,231,255,.18), transparent 55%),
+      radial-gradient(900px 500px at 85% 10%, rgba(167,139,250,.18), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, rgba(45,255,106,.10), transparent 60%),
+      #070b10;
+    color:var(--ink);
+    overflow:hidden; /* no page scroll on mobile */
+    padding-bottom:env(safe-area-inset-bottom);
+  }
 
-    /* Full-screen frame that ALWAYS fits mobile */
-    .stage{
-      height:100dvh; /* dynamic viewport height (mobile safe) */
-      min-height:100svh;
-      width:100%;
-      display:flex;
-      align-items:stretch;
-      justify-content:center;
-      padding:
-        calc(12px + env(safe-area-inset-top))
-        12px
-        calc(12px + env(safe-area-inset-bottom))
-        12px;
-    }
+  /* CRT overlay (from your code vibe) */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,0) 3px 6px);
+    opacity:.08;mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:rgba(255,255,255,.02);opacity:0;
+    animation:crtFlicker 7s steps(1,end) infinite;
+  }
+  @keyframes crtFlicker{
+    0%,52%,100%{opacity:0}
+    53%{opacity:.05}
+    54%{opacity:0}
+    78%{opacity:.03}
+    79%{opacity:0}
+  }
 
-    .frame{
-      width:min(980px, 100%);
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius:24px;
-      box-shadow: var(--shadow);
-      padding:14px;
-      overflow:hidden; /* keep everything inside */
-    }
+  /* Full-screen stage that fits mobile perfectly */
+  .stage{
+    height:100dvh;
+    min-height:100svh;
+    width:100%;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    padding:
+      calc(12px + env(safe-area-inset-top))
+      12px
+      calc(12px + env(safe-area-inset-bottom))
+      12px;
+    position:relative;
+    z-index:5; /* above CRT */
+  }
 
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 12px;
-      background:rgba(0,0,0,.25);
-      border:1px solid var(--line);
-      border-radius:18px;
-    }
+  .frame{
+    width:min(1040px, 100%);
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:26px;
+    box-shadow:var(--shadow);
+    padding:14px;
+    overflow:hidden;
+  }
 
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 12px;
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--line);
+    border-radius:18px;
+  }
 
-    .brand .title{
-      font-weight:800;
-      letter-spacing:.3px;
-      font-size:clamp(16px, 2.2vw, 22px);
-      line-height:1.1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand .sub{
-      font-size:clamp(11px, 1.6vw, 13px);
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+  }
+  .brandLogo{
+    width:46px;height:46px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.25);
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .brandLogo img{
+    width:100%; height:100%;
+    object-fit:cover;
+    image-rendering:pixelated;
+  }
 
-    .stats{
-      display:flex;
-      align-items:stretch;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+  .brandText{min-width:0}
+  .brandText .title{
+    font-weight:900;
+    letter-spacing:.2px;
+    font-size:clamp(16px, 2.2vw, 22px);
+    line-height:1.05;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .brandText .sub{
+    font-size:clamp(11px, 1.6vw, 13px);
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
 
-    .pill{
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:2px;
-      padding:8px 10px;
-      border-radius:14px;
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-      min-width:120px;
-    }
-    .pill .k{font-size:11px;color:var(--muted)}
-    .pill .v{
-      font-size:clamp(14px, 2vw, 18px);
-      font-weight:800;
-      line-height:1.1;
-      display:flex;
-      align-items:baseline;
-      gap:6px;
-      white-space:nowrap;
-    }
-    .pill .v small{font-size:11px;color:var(--muted);font-weight:700}
+  .stats{
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
 
-    .content{
-      flex:1;
-      min-height:0;
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap:12px;
-      overflow:hidden;
-    }
+  .pill{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:2px;
+    padding:8px 10px;
+    border-radius:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    min-width:132px;
+  }
+  .pill .k{font-size:11px;color:var(--muted);letter-spacing:.5px}
+  .pill .v{
+    font-size:clamp(14px, 2vw, 18px);
+    font-weight:900;
+    line-height:1.1;
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    white-space:nowrap;
+  }
+  .pill .v small{font-size:11px;color:var(--muted);font-weight:800}
 
-    @media (max-width: 820px){
-      .content{grid-template-columns:1fr; gap:12px;}
-      .pill{min-width:140px}
-    }
+  .content{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns: 1.25fr .75fr;
+    gap:12px;
+    overflow:hidden;
+  }
+  @media (max-width: 860px){
+    .content{grid-template-columns:1fr;}
+  }
 
-    .card{
-      background:rgba(0,0,0,.22);
-      border:1px solid var(--line);
-      border-radius:var(--r);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
+  .card{
+    background:rgba(0,0,0,.22);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
 
-    .card h2{
-      margin:0;
-      padding:10px 12px;
-      font-size:13px;
-      letter-spacing:.25px;
-      color:var(--muted);
-      border-bottom:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-      text-transform:uppercase;
-    }
+  .card h2{
+    margin:0;
+    padding:10px 12px;
+    font-size:12px;
+    letter-spacing:.28px;
+    color:var(--muted);
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.03);
+    text-transform:uppercase;
+  }
 
-    /* Fake chart area */
-    .chartWrap{
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:0;
-    }
+  /* Left: big logo + chart */
+  .hero{
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:0;
+  }
 
-    .chartTop{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+  .heroTop{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:space-between;
+  }
 
-    .price{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
-    .price .big{
-      font-weight:900;
-      font-size:clamp(20px, 3.2vw, 30px);
-      line-height:1;
-      display:flex;
-      align-items:baseline;
-      gap:8px;
-      white-space:nowrap;
-    }
-    .price .big .pct{
-      font-size:12px;
-      font-weight:800;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(51,209,122,.10);
-      color:var(--good);
-    }
-    .price .small{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+  .bigLogoWrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .bigLogo{
+    width:clamp(110px, 18dvh, 165px);
+    height:clamp(110px, 18dvh, 165px);
+    border-radius:22px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.25);
+    overflow:hidden;
+    box-shadow:0 0 0 2px rgba(0,0,0,.35);
+    animation:bob 2.4s steps(2,end) infinite;
+    image-rendering:pixelated;
+    flex:0 0 auto;
+  }
+  .bigLogo img{
+    width:100%;height:100%;
+    object-fit:cover;
+    image-rendering:pixelated;
+  }
+  @keyframes bob{
+    0%,50%,100%{transform:translateY(0)}
+    25%,75%{transform:translateY(-2px)}
+  }
 
-    .sparkBox{
-      flex:1;
-      min-width:220px;
-      max-width:460px;
-      height:110px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(110,231,255,.10), rgba(0,0,0,0));
-      overflow:hidden;
-      position:relative;
-    }
-    .sparkBox svg{width:100%; height:100%}
-    .sparkGlow{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:radial-gradient(280px 140px at 85% 35%, rgba(110,231,255,.25), transparent 60%);
-      opacity:.6;
-      mix-blend-mode:screen;
-    }
+  .headline{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:240px;
+  }
+  .headline .h1{
+    font-weight:950;
+    font-size:clamp(18px, 3vw, 30px);
+    line-height:1.05;
+    letter-spacing:.2px;
+  }
+  .headline .tagline{
+    color:var(--muted);
+    font-size:clamp(12px, 1.9vw, 14px);
+    line-height:1.3;
+  }
 
-    .actions{
-      margin-top:auto;
-      padding:12px;
-      border-top:1px solid var(--line);
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:stretch;
-      justify-content:space-between;
-      background:rgba(255,255,255,.02);
-    }
+  /* Fake chart */
+  .chartWrap{
+    margin-top:2px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:0;
+  }
 
-    .btnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      flex:1;
-      min-width:0;
-    }
+  .chartTop{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
 
-    button{
-      appearance:none;
-      border:none;
-      border-radius:14px;
-      padding:12px 14px;
-      font-weight:900;
-      letter-spacing:.3px;
-      cursor:pointer;
-      color:var(--text);
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      transition: transform .06s ease, filter .2s ease, background .2s ease;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      flex:1;
-      min-width:160px;
-    }
-    button:active{transform:translateY(1px) scale(.99)}
-    button:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
+  .price{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+  }
+  .price .big{
+    font-weight:950;
+    font-size:clamp(20px, 3.2vw, 32px);
+    line-height:1;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    white-space:nowrap;
+  }
 
-    .primary{
-      background:linear-gradient(135deg, rgba(110,231,255,.22), rgba(167,139,250,.18));
-      border-color:rgba(110,231,255,.25);
-    }
-    .danger{
-      background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
-      border-color:rgba(255,77,109,.28);
-    }
-    .ghost{
-      background:rgba(255,255,255,.04);
-    }
+  .pct{
+    font-size:12px;
+    font-weight:900;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(45,255,106,.12);
+    color:var(--green);
+    letter-spacing:.4px;
+  }
+  .pct.down{
+    background:rgba(255,77,109,.12);
+    color:var(--red);
+  }
+  .price .small{
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
 
-    .rightCol{
-      min-height:0;
-    }
+  .sparkBox{
+    flex:1;
+    min-width:220px;
+    height:120px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(200,255,47,.08), rgba(0,0,0,0));
+    overflow:hidden;
+    position:relative;
+  }
+  .sparkBox svg{width:100%;height:100%}
+  .sparkGlow{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(280px 140px at 85% 35%, rgba(200,255,47,.22), transparent 60%);
+    opacity:.55;
+    mix-blend-mode:screen;
+  }
 
-    .panel{
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:0;
-    }
+  .sparkFill{fill:rgba(200,255,47,.12)}
+  .sparkLine{fill:none;stroke:rgba(200,255,47,.95);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
-    .log{
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      padding:10px;
-    }
-    .log p{
-      margin:0 0 8px 0;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
-    .log p b{color:var(--text)}
-    .log::-webkit-scrollbar{width:10px}
-    .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10); border-radius:999px}
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
+  .shake{animation:shake .32s linear 1;}
+  @keyframes shake{
+    0%{transform:translate(0,0)}
+    20%{transform:translate(-6px, 2px)}
+    40%{transform:translate(6px, -2px)}
+    60%{transform:translate(-5px, -1px)}
+    80%{transform:translate(5px, 1px)}
+    100%{transform:translate(0,0)}
+  }
 
-    .toast{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:calc(16px + env(safe-area-inset-bottom));
-      background:rgba(0,0,0,.78);
-      border:1px solid var(--line);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:12px;
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      box-shadow: var(--shadow);
-      max-width:min(520px, calc(100% - 24px));
-      text-align:center;
-    }
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(-4px);
-    }
+  /* Buttons row */
+  .actions{
+    margin-top:auto;
+    padding:12px;
+    border-top:1px solid var(--line);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:stretch;
+    justify-content:space-between;
+    background:rgba(255,255,255,.02);
+  }
 
-    .shake{
-      animation: shake .32s linear 1;
-    }
-    @keyframes shake{
-      0%{transform:translate(0,0)}
-      20%{transform:translate(-6px, 2px)}
-      40%{transform:translate(6px, -2px)}
-      60%{transform:translate(-5px, -1px)}
-      80%{transform:translate(5px, 1px)}
-      100%{transform:translate(0,0)}
-    }
+  button,.btnLink{
+    appearance:none;
+    border:none;
+    border-radius:16px;
+    padding:12px 14px;
+    font-weight:950;
+    letter-spacing:.3px;
+    cursor:pointer;
+    color:var(--ink);
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--line);
+    transition: transform .06s ease, filter .2s ease, background .2s ease;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
+    min-width:160px;
+    flex:1;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  button:active,.btnLink:active{transform:translateY(1px) scale(.99)}
+  button:focus-visible,.btnLink:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-    .blinkRed{
-      animation: blinkRed .55s ease 1;
-    }
-    @keyframes blinkRed{
-      0%{filter:none}
-      35%{filter: drop-shadow(0 0 14px rgba(255,77,109,.55))}
-      100%{filter:none}
-    }
-  </style>
+  .primary{
+    background:linear-gradient(135deg, rgba(200,255,47,.22), rgba(110,231,255,.16));
+    border-color:rgba(200,255,47,.25);
+    color:#081018;
+  }
+  .primary span{color:#081018}
+  .ghost{background:rgba(255,255,255,.04)}
+  .danger{
+    background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
+    border-color:rgba(255,77,109,.28);
+  }
+
+  .btnLink.primary{color:#081018}
+  .btnLink.primary:hover{filter:brightness(1.05)}
+  .danger:hover{filter:brightness(1.05)}
+  .ghost:hover{filter:brightness(1.05)}
+
+  .btnIcon{
+    width:28px;height:28px;
+    image-rendering:pixelated;
+    flex:0 0 auto;
+  }
+
+  /* Right: terminal, CA, links */
+  .side{
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:0;
+  }
+
+  .terminal{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:rgba(0,0,0,.18);
+    padding:10px 12px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-size:12px;
+    line-height:1.45;
+    color:#cfcfcf;
+    user-select:none;
+    position:relative;
+    overflow:hidden;
+  }
+  .prompt{color:var(--yellow);font-weight:950}
+  .dim{color:#9a9a9a}
+  .ready{
+    color:var(--yellow);
+    font-weight:950;
+    animation:readyFlicker 1s steps(1,end) infinite;
+  }
+  @keyframes readyFlicker{
+    0%,76%{opacity:1}
+    77%{opacity:.2}
+    78%{opacity:1}
+    92%{opacity:.35}
+    93%{opacity:1}
+  }
+  .cursor{
+    display:inline-block;width:8px;height:12px;background:var(--yellow);
+    margin-left:6px;transform:translateY(2px);
+    animation:cursorBlink .8s steps(1,end) infinite;
+  }
+  @keyframes cursorBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  .degenBtn{
+    width:100%;
+    border-radius:16px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+    color:var(--yellow);
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    animation:blink 1s steps(1,end) infinite;
+  }
+  .degenBtn:active{transform:translateY(1px)}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  .degenBtn.activated{
+    animation:none !important;
+    background:var(--yellow);
+    color:#0b0b0b;
+    box-shadow:0 0 0 2px rgba(0,0,0,.35), 0 0 18px rgba(200,255,47,.25);
+  }
+
+  .counterRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .miniPill{
+    flex:1;
+    min-width:160px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:10px 12px;
+    background:rgba(0,0,0,.18);
+  }
+  .miniPill .k{font-size:11px;color:var(--muted);letter-spacing:.5px}
+  .miniPill .v{
+    margin-top:2px;
+    font-weight:950;
+    font-size:18px;
+    color:var(--yellow);
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  .caBtn{
+    width:100%;
+    border-radius:16px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    background:#ffffff;
+    color:#081018;
+    font-weight:950;
+    cursor:pointer;
+    position:relative;
+  }
+  .caMono{
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    font-size:13px;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+  }
+  .tooltip{
+    position:absolute;
+    top:-40px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.85);
+    color:var(--yellow);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:8px 10px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s steps(1,end), transform .12s steps(1,end);
+    white-space:pre-line;
+    text-align:center;
+    z-index:10;
+  }
+  .tooltip.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  .linkRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .linkRow .btnLink{min-width:160px;flex:1}
+
+  /* Jackpot + Coin rain (from your code, simplified but same feel) */
+  .coin-rain{
+    position:fixed; inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:9998;
+  }
+  .coin{
+    position:absolute; top:-18px;
+    width:12px;height:12px;
+    border:2px solid #000;
+    background:var(--yellow);
+    box-shadow:2px 2px 0 #000, 0 0 10px rgba(200,255,47,.18);
+    image-rendering:pixelated;
+    opacity:0;
+    will-change:transform, opacity;
+  }
+  .coin::after{
+    content:"";
+    position:absolute; inset:2px;
+    border:1px solid rgba(0,0,0,.25);
+  }
+
+  .jackpot{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+    opacity:0;
+    z-index:9999;
+  }
+  .jackpot.show{
+    opacity:1;
+    animation:jackFlash 1200ms steps(6,end) 1;
+  }
+  .jackpot::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 45%, rgba(200,255,47,.22) 0%, rgba(45,255,106,.12) 35%, rgba(0,0,0,.0) 70%);
+    opacity:0;
+    animation:jackGlow 1200ms steps(6,end) 1;
+  }
+  @keyframes jackFlash{
+    0%{filter:brightness(1); transform:translate(0,0)}
+    10%{filter:brightness(1.9); transform:translate(-1px,-1px)}
+    20%{filter:brightness(1.1); transform:translate(0,0)}
+    30%{filter:brightness(2.2); transform:translate(-2px,0)}
+    45%{filter:brightness(1.0); transform:translate(0,0)}
+    60%{filter:brightness(2.4); transform:translate(1px,-1px)}
+    75%{filter:brightness(1.05); transform:translate(0,0)}
+    100%{filter:brightness(1); transform:translate(0,0)}
+  }
+  @keyframes jackGlow{
+    0%{opacity:0}
+    18%{opacity:1}
+    40%{opacity:.15}
+    60%{opacity:.85}
+    85%{opacity:.08}
+    100%{opacity:0}
+  }
+  .jackpot-inner{
+    position:relative;
+    padding:18px 22px;
+    border-radius:18px;
+    border:1px solid var(--line);
+    box-shadow:0 10px 34px rgba(0,0,0,.55), 0 0 48px rgba(200,255,47,.18);
+    background:rgba(0,0,0,.72);
+    text-align:center;
+    overflow:hidden;
+  }
+  .jackpot-nums{
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    font-size:68px;
+    letter-spacing:6px;
+    color:var(--yellow);
+    text-shadow:0 0 14px rgba(200,255,47,.35), 0 0 34px rgba(200,255,47,.18);
+    line-height:1;
+  }
+  .jackpot-text{
+    margin-top:6px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#eaeaea;
+    font-size:14px;
+  }
+  .jackpot-sub{
+    margin-top:6px;
+    font-family:ui-monospace, Menlo, Consolas, monospace;
+    font-weight:950;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--yellow);
+    font-size:12px;
+    opacity:.92;
+  }
+
+  /* Mute button */
+  .mute{
+    width:44px;height:38px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.25);
+    color:var(--yellow);
+    font-weight:950;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    user-select:none;
+  }
+
+  /* Small screens tighten */
+  @media (max-width:420px){
+    .frame{padding:12px}
+    header{padding:9px 10px}
+    .pill{min-width:150px}
+    .sparkBox{height:110px}
+    button,.btnLink{min-width:140px}
+    .jackpot-nums{font-size:54px; letter-spacing:4px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bigLogo{animation:none !important;}
+    .degenBtn{animation:none !important; opacity:1}
+    .cursor{animation:none !important;}
+    .ready{animation:none !important;}
+  }
+</style>
 </head>
 
 <body>
+  <!-- overlays -->
+  <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
+  <div class="jackpot" id="jackpot" aria-hidden="true">
+    <div class="jackpot-inner">
+      <div class="jackpot-nums">777</div>
+      <div class="jackpot-text">GBARON JACKPOT</div>
+      <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
+    </div>
+  </div>
+
   <div class="stage">
     <div class="frame" id="frame">
+
       <header>
         <div class="brand">
-          <div class="title">Greenback <span style="opacity:.85">($GBACK)</span></div>
-          <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
+          <div class="brandLogo" title="logo">
+            <img src="logo.png" alt="Greenback logo">
+          </div>
+          <div class="brandText">
+            <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
+            <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
+          </div>
         </div>
 
         <div class="stats">
           <div class="pill" aria-label="Coins inserted">
             <div class="k">COINS INSERTED</div>
-            <div class="v"><span id="coinsInserted">0</span> <small>clicks</small></div>
+            <div class="v"><span id="coinsInserted">00</span> <small>clicks</small></div>
           </div>
           <div class="pill" aria-label="Rank">
             <div class="k">RANK</div>
-            <div class="v"><span id="rank">0</span> <small>lvl</small></div>
+            <div class="v"><span id="rank">00</span> <small>lvl</small></div>
           </div>
-          <div class="pill" aria-label="Degen mode">
-            <div class="k">DEGEN MODE</div>
-            <div class="v"><span id="degen">OFF</span> <small id="degenNote">—</small></div>
+          <div class="pill" aria-label="Sound">
+            <div class="k">SOUND</div>
+            <div class="v">
+              <button class="mute" id="muteBtn" type="button" aria-label="Toggle sound">🔊</button>
+              <small id="soundNote">on</small>
+            </div>
           </div>
         </div>
       </header>
 
       <div class="content">
-        <!-- Left: Fake pumping chart -->
+        <!-- LEFT -->
         <section class="card" aria-label="Fake chart that pumps on clicks">
-          <h2>📉 Fake Chart (Pumps on Clicks)</h2>
+          <h2>📉 Fake Chart (pumps on clicks)</h2>
 
-          <div class="chartWrap">
-            <div class="chartTop">
-              <div class="price">
-                <div class="big">
-                  <span id="price">$0.000420</span>
-                  <span class="pct" id="pct">+0.00%</span>
+          <div class="hero">
+            <div class="heroTop">
+              <div class="bigLogoWrap">
+                <div class="bigLogo" aria-label="big logo">
+                  <img src="logo.png" alt="Baron logo">
                 </div>
-                <div class="small" id="priceNote">Totally organic growth (trust me bro)</div>
-              </div>
-
-              <div class="sparkBox" aria-label="Sparkline chart">
-                <div class="sparkGlow"></div>
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Price line">
-                  <path id="sparkFill" d="" fill="rgba(110,231,255,.10)"></path>
-                  <path id="sparkLine" d="" fill="none" stroke="rgba(110,231,255,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
+                <div class="headline">
+                  <div class="h1">THE BARON ALWAYS EXITS FIRST</div>
+                  <div class="tagline">This is a meme landing page. Buttons do funny things. Nothing here is financial advice. Ever.</div>
+                </div>
               </div>
             </div>
 
-            <div class="actions">
-              <div class="btnRow">
-                <!-- Main requirement: coins increase on INSERT COINS -->
-                <button class="primary" id="btnInsert" aria-label="Insert coins">
-                  INSERT COINS
-                </button>
+            <div class="chartWrap">
+              <div class="chartTop">
+                <div class="price">
+                  <div class="big">
+                    <span id="price">$0.000420</span>
+                    <span class="pct" id="pct">+0.00%</span>
+                  </div>
+                  <div class="small" id="priceNote">Totally organic growth (trust me bro)</div>
+                </div>
 
-                <!-- Keep a degen toggle so we "don't break anything" logically -->
+                <div class="sparkBox" aria-label="Sparkline chart">
+                  <div class="sparkGlow"></div>
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Price line">
+                    <path id="sparkFill" class="sparkFill" d=""></path>
+                    <path id="sparkLine" class="sparkLine" d=""></path>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="actions">
+                <a class="btnLink primary" id="btnInsert" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Insert coins">
+                  <img class="btnIcon" src="pump.png" alt="" aria-hidden="true">
+                  <span>INSERT COINS</span>
+                </a>
+
                 <button class="ghost" id="btnDegen" aria-label="Activate degen mode">
                   ACTIVATE DEGEN
                 </button>
-              </div>
 
-              <!-- Meme Rug Pull button -->
-              <button class="danger" id="btnRug" aria-label="Rug pull (meme)">
-                💀 RUG PULL
-              </button>
+                <button class="danger" id="btnRug" aria-label="Rug pull (meme)">
+                  💀 RUG PULL
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- Right: Feed / info -->
-        <aside class="card rightCol" aria-label="Activity">
-          <h2>Activity Feed</h2>
-          <div class="panel">
-            <div class="hint">
-              • Each <b>INSERT COINS</b> pumps the fake chart and increases your <b>Rank</b>.<br/>
-              • <b>DEGEN</b> makes pumps wilder (still fake).<br/>
-              • <b>RUG PULL</b> is just memes (but it *will* nuke the chart 💀).
+        <!-- RIGHT -->
+        <aside class="card" aria-label="Terminal + Links">
+          <h2>Terminal / Links</h2>
+
+          <div class="side">
+            <div class="terminal" id="terminal" aria-label="status terminal">
+              <div><span class="prompt">&gt;</span> <span id="termLine1" class="dim"></span></div>
+              <div><span class="prompt">&gt;</span> <span id="termLine2" class="dim"></span></div>
+              <div><span class="prompt">&gt;</span> <span id="termLine3" class="dim"></span><span class="cursor"></span></div>
             </div>
 
-            <div class="log" id="log" aria-live="polite"></div>
+            <button class="degenBtn" id="degenBtn" type="button" aria-label="Activate degen">
+              ACTIVATE DEGEN!
+            </button>
+
+            <div class="counterRow">
+              <div class="miniPill" aria-label="Jackpot">
+                <div class="k">JACKPOT</div>
+                <div class="v"><span id="jpCountText">1/5</span> <span id="jpReady" style="display:none; margin-left:8px; color:var(--yellow);">READY!</span></div>
+              </div>
+              <div class="miniPill" aria-label="Status">
+                <div class="k">MEME STATUS</div>
+                <div class="v" id="memeStatus">NO RUGS FOUND</div>
+              </div>
+            </div>
+
+            <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
+              <span class="tooltip" id="tip">COPIED</span>
+              <div style="font-size:11px; font-weight:950; letter-spacing:.6px; opacity:.8;">CONTRACT</div>
+              <div class="caMono" id="caText"></div>
+            </button>
+
+            <div class="linkRow">
+              <a class="btnLink" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer">DEXSCREENER</a>
+              <a class="btnLink" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer">TWITTER</a>
+            </div>
+
+            <div style="color:var(--muted); font-size:12px; line-height:1.35;">
+              Tip: spam <b>INSERT COINS</b> to pump the chart. Hit <b>RUG PULL</b> for the villain arc. 💀
+            </div>
           </div>
         </aside>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- audio -->
+  <audio id="clickSfx" src="arcade.mp3" preload="auto"></audio>
+  <audio id="baronVoice" src="baron.mp3" preload="auto"></audio>
+  <audio id="laughSfx" src="laugh.mp3" preload="auto"></audio>
+  <audio id="jackpotSfx" src="jackpot.mp3" preload="auto"></audio>
 
-  <script>
-    // ====== State ======
-    const state = {
-      coinsInserted: 0,
-      rank: 0,
-      degen: false,
-      basePrice: 0.000420,
-      price: 0.000420,
-      lastPrice: 0.000420,
-      series: [],        // values for sparkline
-      seriesLen: 30,
-      allTimeHigh: 0.000420
-    };
+<script>
+/* =========================
+   CONFIG (yours)
+   ========================= */
+const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+const INSERT_URL = "https://pump.fun";
+const DEX_URL = "https://dexscreener.com";
+const X_URL = "https://x.com/";
+const TICKER = "$GBARON";
 
-    // ====== Elements ======
-    const elCoins = document.getElementById('coinsInserted');
-    const elRank  = document.getElementById('rank');
-    const elDegen = document.getElementById('degen');
-    const elDegenNote = document.getElementById('degenNote');
+const JACKPOT_CHANCE = 0.02; // 2% random
+const COMBO_TARGET = 5;       // guaranteed every 5 presses
+const COMBO_KEY = "gb_comboCount_fixed";
+const LAUGH_DELAY_MS = 170;
 
-    const elPrice = document.getElementById('price');
-    const elPct   = document.getElementById('pct');
-    const elPriceNote = document.getElementById('priceNote');
+const STATUS_LINES = [
+  "loading greenback protocol v0.0.1",
+  "syncing liquidity routes... OK",
+  "scanning degen index... OK",
+  "checking rugs... NOT FOUND",
+  "loading memes... OK",
+  "routing orders... STABLE"
+];
 
-    const elLine  = document.getElementById('sparkLine');
-    const elFill  = document.getElementById('sparkFill');
+/* =========================
+   WIRE DOM
+   ========================= */
+const elCoins = document.getElementById("coinsInserted");
+const elRank  = document.getElementById("rank");
+const elPrice = document.getElementById("price");
+const elPct   = document.getElementById("pct");
+const elPriceNote = document.getElementById("priceNote");
+const elLine  = document.getElementById("sparkLine");
+const elFill  = document.getElementById("sparkFill");
+const elMemeStatus = document.getElementById("memeStatus");
 
-    const elLog   = document.getElementById('log');
-    const elToast = document.getElementById('toast');
-    const elFrame = document.getElementById('frame');
+const btnInsert = document.getElementById("btnInsert");
+const btnDegen  = document.getElementById("btnDegen");
+const btnRug    = document.getElementById("btnRug");
 
-    const btnInsert = document.getElementById('btnInsert');
-    const btnDegen  = document.getElementById('btnDegen');
-    const btnRug    = document.getElementById('btnRug');
+const degenBtn = document.getElementById("degenBtn");
+const caBtn = document.getElementById("caBtn");
+const caText = document.getElementById("caText");
+const tip = document.getElementById("tip");
 
-    // ====== Helpers ======
-    function fmtPrice(n){
-      // keep it meme-y, but readable
-      if (n < 0.01) return '$' + n.toFixed(6);
-      if (n < 1)    return '$' + n.toFixed(4);
-      return '$' + n.toFixed(2);
-    }
+const dexBtn = document.getElementById("dexBtn");
+const xBtn = document.getElementById("xBtn");
 
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+btnInsert.href = INSERT_URL;
+dexBtn.href = DEX_URL;
+xBtn.href = X_URL;
+caText.textContent = CA;
 
-    function showToast(msg){
-      elToast.textContent = msg;
-      elToast.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => elToast.classList.remove('show'), 1100);
-    }
+/* =========================
+   COUNTERS (session)
+   ========================= */
+let coins = Number(sessionStorage.getItem("gb_coinCount") || "0");
+let rank  = Number(sessionStorage.getItem("gb_rankCount") || "0");
+function sane(n){ n=Number(n); return (Number.isFinite(n) && n>=0) ? Math.floor(n) : 0; }
+coins = sane(coins); rank = sane(rank);
 
-    function logLine(msg){
-      const p = document.createElement('p');
-      const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      p.innerHTML = `<b>${time}</b> — ${msg}`;
-      elLog.prepend(p);
-    }
+function renderCounts(){
+  elCoins.textContent = String(Math.min(99, coins)).padStart(2,"0");
+  elRank.textContent  = String(Math.min(99, rank)).padStart(2,"0");
+}
+function bumpCounts(){
+  coins = Math.min(99, coins + 1);
+  rank  = Math.min(99, rank + 1);
+  sessionStorage.setItem("gb_coinCount", String(coins));
+  sessionStorage.setItem("gb_rankCount", String(rank));
+  renderCounts();
+}
+renderCounts();
 
-    function ensureSeries(){
-      if (state.series.length === 0){
-        for (let i=0;i<state.seriesLen;i++){
-          state.series.push(state.price);
-        }
+/* =========================
+   JACKPOT (combo + random)
+   ========================= */
+const jackpotEl = document.getElementById("jackpot");
+const jackpotSub = document.getElementById("jackpotSub");
+const coinRain = document.getElementById("coinRain");
+const jpCountText = document.getElementById("jpCountText");
+const jpReady = document.getElementById("jpReady");
+let jackpotTimer = null;
+
+function safeGetCombo(){
+  const raw = Number(sessionStorage.getItem(COMBO_KEY) || "0");
+  if(!Number.isFinite(raw) || raw < 0 || raw > (COMBO_TARGET - 1)){
+    sessionStorage.setItem(COMBO_KEY, "0");
+    return 0;
+  }
+  return raw;
+}
+function comboStepAndCheckHit(){
+  let progress = safeGetCombo(); // 0..4
+  const willHitNow = (progress === (COMBO_TARGET - 1));
+  if(willHitNow){
+    sessionStorage.setItem(COMBO_KEY, "0");
+    return true;
+  }else{
+    progress += 1;
+    sessionStorage.setItem(COMBO_KEY, String(progress));
+    return false;
+  }
+}
+function renderJackpotCountdown(){
+  const progress = safeGetCombo(); // 0..4
+  const shown = progress + 1; // 1..5
+  jpCountText.textContent = String(shown) + "/" + String(COMBO_TARGET);
+  const ready = (shown === COMBO_TARGET);
+  jpReady.style.display = ready ? "inline" : "none";
+}
+renderJackpotCountdown();
+
+function spawnCoinRain(count = 38){
+  coinRain.innerHTML = "";
+  const W = window.innerWidth || 520;
+  const H = window.innerHeight || 700;
+  for(let i=0;i<count;i++){
+    const c = document.createElement("span");
+    c.className = "coin";
+    const left = Math.random() * W;
+    const size = 8 + Math.random() * 10;
+    const dur = 900 + Math.random() * 900;
+    const delay = Math.random() * 240;
+    const rot = 240 + Math.random() * 360;
+    c.style.left = left + "px";
+    c.style.width = size + "px";
+    c.style.height = size + "px";
+    coinRain.appendChild(c);
+    c.animate(
+      [
+        { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
+        { opacity: 1, offset: 0.12 },
+        { transform: "translateY(" + (H + 80) + "px) rotate(" + rot + "deg)", opacity: 0 }
+      ],
+      { duration: dur, delay, easing: "linear", fill: "forwards" }
+    );
+  }
+  setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
+}
+function triggerJackpot(reason){
+  jackpotSub.textContent = (reason === "combo")
+    ? ("COMBO WIN! YOU WON: 777 " + TICKER)
+    : ("YOU WON: 777 " + TICKER);
+
+  spawnCoinRain(42);
+  jackpotEl.classList.remove("show");
+  void jackpotEl.offsetWidth;
+  jackpotEl.classList.add("show");
+  clearTimeout(jackpotTimer);
+  jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
+
+  playJackpot();
+}
+
+/* =========================
+   FAKE CHART (session)
+   ========================= */
+const CHART_KEY = "gb_chart_state_v2";
+const state = {
+  base: 0.000420,
+  seriesLen: 30,
+  price: 0.000420,
+  last: 0.000420,
+  series: [],
+  ath: 0.000420
+};
+
+function loadChart(){
+  try{
+    const s = JSON.parse(sessionStorage.getItem(CHART_KEY) || "null");
+    if(s && typeof s === "object"){
+      if(Number.isFinite(Number(s.price)) && Number(s.price)>0) state.price = Number(s.price);
+      if(Number.isFinite(Number(s.last)) && Number(s.last)>0) state.last = Number(s.last);
+      if(Number.isFinite(Number(s.ath))  && Number(s.ath)>0)  state.ath = Number(s.ath);
+      if(Array.isArray(s.series)){
+        state.series = s.series.map(Number).filter(Number.isFinite);
       }
-      while (state.series.length > state.seriesLen) state.series.shift();
-      while (state.series.length < state.seriesLen) state.series.unshift(state.price);
     }
+  }catch(e){}
+}
+function saveChart(){
+  sessionStorage.setItem(CHART_KEY, JSON.stringify({
+    price: state.price,
+    last: state.last,
+    ath: state.ath,
+    series: state.series
+  }));
+}
+function fmtPrice(n){
+  if(n < 0.01) return "$" + n.toFixed(6);
+  if(n < 1) return "$" + n.toFixed(4);
+  return "$" + n.toFixed(2);
+}
+function ensureSeries(){
+  if(!state.series.length){
+    for(let i=0;i<state.seriesLen;i++) state.series.push(state.price);
+  }
+  while(state.series.length < state.seriesLen) state.series.unshift(state.price);
+  while(state.series.length > state.seriesLen) state.series.shift();
+}
+function sparkPath(values){
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = (max - min) || 1;
 
-    function sparkPath(values){
-      // normalize to 0..100 box
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const span = (max - min) || 1;
+  const pts = values.map((v,i)=>{
+    const x = (i/(values.length-1))*100;
+    const y = 100 - ((v - min)/span)*92 - 4;
+    return [x,y];
+  });
 
-      const pts = values.map((v, i) => {
-        const x = (i/(values.length-1))*100;
-        const y = 100 - ((v - min)/span)*92 - 4; // keep margins
-        return [x, y];
+  const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ");
+  const dFill = d + " L 100 100 L 0 100 Z";
+  return {d, dFill};
+}
+function updateChartUI(){
+  ensureSeries();
+  elPrice.textContent = fmtPrice(state.price);
+
+  const pct = ((state.price - state.last) / (state.last || state.price)) * 100;
+  const pctText = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
+  elPct.textContent = pctText;
+  elPct.classList.toggle("down", pct < 0);
+
+  state.ath = Math.max(state.ath, state.price);
+  elPriceNote.textContent = `ATH: ${fmtPrice(state.ath)} • Liquidity: imaginary`;
+
+  const p = sparkPath(state.series);
+  elLine.setAttribute("d", p.d);
+  elFill.setAttribute("d", p.dFill);
+}
+function pumpChart(isDegen=false){
+  const baseMove = 0.006;
+  const vol = isDegen ? 0.060 : 0.030;
+  const jitter = (Math.random()*vol) - (vol*0.18);
+  const pctMove = baseMove + jitter;
+
+  state.last = state.price;
+  state.price = Math.max(0.000001, state.price * (1 + pctMove));
+
+  state.series.push(state.price);
+  if(state.series.length > state.seriesLen) state.series.shift();
+
+  saveChart();
+  updateChartUI();
+}
+function rugPull(){
+  state.last = state.price;
+  const nuked = Math.max(state.base * 0.05, state.price * (0.05 + Math.random()*0.06));
+  state.price = nuked;
+
+  for(let i=0;i<5;i++){
+    state.series.push(state.price * (0.92 - Math.random()*0.08));
+  }
+  while(state.series.length > state.seriesLen) state.series.shift();
+
+  saveChart();
+  updateChartUI();
+
+  const box = document.querySelector(".sparkBox");
+  box.classList.remove("shake");
+  void box.offsetWidth;
+  box.classList.add("shake");
+
+  elMemeStatus.textContent = "RUGGED 💀";
+  setTimeout(()=>{ elMemeStatus.textContent = "NO RUGS FOUND"; }, 1800);
+}
+
+loadChart();
+ensureSeries();
+updateChartUI();
+
+/* =========================
+   AUDIO (your pools logic trimmed)
+   ========================= */
+const muteBtn = document.getElementById("muteBtn");
+const soundNote = document.getElementById("soundNote");
+
+let isMuted = (localStorage.getItem("gb_muted") === "1");
+function renderMute(){
+  muteBtn.textContent = isMuted ? "🔇" : "🔊";
+  soundNote.textContent = isMuted ? "off" : "on";
+}
+renderMute();
+
+muteBtn.addEventListener("click", ()=>{
+  isMuted = !isMuted;
+  localStorage.setItem("gb_muted", isMuted ? "1" : "0");
+  renderMute();
+});
+
+let audioUnlocked = false;
+let audioCtx = null;
+
+function unlockAudio(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+  }catch(e){}
+  initClickPool(); initLaughPool(); initJackpotPool();
+}
+window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
+window.addEventListener("touchstart", unlockAudio, {once:true, passive:true, capture:true});
+
+function beepFallback(){
+  if(isMuted) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "square";
+    o.frequency.value = 740;
+    g.gain.value = 0.05;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
+  }catch(e){}
+}
+
+const CLICK_POOL_SIZE = 6;
+const clickPool = [];
+let clickPoolIdx = 0;
+
+function initClickPool(){
+  if(clickPool.length) return;
+  for(let i=0;i<CLICK_POOL_SIZE;i++){
+    const a = new Audio("arcade.mp3");
+    a.preload = "auto";
+    a.volume = 0.85;
+    clickPool.push(a);
+  }
+}
+function playClick(volume=0.85){
+  if(isMuted) return;
+  unlockAudio();
+  try{
+    initClickPool();
+    const a = clickPool[clickPoolIdx % clickPool.length];
+    clickPoolIdx++;
+    a.pause(); a.currentTime = 0; a.volume = volume;
+    const p = a.play();
+    if(p && typeof p.catch === "function") p.catch(()=>beepFallback());
+  }catch{ beepFallback(); }
+}
+
+function playBaron(){
+  if(isMuted) return;
+  unlockAudio();
+  try{
+    const a = new Audio("baron.mp3");
+    a.preload = "auto"; a.volume = 0.75;
+    const p = a.play();
+    if(p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(e){}
+}
+
+const LAUGH_POOL_SIZE = 2;
+const laughPool = [];
+let laughPoolIdx = 0;
+
+function initLaughPool(){
+  if(laughPool.length) return;
+  for(let i=0;i<LAUGH_POOL_SIZE;i++){
+    const a = new Audio("laugh.mp3");
+    a.preload = "auto";
+    a.volume = 0.9;
+    laughPool.push(a);
+  }
+}
+function stopLaugh(){
+  try{ laughPool.forEach(a=>{ a.pause(); a.currentTime = 0; }); }catch(e){}
+}
+function playLaugh(){
+  if(isMuted) return;
+  unlockAudio();
+  try{
+    initLaughPool();
+    stopLaugh();
+    const a = laughPool[laughPoolIdx % laughPool.length];
+    laughPoolIdx++;
+    a.currentTime = 0;
+    const p = a.play();
+    if(p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(e){}
+}
+
+const JACKPOT_POOL_SIZE = 2;
+const jackpotPool = [];
+let jackpotPoolIdx = 0;
+
+function initJackpotPool(){
+  if(jackpotPool.length) return;
+  for(let i=0;i<JACKPOT_POOL_SIZE;i++){
+    const a = new Audio("jackpot.mp3");
+    a.preload = "auto";
+    a.volume = 0.95;
+    jackpotPool.push(a);
+  }
+}
+function stopJackpot(){
+  try{ jackpotPool.forEach(a=>{ a.pause(); a.currentTime = 0; }); }catch(e){}
+}
+function playJackpot(){
+  if(isMuted) return;
+  unlockAudio();
+  try{
+    initJackpotPool();
+    stopJackpot();
+    const a = jackpotPool[jackpotPoolIdx % jackpotPool.length];
+    jackpotPoolIdx++;
+    a.currentTime = 0;
+    const p = a.play();
+    if(p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(e){}
+}
+
+/* =========================
+   TERMINAL LOOP (your vibe)
+   ========================= */
+let statusIdx = 0;
+const line1 = document.getElementById("termLine1");
+const line2 = document.getElementById("termLine2");
+const line3 = document.getElementById("termLine3");
+
+const LOOP_MS = 10000;
+let easterMode = false;
+
+function typeText(el, text, speed, done){
+  let i = 0;
+  el.textContent = "";
+  const t = setInterval(()=>{
+    el.textContent += (text[i++] || "");
+    if(i >= text.length){
+      clearInterval(t);
+      done && done();
+    }
+  }, speed);
+  return t;
+}
+function setReadyLine(){
+  line3.textContent = "status: ";
+  const s = document.createElement("span");
+  s.className = "ready";
+  s.textContent = "READY";
+  line3.appendChild(s);
+}
+let cycleTimers = [];
+function clearCycle(){
+  cycleTimers.forEach(id=>{ clearInterval(id); clearTimeout(id); });
+  cycleTimers = [];
+}
+function runCycle(){
+  clearCycle();
+
+  const statusLine = STATUS_LINES[statusIdx % STATUS_LINES.length];
+  statusIdx++;
+
+  const l1 = easterMode ? "ACCESS GRANTED..." : "initializing terminal on solana...";
+  const l2 = easterMode ? "DEGEN MODE: ACTIVE" : statusLine;
+
+  line1.textContent = "";
+  line2.textContent = "";
+  line3.textContent = "";
+
+  const t1 = typeText(line1, l1, 16, ()=>{
+    const t2 = setTimeout(()=>{
+      const t2i = typeText(line2, l2, 13, ()=>{
+        const t3 = setTimeout(()=>{
+          typeText(line3, "status: ", 14, ()=> setReadyLine());
+        }, 120);
+        cycleTimers.push(t3);
       });
+      cycleTimers.push(t2i);
+    }, 120);
+    cycleTimers.push(t2);
+  });
+  cycleTimers.push(t1);
+}
+runCycle();
+setInterval(runCycle, LOOP_MS);
 
-      const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' ');
-      const dFill = d + ` L 100 100 L 0 100 Z`;
-      return { d, dFill, min, max };
+/* =========================
+   COPY CA
+   ========================= */
+let tipTimer;
+function showTip(text){
+  tip.textContent = text;
+  tip.classList.add("show");
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(()=> tip.classList.remove("show"), 900);
+}
+const canClipboard = !!(navigator.clipboard && window.isSecureContext);
+
+let laughTimer = null;
+caBtn.addEventListener("click", async ()=>{
+  playClick();
+  try{
+    if(canClipboard){
+      await navigator.clipboard.writeText(CA);
+    }else{
+      throw new Error("clipboard not available");
     }
-
-    function updateUI(){
-      elCoins.textContent = String(state.coinsInserted);
-      elRank.textContent  = String(state.rank);
-
-      elDegen.textContent = state.degen ? 'ON' : 'OFF';
-      elDegenNote.textContent = state.degen ? 'wilder pumps' : 'safe-ish';
-
-      elPrice.textContent = fmtPrice(state.price);
-
-      const pct = ((state.price - state.lastPrice) / state.lastPrice) * 100;
-      const pctText = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-      elPct.textContent = pctText;
-
-      // color-ish by changing background via inline style (no fixed palette change needed)
-      if (pct >= 0){
-        elPct.style.background = 'rgba(51,209,122,.12)';
-        elPct.style.color = 'var(--good)';
-      } else {
-        elPct.style.background = 'rgba(255,77,109,.12)';
-        elPct.style.color = 'var(--bad)';
-      }
-
-      state.allTimeHigh = Math.max(state.allTimeHigh, state.price);
-      elPriceNote.textContent = `ATH: ${fmtPrice(state.allTimeHigh)} • Liquidity: imaginary`;
-
-      ensureSeries();
-      const paths = sparkPath(state.series);
-      elLine.setAttribute('d', paths.d);
-      elFill.setAttribute('d', paths.dFill);
+  }catch{
+    try{
+      const t=document.createElement("textarea");
+      t.value=CA;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      document.body.removeChild(t);
+    }catch{
+      window.prompt("Copy CA:", CA);
     }
+  }
+  showTip("BARON APPROVES\nSEE YOU AT ATH!");
+  clearTimeout(laughTimer);
+  laughTimer = setTimeout(()=> playLaugh(), LAUGH_DELAY_MS);
+});
 
-    // ====== Pump / Rug logic ======
-    function pump(){
-      state.coinsInserted += 1;
-      state.rank += 1;
+/* =========================
+   BUTTON LOGIC
+   ========================= */
+let degenResetTimer = null;
 
-      state.lastPrice = state.price;
+function setDegenActivatedTemp(){
+  degenBtn.classList.add("activated");
+  degenBtn.textContent = "ACTIVATED";
+  clearTimeout(degenResetTimer);
+  degenResetTimer = setTimeout(()=>{
+    degenBtn.classList.remove("activated");
+    degenBtn.textContent = "ACTIVATE DEGEN!";
+  }, 10000);
+}
 
-      // Pump amount (fake): small baseline + randomness; DEGEN increases volatility.
-      const base = 0.004; // ~0.4% baseline
-      const vol  = state.degen ? 0.040 : 0.018; // degen = more insane
-      const jitter = (Math.random() * vol) - (vol * 0.25); // slightly biased up
-      const pctMove = base + jitter;
+btnInsert.addEventListener("click", ()=>{
+  playClick();
+  bumpCounts();           // ✅ coins + rank go up on INSERT
+  pumpChart(degenBtn.classList.contains("activated")); // chart pumps
+  renderJackpotCountdown();
+});
 
-      state.price = Math.max(0.000001, state.price * (1 + pctMove));
+btnDegen.addEventListener("click", ()=>{
+  playClick();
+  // toggles chart volatility for clicks; degen button on right is the "event" one
+  const active = degenBtn.classList.contains("activated");
+  if(active){
+    degenBtn.classList.remove("activated");
+    degenBtn.textContent = "ACTIVATE DEGEN!";
+    easterMode = false;
+    runCycle();
+    elMemeStatus.textContent = "NO RUGS FOUND";
+  }else{
+    setDegenActivatedTemp();
+    easterMode = true;
+    runCycle();
+    elMemeStatus.textContent = "DEGEN OVERDRIVE";
+    setTimeout(()=>{ easterMode = false; }, 14000);
+  }
+});
 
-      // series update
-      state.series.push(state.price);
-      if (state.series.length > state.seriesLen) state.series.shift();
+btnRug.addEventListener("click", ()=>{
+  playClick(0.9);
+  rugPull();
+});
 
-      logLine(`Inserted coin 🪙 — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
-      showToast('PUMPED 📈');
-      updateUI();
-    }
+/* Right-side DEGEN button = jackpot logic + baron voice */
+let degenLock = false;
 
-    function toggleDegen(){
-      state.degen = !state.degen;
-      logLine(state.degen ? `DEGEN MODE <b>ON</b> 😈` : `DEGEN MODE <b>OFF</b> 😇`);
-      showToast(state.degen ? 'DEGEN ON 😈' : 'DEGEN OFF 😇');
-      updateUI();
-    }
+function handleDegenActivate(e){
+  if(e) e.preventDefault?.();
+  unlockAudio();
 
-    function rugPull(){
-      state.lastPrice = state.price;
+  if(degenBtn.classList.contains("activated")) return;
+  if(degenLock) return;
+  degenLock = true;
+  setTimeout(()=>{ degenLock = false; }, 350);
 
-      // nuke it
-      const nuked = Math.max(state.basePrice * 0.25, state.price * (0.06 + Math.random()*0.05));
-      state.price = nuked;
+  playClick();
+  setDegenActivatedTemp();
 
-      // make the chart plunge hard (fill series with lower values quickly)
-      for (let i=0;i<4;i++){
-        state.series.push(state.price * (0.95 - Math.random()*0.05));
-      }
-      while (state.series.length > state.seriesLen) state.series.shift();
+  const comboHit = comboStepAndCheckHit();
+  const randomHit = (!comboHit && (Math.random() < JACKPOT_CHANCE));
 
-      elFrame.classList.remove('shake');
-      void elFrame.offsetWidth; // restart animation
-      elFrame.classList.add('shake');
-      elFrame.classList.add('blinkRed');
-      setTimeout(()=>elFrame.classList.remove('blinkRed'), 560);
+  renderJackpotCountdown();
 
-      logLine(`💀 <b>RUG PULL</b> — liquidity vanished into the void`);
-      showToast('RUGGED 💀');
-      updateUI();
-    }
+  if(comboHit || randomHit){
+    triggerJackpot(comboHit ? "combo" : "random");
+  }else{
+    playBaron();
+  }
 
-    // ====== Events ======
-    btnInsert.addEventListener('click', pump);
-    btnDegen.addEventListener('click', toggleDegen);
-    btnRug.addEventListener('click', rugPull);
+  easterMode = true;
+  runCycle();
+  setTimeout(()=>{ easterMode = false; }, 14000);
+}
 
-    // ====== Init ======
-    // seed series + first render
-    ensureSeries();
-    updateUI();
-    logLine(`Booted $GBACK terminal — ready to insert coins 🪙`);
-  </script>
+degenBtn.addEventListener("click", handleDegenActivate, {passive:false});
+degenBtn.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    handleDegenActivate(e);
+  }
+});
+
+// Also: pump chart when user clicks DEGEN (because vibes)
+degenBtn.addEventListener("click", ()=>{
+  pumpChart(true);
+});
+
+</script>
 </body>
 </html>
