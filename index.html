@@ -51,6 +51,7 @@ body::after{
   justify-content:center;
   padding:18px;
   padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  overflow:auto; /* ✅ allow safe scrolling if needed */
 }
 
 .card{
@@ -419,9 +420,11 @@ button.btn{background:none;font:inherit;outline:none;appearance:none}
 
 @media (max-width:420px){
   .wrap{
+    min-height:100dvh;         /* ✅ dynamic viewport height */
     align-items:flex-start;
     padding:12px;
     padding-bottom:calc(32px + env(safe-area-inset-bottom));
+    overflow:auto;             /* ✅ never clip content */
   }
   .card{
     padding:12px;
@@ -798,10 +801,22 @@ function playJackpot(){
   }catch(e){}
 }
 
+/* ✅ CLICK HANDLERS:
+   - insertBtn: playClick + bumpCoinCount + pulseInsertCoins
+   - others: playClick only
+*/
 ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
   const el = document.getElementById(id);
   if(!el) return;
-  el.addEventListener("click", ()=>{ playClick(); });
+
+  el.addEventListener("click", ()=>{
+    playClick();
+
+    if(id === "insertBtn"){
+      bumpCoinCount();
+      pulseInsertCoins();
+    }
+  });
 });
 
 // COPY CA
@@ -1089,7 +1104,7 @@ function handleDegenActivate(e){
   playClick();
   setDegenActivatedTemp();
   pulseInsertCoins();
-  bumpCoinCount();
+  // ✅ coin count no longer increments here
 
   const comboHit = comboStepAndCheckHit();
   const randomHit = (!comboHit && (Math.random() < JACKPOT_CHANCE));
