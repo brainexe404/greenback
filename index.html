@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Greenback ($GBACK)</title>
 <style>
 *,*::before,*::after{box-sizing:border-box}
@@ -14,9 +14,18 @@
   --yellow:#c8ff2f;
   --green:#2dff6a;
 }
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial, Helvetica, sans-serif;}
-/* Extra bottom padding safety for mobile UI bars */
-body{padding-bottom:env(safe-area-inset-bottom);}
+
+html,body{height:100%; margin:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:Arial, Helvetica, sans-serif;
+  /* Prevent “bottom cut off” on mobile + allow scrolling */
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:env(safe-area-inset-bottom);
+}
 
 /* CRT overlay */
 body::before{
@@ -40,20 +49,29 @@ body::after{
 /* keep content above CRT */
 .wrap,.card{position:relative;z-index:5}
 
-/* Viewport-safe wrapper */
+/*
+  ✅ KEY FIX:
+  Use a fixed, viewport-bound wrapper that *always* matches the visible screen.
+  This avoids iOS/Safari “100vh” bugs and ensures the bottom is reachable.
+*/
 .wrap{
-  min-height:100vh;
-  min-height:100svh;
-  min-height:100dvh;
-  height:auto;
+  position:fixed;
+  inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:18px;
+  padding-top:calc(18px + env(safe-area-inset-top));
   padding-bottom:calc(24px + env(safe-area-inset-bottom));
-  overflow:auto; /* ✅ allow safe scrolling if needed */
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 
+/*
+  ✅ Card is capped to the available viewport height.
+  If content ever exceeds, the wrapper scrolls — never gets cut off.
+*/
 .card{
   width:100%;
   max-width:520px;
@@ -63,6 +81,9 @@ body::after{
   padding:18px;
   text-align:center;
   position:relative;
+
+  /* keep fully visible within viewport padding */
+  max-height:calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 /* FULL-SCREEN COIN RAIN LAYER */
@@ -420,16 +441,16 @@ button.btn{background:none;font:inherit;outline:none;appearance:none}
 
 @media (max-width:420px){
   .wrap{
-    min-height:100dvh;         /* ✅ dynamic viewport height */
     align-items:flex-start;
     padding:12px;
-    padding-bottom:calc(32px + env(safe-area-inset-bottom));
-    overflow:auto;             /* ✅ never clip content */
+    padding-top:calc(12px + env(safe-area-inset-top));
+    padding-bottom:calc(18px + env(safe-area-inset-bottom));
   }
   .card{
     padding:12px;
     margin-top:6px;
-    margin-bottom:calc(18px + env(safe-area-inset-bottom));
+    /* allow a bit more breathing room */
+    max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   .logo{
     width:clamp(128px, 22dvh, 165px);
@@ -801,10 +822,6 @@ function playJackpot(){
   }catch(e){}
 }
 
-/* ✅ CLICK HANDLERS:
-   - insertBtn: playClick + bumpCoinCount + pulseInsertCoins
-   - others: playClick only
-*/
 ["insertBtn","dexBtn","xBtn","muteBtn"].forEach(id=>{
   const el = document.getElementById(id);
   if(!el) return;
@@ -813,8 +830,8 @@ function playJackpot(){
     playClick();
 
     if(id === "insertBtn"){
-      bumpCoinCount();
-      pulseInsertCoins();
+      bumpCoinCount();      // ✅ coin count increments here
+      pulseInsertCoins();   // optional: feels good
     }
   });
 });
