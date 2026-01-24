@@ -3,623 +3,315 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Baron Greenback ($GBARON) — MOBILE</title>
+<title>Baron Greenback ($GBARON)</title>
 
 <style>
-  *,*::before,*::after{box-sizing:border-box}
-  :root{
-    --bg:#070b10;
-    --panel:#0d1320;
-    --text:#eaf2ff;
-    --muted:#93a4c7;
-    --line:rgba(255,255,255,.10);
-    --good:#2dff6a;
-    --warn:#c8ff2f;
-    --bad:#ff4d6d;
-    --shadow: 0 14px 40px rgba(0,0,0,.55);
-    --r:18px;
-    --mono: ui-monospace, Menlo, Consolas, "SF Mono", monospace;
-  }
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#070b10;
+  --panel:#0d1320;
+  --text:#eaf2ff;
+  --muted:#93a4c7;
+  --line:rgba(255,255,255,.10);
+  --good:#2dff6a;
+  --warn:#c8ff2f;
+  --bad:#ff4d6d;
+  --mono: ui-monospace, Menlo, Consolas, "SF Mono", monospace;
+}
+html,body{height:100%;margin:0}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:radial-gradient(900px 520px at 20% -10%, rgba(110,231,255,.14), transparent 55%),var(--bg);
+  color:var(--text);
+}
 
-  html,body{height:100%;margin:0}
-  body{
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background:
-      radial-gradient(900px 520px at 20% -10%, rgba(110,231,255,.16), transparent 55%),
-      radial-gradient(700px 420px at 85% 10%, rgba(167,139,250,.16), transparent 60%),
-      radial-gradient(700px 420px at 50% 110%, rgba(45,255,106,.10), transparent 60%),
-      var(--bg);
-    color:var(--text);
-    overflow:hidden;
-  }
+/* ===== LAYOUT ===== */
+.stage{
+  min-height:100dvh;
+  padding:10px env(safe-area-inset-right) 14px env(safe-area-inset-left);
+  display:flex;
+  justify-content:center;
+}
+.frame{
+  width:100%;
+  max-width:520px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(0,0,0,.25);
+  overflow:hidden;
+}
 
-  /* CRT overlay */
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
-    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 3px 6px);
-    opacity:.07;mix-blend-mode:overlay;
-  }
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid var(--line);
+}
+.brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  min-width:0;
+}
+.brand img{
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
+}
+.brandText{
+  min-width:0;
+}
+.brandText b{
+  display:block;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.brandText span{
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+}
 
-  .stage{
-    height:100dvh;
-    padding:10px;
-    padding-top:calc(10px + env(safe-area-inset-top));
-    padding-bottom:calc(10px + env(safe-area-inset-bottom));
-    display:flex;
-    justify-content:center;
-    align-items:stretch;
-    position:relative;
-    z-index:5;
-  }
+/* ===== SOUND ===== */
+.soundToggle{
+  width:46px;height:26px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  position:relative;
+  background:rgba(255,255,255,.05);
+}
+.soundToggle::after{
+  content:"";
+  position:absolute;top:2px;left:2px;
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  transition:.15s;
+}
+.soundToggle.on::after{transform:translateX(20px);background:var(--good)}
 
-  .frame{
-    width:100%;
-    max-width:520px;
-    height:100%;
-    border-radius:22px;
-    border:1px solid var(--line);
-    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-    box-shadow:var(--shadow);
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    min-height:0;
-  }
+/* ===== CARDS ===== */
+.card{
+  margin:10px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+}
 
-  /* ===== HEADER (compact) ===== */
-  .header{
-    padding:10px;
-    border-bottom:1px solid var(--line);
-    background:rgba(0,0,0,.22);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .brandLink{
-    display:flex;align-items:center;gap:10px;min-width:0;
-    text-decoration:none;color:inherit;
-  }
-  .avatar{
-    width:38px;height:38px;border-radius:12px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    overflow:hidden;flex:0 0 auto;
-  }
-  .avatar img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-  .brandText{min-width:0;display:flex;flex-direction:column;gap:2px}
-  .title{
-    font-weight:1000;font-size:14px;line-height:1.05;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .sub{
-    font-size:11px;color:var(--muted);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
+/* ===== STATS ===== */
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px;
+}
+.stat .k{font-size:10px;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-weight:900;font-size:15px}
 
-  .soundPill{
-    display:flex;align-items:center;gap:8px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    padding:7px 9px;
-    border-radius:14px;
-    flex:0 0 auto;
-  }
-  .soundLabel{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:900}
-  .soundToggle{
-    height:28px;width:48px;border-radius:999px;border:1px solid var(--line);
-    background:rgba(0,0,0,.20);position:relative;cursor:pointer;user-select:none;
-  }
-  .soundToggle::after{
-    content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:999px;
-    background:rgba(255,255,255,.10);border:1px solid var(--line);
-    transition:transform .16s ease, background .16s ease;
-  }
-  .soundToggle.on::after{transform:translateX(18px); background:rgba(45,255,106,.18)}
+/* ===== PRICE ===== */
+.priceRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border-top:1px solid var(--line);
+}
+.priceRow .big{font-family:var(--mono);font-weight:900}
+.priceRow .pct{
+  font-family:var(--mono);
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(45,255,106,.15);
+  color:var(--good);
+}
 
-  /* ===== CONTENT ===== */
-  .content{
-    flex:1;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    padding:10px;
-    overflow:hidden;
-  }
+/* ===== BUTTONS ===== */
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px;
+}
+.btn{
+  border:none;
+  border-radius:16px;
+  padding:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.insert{background:var(--good)}
+.degen{background:var(--warn)}
+.rug{
+  grid-column:1/-1;
+  background:linear-gradient(135deg,#441a1f,#201010);
+  color:#fff;
+}
 
-  .card{
-    border:1px solid var(--line);
-    background:rgba(0,0,0,.22);
-    border-radius:18px;
-    overflow:hidden;
-  }
+/* ===== CA ===== */
+.caBtn{
+  padding:12px;
+  text-align:left;
+  font-family:var(--mono);
+  cursor:pointer;
+}
+.caBtn .label{font-size:11px;color:var(--muted)}
+.caBtn .addr{
+  margin-top:4px;
+  word-break:break-all;
+  font-size:13px;
+}
 
-  /* ===== STATS (compact grid) ===== */
-  .stats{
-    padding:10px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-  .pill{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    border-radius:14px;
-    padding:8px 10px;
-    min-width:0;
-  }
-  .k{font-size:10px;color:var(--muted);letter-spacing:.5px;font-weight:900}
-  .v{
-    margin-top:2px;
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:15px;
-    display:flex;align-items:baseline;gap:8px;
-    white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis;
-  }
-  .rank-white{color:#fff}
-  .rank-yellow{color:var(--warn)}
-  .rank-green{color:var(--good)}
+/* ===== LINKS ===== */
+.links{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px;
+}
+.links .pump{grid-column:1/-1}
+.link{
+  padding:12px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:900;
+  border:1px solid var(--line);
+}
+.dex{background:var(--good)}
+.tw{background:var(--warn);color:#000}
 
-  /* ===== PRICE BAR ===== */
-  .priceBar{
-    padding:10px;
-    border-top:1px solid var(--line);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .priceLeft{min-width:0}
-  .priceBig{
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:18px;
-    line-height:1.1;
-  }
-  .note{
-    margin-top:2px;
-    font-size:11px;
-    color:var(--muted);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .pct{
-    font-size:11px;font-weight:1000;
-    padding:4px 8px;border-radius:999px;
-    border:1px solid var(--line);
-    background:rgba(45,255,106,.10);
-    color:var(--good);
-    font-family:var(--mono);
-    flex:0 0 auto;
-  }
-
-  /* ===== BUTTONS (tighter) ===== */
-  .actions{
-    padding:10px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-  .btn{
-    appearance:none;border:none;border-radius:16px;
-    padding:12px 12px;
-    font-weight:1000;letter-spacing:.3px;
-    cursor:pointer;
-    color:#fff;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.06);
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    user-select:none;-webkit-tap-highlight-color: transparent;
-    transition:transform .06s ease, filter .2s ease;
-  }
-  .btn:active{transform:translateY(1px) scale(.99)}
-  .btn.insert{
-    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
-    border-color:rgba(45,255,106,.55);
-  }
-  .btn.degen{
-    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
-    border-color:rgba(200,255,47,.55);
-  }
-  .btn.rug{
-    grid-column:1 / -1;
-    background:linear-gradient(135deg, rgba(255,77,109,.20), rgba(255,176,0,.10));
-    border-color:rgba(255,77,109,.28);
-    padding:11px 12px;
-  }
-
-  /* ===== CA (clean copy bar) ===== */
-  .caWrap{padding:10px; display:flex;flex-direction:column;gap:6px}
-  .caBtn{
-    width:100%;
-    border-radius:16px;
-    border:1px solid rgba(200,255,47,.22);
-    background:
-      radial-gradient(800px 220px at 10% 30%, rgba(200,255,47,.14), transparent 45%),
-      rgba(255,255,255,.04);
-    padding:12px 12px;
-    cursor:pointer;
-    color:var(--text);
-    position:relative;
-    user-select:none;-webkit-tap-highlight-color: transparent;
-    text-align:left;
-    overflow:hidden;
-  }
-  .caTop{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    font-family:var(--mono);font-weight:1000;font-size:11px;letter-spacing:.7px;text-transform:uppercase;
-    color:rgba(255,255,255,.78);
-    margin-bottom:6px;
-  }
-  .caBig{
-    font-family:var(--mono);
-    font-weight:1000;
-    font-size:13px;
-    letter-spacing:.2px;
-    line-height:1.2;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  .tapHint{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase}
-  .toast{
-    position:absolute;top:10px;right:10px;
-    font-family:var(--mono);font-weight:1000;font-size:10px;letter-spacing:.6px;text-transform:uppercase;
-    background:rgba(0,0,0,.70);border:1px solid var(--line);
-    padding:6px 8px;border-radius:999px;
-    opacity:0;transform:translateY(-4px);
-    transition:opacity .14s ease, transform .14s ease;
-    pointer-events:none;color:var(--warn);
-  }
-  .toast.show{opacity:1; transform:translateY(0)}
-
-  /* ===== LINKS (3-grid) ===== */
-  .links{
-    padding:10px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-  }
-  .linkBtn{
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    border-radius:16px;border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    padding:12px 10px;
-    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
-    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
-    text-decoration:none;color:#fff;
-    min-width:0;
-  }
-  .linkBtn.pump{grid-column:1 / -1;}
-  .linkBtn.dex{
-    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.72));
-    border-color:rgba(45,255,106,.55);
-  }
-  .linkBtn.tw{
-    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
-    border-color:rgba(200,255,47,.55);
-  }
-  .ico{width:20px;height:20px;image-rendering:pixelated}
-
-  /* ===== TERMINAL (collapsible drawer) ===== */
-  .termHeader{
-    padding:10px;
-    display:flex;align-items:center;justify-content:space-between;
-    font-family:var(--mono);
-    text-transform:uppercase;
-    letter-spacing:.6px;
-    font-weight:1000;
-    color:var(--muted);
-    cursor:pointer;
-    user-select:none;
-    border-top:1px solid var(--line);
-    background:rgba(255,255,255,.03);
-  }
-  .termBody{
-    max-height:0;
-    overflow:hidden;
-    transition:max-height .22s ease;
-  }
-  .termBody.open{max-height:220px;}
-  .term{
-    padding:10px;
-    font-family:var(--mono);
-    font-size:12px;
-    line-height:1.45;
-    color:#cfd7ea;
-    border-top:1px solid var(--line);
-  }
-  .termLine{display:flex;gap:8px;align-items:baseline}
-  .prompt{color:var(--warn);font-weight:1000}
-  .dim{color:#94a4c2}
-  .cursor{
-    display:inline-block;width:8px;height:12px;background:var(--warn); margin-left:6px;
-    transform:translateY(2px);
-    animation:cursorPulse .75s steps(2,end) infinite;
-    box-shadow:0 0 10px rgba(200,255,47,.18);
-  }
-  @keyframes cursorPulse{0%{opacity:1}50%{opacity:.22}100%{opacity:1}}
-
-  @media (prefers-reduced-motion: reduce){
-    .cursor{animation:none !important}
-  }
+/* ===== TERMINAL ===== */
+.termHead{
+  padding:10px;
+  font-family:var(--mono);
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
+.termBody{
+  display:none;
+  padding:10px;
+  font-family:var(--mono);
+  font-size:12px;
+}
+.termBody.open{display:block}
+.termLine{color:#cfd7ea}
+.prompt{color:var(--warn)}
 </style>
 </head>
 
 <body>
 <div class="stage">
-  <div class="frame">
+<div class="frame">
 
-    <div class="header">
-      <a class="brandLink" id="topPumpLink" href="https://pump.fun" target="_blank" rel="noopener noreferrer">
-        <div class="avatar"><img src="logo.png" alt=""></div>
-        <div class="brandText">
-          <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
-          <div class="sub">arcade mode • tap everything • don’t get rugged 💀</div>
-        </div>
-      </a>
-
-      <div class="soundPill">
-        <div class="soundLabel"><span id="soundState">on</span></div>
-        <div class="soundToggle on" id="soundToggle" role="switch" aria-checked="true" tabindex="0"></div>
-      </div>
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <img src="logo.png">
+    <div class="brandText">
+      <b>Baron Greenback ($GBARON)</b>
+      <span>arcade mode • tap everything</span>
     </div>
+  </div>
+  <div id="soundToggle" class="soundToggle on"></div>
+</div>
 
-    <div class="content">
-      <div class="card">
-        <div class="stats">
-          <div class="pill">
-            <div class="k">COINS</div>
-            <div class="v"><span id="coinsInserted">0</span> <span style="font-size:11px;color:var(--muted);font-weight:900">clicks</span></div>
-          </div>
-          <div class="pill">
-            <div class="k">RANK</div>
-            <div class="v"><span id="rank" class="rank-white">paperhands</span></div>
-          </div>
-        </div>
-        <div class="priceBar">
-          <div class="priceLeft">
-            <div class="k">FAKE PRICE</div>
-            <div class="priceBig" id="price">$0.000001</div>
-            <div class="note" id="priceNote">Totally organic growth (trust me bro)</div>
-          </div>
-          <div class="pct" id="pct">+0.00%</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="actions">
-          <button class="btn insert" id="btnInsert">🪙 INSERT</button>
-          <button class="btn degen" id="btnDegen">⚡ <span id="degenLabel">DEGEN</span></button>
-          <button class="btn rug" id="btnRug">💀 RUG PULL</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="caWrap">
-          <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
-            <span class="toast" id="toast">THE BARON APPROVES • SEE YOU AT ATH!</span>
-            <div class="caTop">
-              <span>CA</span>
-              <span style="color:var(--warn)">$GBARON</span>
-            </div>
-            <div class="caBig" id="caText"></div>
-          </button>
-          <div class="tapHint">Tap to copy</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="links">
-          <a class="linkBtn pump" id="pumpBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer">
-            <img class="ico" src="pump.png" alt="" aria-hidden="true"> PUMP.FUN
-          </a>
-          <a class="linkBtn dex" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer">
-            <img class="ico" src="dex.png" alt="" aria-hidden="true"> DEX
-          </a>
-          <a class="linkBtn tw" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer">
-            <img class="ico" src="x.png" alt="" aria-hidden="true"> X
-          </a>
-        </div>
-
-        <div class="termHeader" id="termToggle">
-          <span>TERMINAL</span>
-          <span id="termChevron">▾</span>
-        </div>
-        <div class="termBody" id="termBody">
-          <div class="term">
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t1">INITIALIZING TERMINAL…</span></div>
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t2">THE BARON ALWAYS EXITS FIRST</span></div>
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t3">READY FOR COINS… INSERT TO BEGIN</span><span class="cursor"></span></div>
-          </div>
-        </div>
-      </div>
-
+<!-- STATS -->
+<div class="card">
+  <div class="stats">
+    <div class="stat">
+      <div class="k">COINS</div>
+      <div class="v" id="coins">0</div>
     </div>
+    <div class="stat">
+      <div class="k">RANK</div>
+      <div class="v" id="rank">paperhands</div>
+    </div>
+  </div>
+  <div class="priceRow">
+    <div class="big" id="price">$0.000001</div>
+    <div class="pct" id="pct">+0.00%</div>
   </div>
 </div>
 
+<!-- ACTIONS -->
+<div class="card">
+  <div class="actions">
+    <button class="btn insert" id="insert">🪙 INSERT</button>
+    <button class="btn degen" id="degen">⚡ DEGEN</button>
+    <button class="btn rug" id="rug">💀 RUG PULL</button>
+  </div>
+</div>
+
+<!-- CA -->
+<div class="card">
+  <div class="caBtn" id="caBtn">
+    <div class="label">CA — $GBARON</div>
+    <div class="addr" id="ca"></div>
+  </div>
+</div>
+
+<!-- LINKS -->
+<div class="card">
+  <div class="links">
+    <a class="link pump" href="https://pump.fun" target="_blank">PUMP.FUN</a>
+    <a class="link dex" href="https://dexscreener.com" target="_blank">DEX</a>
+    <a class="link tw" href="https://x.com" target="_blank">TWITTER</a>
+  </div>
+</div>
+
+<!-- TERMINAL -->
+<div class="card">
+  <div class="termHead" id="termToggle">
+    <span>TERMINAL</span><span>▾</span>
+  </div>
+  <div class="termBody" id="terminal">
+    <div class="termLine"><span class="prompt">&gt;</span> READY.</div>
+  </div>
+</div>
+
+</div>
+</div>
+
 <script>
-/* ========= CONFIG ========= */
-const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-const DEGEN_MP3 = "baron.mp3";
-const LAUGH_MP3 = "laugh.mp3";
+const CA="AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+const coinsEl=document.getElementById("coins");
+const priceEl=document.getElementById("price");
+const pctEl=document.getElementById("pct");
+const caEl=document.getElementById("ca");
+const terminal=document.getElementById("terminal");
 
-/* ========= ELEMENTS ========= */
-const elCoins = document.getElementById("coinsInserted");
-const elRank  = document.getElementById("rank");
-const elPrice = document.getElementById("price");
-const elPct   = document.getElementById("pct");
-const elNote  = document.getElementById("priceNote");
+let coins=0;
+let price=0.000001;
 
-const btnInsert = document.getElementById("btnInsert");
-const btnDegen  = document.getElementById("btnDegen");
-const btnRug    = document.getElementById("btnRug");
-const degenLabel= document.getElementById("degenLabel");
+caEl.textContent=CA;
 
-const caBtn  = document.getElementById("caBtn");
-const caText = document.getElementById("caText");
-const toast  = document.getElementById("toast");
+document.getElementById("insert").onclick=()=>{
+  coins++;
+  coinsEl.textContent=coins;
+  const p=(Math.random()*0.02);
+  price*=1+p;
+  priceEl.textContent="$"+price.toFixed(6);
+  pctEl.textContent="+"+(p*100).toFixed(2)+"%";
+};
 
-const pumpBtn = document.getElementById("pumpBtn");
-const dexBtn  = document.getElementById("dexBtn");
-const xBtn    = document.getElementById("xBtn");
-const topPumpLink = document.getElementById("topPumpLink");
+document.getElementById("rug").onclick=()=>{
+  coins=0;price=0.000001;
+  coinsEl.textContent=0;
+  priceEl.textContent="$0.000001";
+  pctEl.textContent="+0.00%";
+};
 
-const soundToggle = document.getElementById("soundToggle");
-const soundState  = document.getElementById("soundState");
+document.getElementById("caBtn").onclick=()=>{
+  navigator.clipboard.writeText(CA);
+};
 
-const termToggle = document.getElementById("termToggle");
-const termBody   = document.getElementById("termBody");
-const termChevron= document.getElementById("termChevron");
-
-const t1 = document.getElementById("t1");
-const t2 = document.getElementById("t2");
-const t3 = document.getElementById("t3");
-
-/* ========= STATE ========= */
-let coinsInserted = Number(sessionStorage.getItem("gbaron_m_coins") || "0");
-if(!Number.isFinite(coinsInserted) || coinsInserted < 0) coinsInserted = 0;
-
-const basePrice = 0.000001;
-let price = Number(sessionStorage.getItem("gbaron_m_price") || String(basePrice));
-if(!Number.isFinite(price) || price <= 0) price = basePrice;
-
-let degenActive = false;
-let audioEnabled = (sessionStorage.getItem("gbaron_m_sound") || "1") === "1";
-
-/* ========= TERMINAL (instant priority) ========= */
-let typingTimer = null;
-let termQueue = [];
-let termBusy = false;
-
-function clearTyping(){
-  if(typingTimer){ clearInterval(typingTimer); typingTimer = null; }
-  termBusy = false;
-}
-function enqueueNow(lines){
-  // priority: flush pending spam so actions respond instantly
-  termQueue = lines.concat(termQueue.slice(-2)); // keep last 2 as “history”
-  clearTyping();
-  pumpTerminal();
-}
-function enqueue(lines){
-  for(const l of lines) termQueue.push(l);
-  if(!termBusy) pumpTerminal();
-}
-function pumpTerminal(){
-  if(termQueue.length === 0){ termBusy = false; return; }
-  termBusy = true;
-  const next = termQueue.shift();
-  t1.textContent = t2.textContent;
-  t2.textContent = t3.textContent;
-  typeInto(t3, next, 28, () => setTimeout(pumpTerminal, 90));
-}
-function typeInto(el, text, cps, done){
-  el.textContent = "";
-  let i = 0;
-  const stepMs = Math.max(10, Math.floor(1000 / cps));
-  typingTimer = setInterval(() => {
-    i++;
-    el.textContent = text.slice(0, i);
-    if(i >= text.length){
-      clearInterval(typingTimer);
-      typingTimer = null;
-      done && done();
-    }
-  }, stepMs);
-}
-
-/* ========= RANKS ========= */
-const ranks = [
-  { min:0,   name:"paperhands", cls:"rank-white" },
-  { min:10,  name:"hodler", cls:"rank-yellow" },
-  { min:25,  name:"diamondhands", cls:"rank-green" },
-  { min:45,  name:"degen", cls:"rank-yellow" },
-  { min:70,  name:"baron’s henchman", cls:"rank-green" },
-  { min:100, name:"the baron", cls:"rank-yellow" },
-];
-function setRankUI(){
-  let r = ranks[0];
-  for(const x of ranks){ if(coinsInserted >= x.min) r = x; }
-  elRank.textContent = r.name;
-  elRank.classList.remove("rank-white","rank-yellow","rank-green");
-  elRank.classList.add(r.cls);
-}
-
-/* ========= PRICE ========= */
-function fmtUSD(x){
-  if (x >= 1) return "$" + x.toFixed(2);
-  if (x >= 0.01) return "$" + x.toFixed(4);
-  return "$" + x.toFixed(6);
-}
-function pumpPrice(mult=1){
-  const chaos = degenActive ? 0.18 : 0.02;
-  const base  = degenActive ? 0.12 : 0.010;
-  const pct = (base*mult) + (Math.random()*chaos);
-
-  const last = price;
-  price = price * (1 + pct);
-
-  const pctShow = ((price/last)-1)*100;
-  elPrice.textContent = fmtUSD(price);
-  elPct.textContent = (pctShow>=0?"+":"") + pctShow.toFixed(2) + "%";
-  elPct.style.color = pctShow>=0 ? "var(--good)" : "var(--bad)";
-  elPct.style.background = pctShow>=0 ? "rgba(45,255,106,.10)" : "rgba(255,77,109,.10)";
-  elNote.textContent = degenActive ? "DEGEN: chart instability at MAX." : "Totally organic growth (trust me bro)";
-
-  sessionStorage.setItem("gbaron_m_price", String(price));
-}
-
-/* ========= COPY CA ========= */
-async function copyCA(){
-  try{
-    await navigator.clipboard.writeText(CA);
-  }catch(e){
-    const ta = document.createElement("textarea");
-    ta.value = CA;
-    document.body.appendChild(ta);
-    ta.select();
-    try{ document.execCommand("copy"); }catch(_){}
-    document.body.removeChild(ta);
-  }
-  toast.classList.add("show");
-  setTimeout(()=>toast.classList.remove("show"), 1200);
-  enqueueNow(["CA COPIED // THE BARON APPROVES","NEXT: PASTE INTO SWAP","READY."]);
-}
-
-/* ========= AUDIO (simple) ========= */
-let ac=null, sfxGain=null;
-function ensureAC(){
-  if(!audioEnabled) return null;
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if(!Ctx) return null;
-  if(!ac){
-    ac = new Ctx();
-    sfxGain = ac.createGain();
-    sfxGain.gain.value = 0.9;
-    sfxGain.connect(ac.destination);
-  }
-  if(ac.state==="suspended"){ ac.resume().catch(()=>{}); }
-  return ac;
-}
-function blip(freq=720, dur=0.035, type="square", gain=0.11){
-  if(!audioEnabled || degenActive) return;
-  const ctx = ensureAC();
-  if(!ctx || !sfxGain) return;
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  const t0 = ctx.currentTime;
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  o.connect(g); g.connect(sfxGain);
-  o.start(t0); o.stop(t0 + dur + 0.02);
-}
-function sfxClick(){ blip(720,0.035,"square",0.11); }
-function sfxOpen(){  blip(520,0.055,"sawtooth",0.09); }
-function sfxBad(){   blip(180,0
+document.getElementById("termToggle").onclick=()=>{
+  terminal.classList.toggle("open");
+};
+</script>
+</body>
+</html>
