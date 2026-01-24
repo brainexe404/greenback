@@ -834,7 +834,8 @@ const RAYDIUM_URL  = "https://raydium.io/swap/";
 const ORCA_URL     = "https://www.orca.so/";
 const TERMINAL_URL = "https://trade.padre.gg/";
 
-const DEGEN_FILES = ["baron.mp3", "baron.mps"];
+/* ✅ ONLY baron.mp3 (removed baron.mps fallback) */
+const DEGEN_FILE = "baron.mp3";
 const LAUGH_FILE  = "laugh.mp3";
 
 const elCoins = document.getElementById("coinsInserted");
@@ -896,30 +897,76 @@ if (!Number.isFinite(ath) || ath <= 0) ath = price;
 let degenActive = false;
 let audioEnabled = (sessionStorage.getItem("gbaron_sound") || "1") === "1";
 
+/* =========================
+   ✅ TERMINAL: priority + interrupt (fix spam backlog)
+   ========================= */
 const termQueue = [];
 let termBusy = false;
+let termTimer = null;
 
-function enqueueTerm(lines){
-  for(const l of lines) termQueue.push(l);
+function termInterrupt(){
+  if(termTimer){
+    clearInterval(termTimer);
+    termTimer = null;
+  }
+  termBusy = false;
+}
+function termClearQueue(){
+  termQueue.length = 0;
+}
+
+/**
+ * enqueueTerm(lines, {priority, flush})
+ * - flush: clears queue + stops current typing immediately
+ * - priority: puts lines at the front (keeps order)
+ */
+function enqueueTerm(lines, opts = {}){
+  const { priority=false, flush=false } = opts;
+
+  if(flush){
+    termClearQueue();
+    termInterrupt();
+  }
+
+  if(priority){
+    // unshift in reverse to preserve order
+    for(let i = lines.length - 1; i >= 0; i--){
+      termQueue.unshift(lines[i]);
+    }
+  }else{
+    for(const l of lines) termQueue.push(l);
+  }
+
   if(!termBusy) pumpTerminal();
 }
+
 function pumpTerminal(){
   if(termQueue.length === 0){ termBusy = false; return; }
   termBusy = true;
+
   const next = termQueue.shift();
   term1.textContent = term2.textContent;
   term2.textContent = term3.textContent;
+
   typeInto(term3, next, 18, () => setTimeout(pumpTerminal, 160));
 }
+
 function typeInto(el, text, cps, done){
+  if(termTimer){
+    clearInterval(termTimer);
+    termTimer = null;
+  }
+
   el.textContent = "";
   let i = 0;
   const stepMs = Math.max(10, Math.floor(1000 / cps));
-  const timer = setInterval(() => {
+
+  termTimer = setInterval(() => {
     i++;
     el.textContent = text.slice(0, i);
     if(i >= text.length){
-      clearInterval(timer);
+      clearInterval(termTimer);
+      termTimer = null;
       done && done();
     }
   }, stepMs);
@@ -1060,7 +1107,7 @@ async function copyCA(){
     await navigator.clipboard.writeText(text);
     showToast();
     addLog(`<span class="yy">COPIED</span> — CA copied. The Baron approves.`);
-    enqueueTerm(["CLIPBOARD: WRITE_OK","CA COPIED // VILLAIN APPROVES","NEXT: PASTE INTO SWAP"]);
+    enqueueTerm(["CLIPBOARD: WRITE_OK","CA COPIED // VILLAIN APPROVES","NEXT: PASTE INTO SWAP"], {priority:true});
   }catch(e){
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -1069,7 +1116,7 @@ async function copyCA(){
     try{ document.execCommand("copy"); showToast(); }catch(_){}
     document.body.removeChild(ta);
     addLog(`<span class="yy">COPIED</span> — CA copied (fallback).`);
-    enqueueTerm(["CLIPBOARD: FALLBACK_COPY()","CA COPIED (LEGACY MODE)","PROCEED."]);
+    enqueueTerm(["CLIPBOARD: FALLBACK_COPY()","CA COPIED (LEGACY MODE)","PROCEED."], {priority:true});
   }
 }
 function showToast(){
@@ -1128,7 +1175,8 @@ function makeAudio(file){
   a.loop = false;
   return a;
 }
-let degenAudio = makeAudio(DEGEN_FILES[0]);
+
+let degenAudio = makeAudio(DEGEN_FILE);
 const laughAudio = makeAudio(LAUGH_FILE);
 
 function safePlay(audioEl, onBlocked){
@@ -1139,17 +1187,12 @@ function safePlay(audioEl, onBlocked){
     p.catch(() => {
       onBlocked && onBlocked();
       addLog(`<span class="rr">AUDIO</span> — blocked by browser until you click once.`);
-      enqueueTerm(["AUDIO: BLOCKED_BY_BROWSER","CLICK ONCE TO UNLOCK","READY."]);
+      enqueueTerm(["AUDIO: BLOCKED_BY_BROWSER","CLICK ONCE TO UNLOCK","READY."], {priority:true});
     });
   }
 }
 function stopAudio(audioEl){
   try{ audioEl.pause(); audioEl.currentTime = 0; }catch(e){}
-}
-function tryFallbackDegen(){
-  if(degenAudio && degenAudio.src && degenAudio.src.includes(DEGEN_FILES[1])) return;
-  degenAudio = makeAudio(DEGEN_FILES[1]);
-  addLog(`<span class="yy">DEGEN</span> — trying fallback: <b>${DEGEN_FILES[1]}</b>`);
 }
 
 function setSoundUI(){
@@ -1162,7 +1205,7 @@ function toggleSound(){
   sessionStorage.setItem("gbaron_sound", audioEnabled ? "1" : "0");
   setSoundUI();
   addLog(`Sound ${audioEnabled ? "<b>ON</b>" : "<b>OFF</b>"} — ${audioEnabled ? "arcade mode engaged" : "silent villain mode"}`);
-  enqueueTerm([`SOUND: ${audioEnabled ? "ON" : "OFF"}`, audioEnabled ? "ARCADE MODE: ENGAGED" : "MODE: SILENT VILLAIN", "READY."]);
+  enqueueTerm([`SOUND: ${audioEnabled ? "ON" : "OFF"}`, audioEnabled ? "ARCADE MODE: ENGAGED" : "MODE: SILENT VILLAIN", "READY."], {priority:true, flush:true});
 }
 
 function wireLink(el, url, name){
@@ -1171,7 +1214,7 @@ function wireLink(el, url, name){
   el.addEventListener("click", ()=>{
     sfxOpen();
     addLog(`<span class="ok">OPEN</span> — ${name}`);
-    enqueueTerm([`NAVIGATE: ${name.toUpperCase()}`,"LINK: OPEN_IN_NEW_TAB","STATUS: OK"]);
+    enqueueTerm([`NAVIGATE: ${name.toUpperCase()}`,"LINK: OPEN_IN_NEW_TAB","STATUS: OK"], {priority:true});
     flash(el, "rgba(200,255,47,.75)");
   });
 }
@@ -1187,16 +1230,12 @@ function startDegen(){
   setSfxDucked(true);
 
   addLog(`<span class="yy">DEGEN</span> — power surge detected.`);
-  enqueueTerm(["DEGEN MODE: ARMING VOLTAGE RAILS…","OVERCLOCK: ON // SLIPPAGE: WHATEVER","ROUTE: CHAOS ENGINE v1.0 (APPROVED)"]);
+  enqueueTerm(
+    ["DEGEN MODE: ARMING VOLTAGE RAILS…","OVERCLOCK: ON // SLIPPAGE: WHATEVER","ROUTE: CHAOS ENGINE v1.0 (APPROVED)"],
+    {priority:true, flush:true}
+  );
 
   flashTimes(pumpBtn, "rgba(200,255,47,.90)", 6, 190);
-
-  const onErr = () => {
-    degenAudio.removeEventListener("error", onErr);
-    tryFallbackDegen();
-    safePlay(degenAudio);
-  };
-  degenAudio.addEventListener("error", onErr, { once:true });
 
   safePlay(degenAudio);
 
@@ -1212,7 +1251,7 @@ function stopDegen(){
   btnDegen.disabled = false;
   setSfxDucked(false);
   addLog(`<span class="ok">DEGEN</span> — cooldown complete.`);
-  enqueueTerm(["DEGEN MODE: OFF","NODE: STABLE (BORING)","READY."]);
+  enqueueTerm(["DEGEN MODE: OFF","NODE: STABLE (BORING)","READY."], {priority:true});
 }
 
 function doRugPull(){
@@ -1223,7 +1262,10 @@ function doRugPull(){
   safePlay(laughAudio);
 
   addLog(`<span class="rr">RUG PULL</span> — liquidity evaporated.`);
-  enqueueTerm(["WARNING: LP DRAIN INITIATED","GLITCH: VIDEO_DESYNC()","EXIT: THE BARON ALWAYS EXITS FIRST"]);
+  enqueueTerm(
+    ["WARNING: LP DRAIN INITIATED","GLITCH: VIDEO_DESYNC()","EXIT: THE BARON ALWAYS EXITS FIRST"],
+    {priority:true, flush:true}
+  );
 
   rugFlicker();
   glitch(740);
@@ -1285,6 +1327,7 @@ function updateUI(reset=false){
     setRankUI();
 
     addLog(`<span class="ok">COIN</span> — inserted. chart pumped.`);
+    // normal enqueue (spam can backlog; other actions interrupt now)
     enqueueTerm([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: CHART_UP()"]);
 
     pumpChart(1);
@@ -1306,6 +1349,8 @@ function updateUI(reset=false){
   caBtn.addEventListener("click", ()=>{
     ensureAC();
     sfxClick();
+    // CA gets priority but doesn't flush (optional)
+    enqueueTerm(["ACTION: COPY_CA()","STATUS: OK","BARON: APPROVES"], {priority:true});
     copyCA();
   });
 
@@ -1327,8 +1372,3 @@ function updateUI(reset=false){
 </script>
 </body>
 </html>
-"""
-
-out_path = Path("/mnt/data/index.html")
-out_path.write_text(html, encoding="utf-8")
-out_path
