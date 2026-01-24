@@ -122,7 +122,7 @@
   }
   .soundToggle.on::after{transform:translateX(20px); background:rgba(45,255,106,.18)}
 
-  /* CONTENT (no scroll if possible) */
+  /* CONTENT */
   .content{
     flex:1;
     min-height:0;
@@ -130,6 +130,7 @@
     flex-direction:column;
     gap:10px;
     padding:10px;
+    overflow:auto; /* allows clean scrolling on smaller devices */
   }
 
   .card{
@@ -210,7 +211,7 @@
     border-color:rgba(255,77,109,.28);
   }
 
-  /* subtle idle pulse (for CA + Pump when idle, not spammy) */
+  /* subtle idle pulse (for CA + Pump when idle) */
   .idlePulse{animation: idlePulse 2.8s ease-in-out infinite;}
   @keyframes idlePulse{
     0%,100%{filter:brightness(1); box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 18px rgba(200,255,47,.08)}
@@ -279,6 +280,7 @@
     cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
     text-decoration:none;color:#fff;
     position:relative;isolation:isolate;
+    min-width:0;
   }
   .linkBtn:active{transform:translateY(1px) scale(.99)}
   .ico{width:22px;height:22px;image-rendering:pixelated;filter:drop-shadow(0 0 10px rgba(255,255,255,.12))}
@@ -316,6 +318,21 @@
     100%{opacity:1}
   }
 
+  /* details/summary (collapsible terminal) */
+  details{border-top:1px solid var(--line)}
+  summary{
+    list-style:none;
+    cursor:pointer;
+    padding:10px 12px;
+    font-family:var(--mono);
+    font-weight:1000;
+    color:var(--muted);
+    letter-spacing:.4px;
+    user-select:none;
+    background:rgba(255,255,255,.03);
+  }
+  summary::-webkit-details-marker{display:none}
+
   /* Flash-glow helper (stronger DEGEN pump pulse) */
   .flashGlow{position:relative; isolation:isolate;}
   .flashGlow::after{
@@ -346,6 +363,63 @@
     .linkBtn{padding:12px 12px}
   }
 
+  /* ===== MOBILE TIGHTEN PATCH (layout fix) ===== */
+  @media (max-width: 520px){
+    body{ overflow:auto; }
+
+    .stage{
+      padding:10px;
+      padding-top:calc(10px + env(safe-area-inset-top));
+      padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .frame{ border-radius:20px; }
+
+    .header{ padding:8px; gap:8px; }
+    .avatar{ width:36px; height:36px; border-radius:10px; }
+    .title{ font-size:14px; }
+    .sub{ font-size:10px; }
+
+    .soundPill{ padding:6px 8px; border-radius:12px; }
+    .soundToggle{ width:46px; height:28px; }
+    .soundToggle::after{ width:22px; height:22px; top:3px; left:3px; }
+    .soundToggle.on::after{ transform:translateX(18px); }
+
+    .content{ gap:8px; padding:8px; }
+
+    .card{ border-radius:16px; }
+    .topBlock{ padding:9px; gap:8px; }
+
+    .pill{ min-width:0; padding:7px 9px; border-radius:12px; }
+    .k{ font-size:10px; }
+    .v{ font-size:14px; }
+    .pct{ font-size:10px; padding:2px 7px; }
+
+    .actions{ padding:9px; gap:8px; }
+    .btn{ padding:12px 12px; border-radius:14px; font-size:14px; }
+
+    .caBtn{ padding:10px 10px; border-radius:14px; }
+    .caBig{ font-size:13px; line-height:1.18; }
+    .tapHint{ font-size:10px; }
+
+    .links{ padding:9px; gap:8px; }
+    .grid2{ gap:8px; }
+    .linkBtn{
+      min-width:0 !important;
+      padding:12px 10px;
+      border-radius:14px;
+      font-size:12px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .ico{ width:18px; height:18px; }
+
+    .term{ padding:9px; font-size:11px; line-height:1.35; }
+    .cursor{ height:11px; }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .idlePulse{animation:none !important}
     .cursor{animation:none !important}
@@ -356,7 +430,7 @@
 <body>
   <div class="stage">
     <div class="frame">
-      <!-- HEADER -->
+      <!-- HEADER (top logo links to pump.fun) -->
       <div class="header">
         <a class="brandLink" id="topPumpLink" href="https://pump.fun" target="_blank" rel="noopener noreferrer">
           <div class="avatar"><img src="logo.png" alt=""></div>
@@ -401,17 +475,9 @@
         <!-- ACTIONS -->
         <div class="card">
           <div class="actions">
-            <button class="btn insert" id="btnInsert">
-              🪙 INSERT COINS
-            </button>
-
-            <button class="btn degen" id="btnDegen">
-              ⚡ <span id="degenLabel">ACTIVATE DEGEN</span>
-            </button>
-
-            <button class="btn rug" id="btnRug">
-              💀 RUG PULL
-            </button>
+            <button class="btn insert" id="btnInsert">🪙 INSERT COINS</button>
+            <button class="btn degen" id="btnDegen">⚡ <span id="degenLabel">ACTIVATE DEGEN</span></button>
+            <button class="btn rug" id="btnRug">💀 RUG PULL</button>
           </div>
         </div>
 
@@ -448,13 +514,16 @@
           </div>
         </div>
 
-        <!-- MINI TERMINAL -->
+        <!-- TERMINAL (collapsible to save space on mobile) -->
         <div class="card">
-          <div class="term" aria-label="Terminal">
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t1">INITIALIZING TERMINAL…</span></div>
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t2">THE BARON ALWAYS EXITS FIRST</span></div>
-            <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t3">READY FOR COINS… INSERT TO BEGIN</span><span class="cursor"></span></div>
-          </div>
+          <details id="terminalDetails" open>
+            <summary>TERMINAL (tap)</summary>
+            <div class="term" aria-label="Terminal">
+              <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t1">INITIALIZING TERMINAL…</span></div>
+              <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t2">THE BARON ALWAYS EXITS FIRST</span></div>
+              <div class="termLine"><span class="prompt">&gt;</span> <span class="dim" id="t3">READY FOR COINS… INSERT TO BEGIN</span><span class="cursor"></span></div>
+            </div>
+          </details>
         </div>
 
       </div>
@@ -463,7 +532,7 @@
 
 <script>
 /* =========================
-   CONFIG (same vibe as desktop)
+   CONFIG
    ========================= */
 const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
 
@@ -515,59 +584,48 @@ let degenActive = false;
 let audioEnabled = (sessionStorage.getItem("gbaron_m_sound") || "1") === "1";
 
 /* =========================
-   TERMINAL QUEUE (mini)
+   TERMINAL QUEUE (spam-proof + priority)
    ========================= */
 const q = [];
 let busy = false;
-let typingTimer = null; // ✅ allow interrupt
 
-function clearTerminal(){
-  // stop typing immediately
-  if(typingTimer){
-    clearInterval(typingTimer);
-    typingTimer = null;
+function enqueue(lines, kind="coin"){
+  // Coin spam protection: keep queue small and drop older coin lines
+  if(kind === "coin" && q.length > 10){
+    // remove a few oldest queued items to keep it responsive
+    q.splice(0, Math.min(6, q.length));
   }
-  // clear queued lines
-  q.length = 0;
-  busy = false;
-}
-
-function enqueue(lines){
-  for(const l of lines) q.push(l);
+  for(const l of lines) q.push({ text:l, kind });
   if(!busy) pump();
 }
 
-// ✅ priority enqueue: interrupts spam so actions respond immediately
 function enqueuePriority(lines){
-  clearTerminal();
-  for(const l of lines) q.push(l);
-  pump();
+  // Priority: jump the line (DEGEN/RUG/COPY should show immediately)
+  // Insert in front preserving order
+  for(let i = lines.length - 1; i >= 0; i--){
+    q.unshift({ text: lines[i], kind:"priority" });
+  }
+  if(!busy) pump();
 }
 
 function pump(){
   if(q.length === 0){ busy = false; return; }
   busy = true;
-  const next = q.shift();
+  const next = q.shift().text;
   t1.textContent = t2.textContent;
   t2.textContent = t3.textContent;
-  typeInto(t3, next, 22, () => setTimeout(pump, 140));
+  typeInto(t3, next, 26, () => setTimeout(pump, 90));
 }
 
 function typeInto(el, text, cps, done){
-  // cancel any current typing interval before starting
-  if(typingTimer){
-    clearInterval(typingTimer);
-    typingTimer = null;
-  }
   el.textContent = "";
   let i = 0;
   const stepMs = Math.max(10, Math.floor(1000 / cps));
-  typingTimer = setInterval(() => {
+  const timer = setInterval(() => {
     i++;
     el.textContent = text.slice(0, i);
     if(i >= text.length){
-      clearInterval(typingTimer);
-      typingTimer = null;
+      clearInterval(timer);
       done && done();
     }
   }, stepMs);
@@ -597,7 +655,7 @@ function setRankUI(){
 }
 
 /* =========================
-   PRICE MECHANICS (no chart, still fun)
+   PRICE MECHANICS
    ========================= */
 function fmtUSD(x){
   if (x >= 1) return "$" + x.toFixed(2);
@@ -623,7 +681,7 @@ function pumpPrice(mult=1){
 }
 
 /* =========================
-   FLASH / DEGEN PULSE (very visible)
+   FLASH / DEGEN PULSE
    ========================= */
 function flash(el, color){
   if(!el) return;
@@ -633,7 +691,7 @@ function flash(el, color){
   el.classList.add("flashGlow");
   setTimeout(()=>el.classList.remove("flashGlow"), 650);
 }
-function flashTimes(el, color, times=7, gap=180){
+function flashTimes(el, color, times=8, gap=160){
   let i = 0;
   const tick = () => {
     i++;
@@ -689,7 +747,7 @@ function setSfxDucked(ducked){
 }
 function blip(freq=720, dur=0.035, type="square", gain=0.11){
   if(!audioEnabled) return;
-  if(degenActive) return;
+  if(degenActive) return; // no overlap while baron.mp3 plays
   const ctx = ensureAC();
   if(!ctx || !sfxGain) return;
 
@@ -760,10 +818,10 @@ function startDegen(){
 
   setSfxDucked(true);
 
-  // ✅ priority so it shows instantly even after spam
   enqueuePriority(["DEGEN MODE: ARMING VOLTAGE RAILS…","OVERCLOCK: ON // SLIPPAGE: WHATEVER","ROUTE: CHAOS ENGINE v1.0 (APPROVED)"]);
 
-  flashTimes(pumpBtn, "rgba(200,255,47,.92)", 8, 170);
+  // VERY visible pulse
+  flashTimes(pumpBtn, "rgba(200,255,47,.92)", 10, 150);
 
   safePlay(degenAudio);
 
@@ -788,9 +846,9 @@ function doRugPull(){
   sfxBad();
   safePlay(laughAudio);
 
-  // ✅ highest priority
   enqueuePriority(["WARNING: LP DRAIN INITIATED","RUG PULL: LIQUIDITY EVAPORATED","EXIT: THE BARON ALWAYS EXITS FIRST"]);
 
+  // reset stats/price
   coinsInserted = 0;
   price = basePrice;
 
@@ -799,7 +857,8 @@ function doRugPull(){
 
   updateUI(true);
 
-  flashTimes(pumpBtn, "rgba(255,77,109,.85)", 3, 220);
+  // dramatic pulses
+  flashTimes(pumpBtn, "rgba(255,77,109,.85)", 4, 180);
 }
 
 /* =========================
@@ -835,6 +894,7 @@ function updateUI(resetPct=false){
 
   enqueuePriority(["INITIALIZING TERMINAL…","THE BARON ALWAYS EXITS FIRST","READY FOR COINS… INSERT TO BEGIN"]);
 
+  // interactions
   btnInsert.addEventListener("click", ()=>{
     ensureAC();
     sfxClick();
@@ -842,8 +902,8 @@ function updateUI(resetPct=false){
     coinsInserted += 1;
     sessionStorage.setItem("gbaron_m_coins", String(coinsInserted));
 
-    // Keep coin spam normal (non-priority) so you can still queue it
-    enqueue([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: PRICE_UP()"]);
+    // Keep terminal responsive: 1 short line per coin
+    enqueue([`COIN ACCEPTED // COUNT: ${coinsInserted}`], "coin");
 
     updateUI(false);
     pumpPrice(1);
@@ -868,6 +928,7 @@ function updateUI(resetPct=false){
     copyCA();
   });
 
+  // sound switch
   soundToggle.addEventListener("click", ()=>{
     ensureAC();
     toggleSound();
@@ -880,6 +941,7 @@ function updateUI(resetPct=false){
     }
   });
 
+  // links -> terminal reacts
   wireLink(pumpBtn, "pump.fun");
   wireLink(dexBtn, "dexscreener");
   wireLink(xBtn, "twitter / x");
