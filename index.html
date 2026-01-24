@@ -5,38 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Baron Greenback ($GBARON)</title>
 
-  <!-- Prevent aggressive caching during iteration -->
+  <!-- Minimal styling: this page is only a router -->
+  <meta name="theme-color" content="#070b10" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
   <style>
-    html,body{height:100%;margin:0;background:#070b10;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    .wrap{min-height:100%;display:grid;place-items:center;padding:24px;text-align:center}
-    .card{max-width:520px;width:100%;border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:18px;background:rgba(255,255,255,.04)}
-    .muted{color:#93a4c7;font-size:14px;line-height:1.4}
-    a{color:#c8ff2f;font-weight:800;text-decoration:none}
+    html,body{
+      height:100%;
+      margin:0;
+      background:#070b10;
+      color:#eaf2ff;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    }
+    .wrap{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      text-align:center;
+    }
+    .card{
+      width:min(520px,92vw);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      padding:18px;
+    }
+    .title{
+      font-weight:900;
+      font-size:18px;
+      letter-spacing:.2px;
+      margin-bottom:6px;
+    }
+    .muted{
+      color:#93a4c7;
+      font-size:14px;
+      line-height:1.4;
+    }
+    a{
+      color:#c8ff2f;
+      font-weight:800;
+      text-decoration:none;
+    }
     a:hover{text-decoration:underline}
   </style>
 
   <script>
     (function () {
+      // Adjust if you want a different cutoff
       var MOBILE_MAX = 900;
 
-      function isMobileNow(){
+      function isMobile(){
         var w = Math.min(window.innerWidth || 9999, screen.width || 9999);
-        return w <= MOBILE_MAX || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        return (
+          w <= MOBILE_MAX ||
+          /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        );
       }
 
-      function pickTarget(){
-        return isMobileNow() ? "mobile.html" : "desktop.html";
+      function targetPage(){
+        return isMobile() ? "mobile.html" : "desktop.html";
       }
 
-      function swapIn(target){
-        fetch(target, { cache: "no-store" })
-          .then(function(r){
-            if(!r.ok) throw new Error("Fetch failed: " + r.status);
-            return r.text();
+      function swapIn(page){
+        // Load the page content but KEEP the URL as "/"
+        fetch(page, { cache: "no-store" })
+          .then(function(res){
+            if(!res.ok) throw new Error("Fetch failed");
+            return res.text();
           })
           .then(function(html){
             document.open();
@@ -44,18 +82,20 @@
             document.close();
           })
           .catch(function(){
-            // fallback (URL will show /mobile.html or /desktop.html if fetch is blocked)
-            location.replace(target);
+            // Absolute fallback (URL will change, but page still works)
+            location.replace(page);
           });
       }
 
-      swapIn(pickTarget());
+      // Initial load
+      swapIn(targetPage());
 
-      var t = null;
+      // Optional: re-route on resize/orientation change
+      var rt = null;
       window.addEventListener("resize", function(){
-        clearTimeout(t);
-        t = setTimeout(function(){
-          swapIn(pickTarget());
+        clearTimeout(rt);
+        rt = setTimeout(function(){
+          swapIn(targetPage());
         }, 200);
       });
     })();
@@ -63,13 +103,16 @@
 </head>
 
 <body>
+  <!-- Fallback UI only visible for a split second or if JS fails -->
   <div class="wrap">
     <div class="card">
-      <div style="font-weight:900;letter-spacing:.2px;font-size:18px;margin-bottom:6px;">Loading $GBARON…</div>
+      <div class="title">Loading $GBARON…</div>
       <div class="muted">
-        If you aren’t redirected, open:
+        Routing you to the correct arcade cabinet.<br><br>
+        If this doesn’t work:
         <div style="margin-top:10px;">
-          <a href="mobile.html">mobile.html</a> · <a href="desktop.html">desktop.html</a>
+          <a href="mobile.html">mobile.html</a> ·
+          <a href="desktop.html">desktop.html</a>
         </div>
       </div>
     </div>
@@ -78,9 +121,11 @@
   <noscript>
     <div class="wrap">
       <div class="card">
-        <div style="font-weight:900;font-size:18px;margin-bottom:6px;">JavaScript is off</div>
+        <div class="title">JavaScript disabled</div>
         <div class="muted">
-          Open: <a href="mobile.html">mobile.html</a> or <a href="desktop.html">desktop.html</a>
+          Open manually:<br>
+          <a href="mobile.html">mobile.html</a> ·
+          <a href="desktop.html">desktop.html</a>
         </div>
       </div>
     </div>
