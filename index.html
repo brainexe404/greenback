@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Baron Greenback ($GBARON)</title>
 
 <style>
@@ -12,9 +12,9 @@
     --text:#eaf2ff;
     --muted:#93a4c7;
     --line:rgba(255,255,255,.10);
-    --good:#2dff6a;   /* bright green */
-    --warn:#c8ff2f;   /* bright yellow */
-    --bad:#ff4d6d;    /* red */
+    --good:#2dff6a;
+    --warn:#c8ff2f;
+    --bad:#ff4d6d;
     --shadow: 0 14px 40px rgba(0,0,0,.55);
     --r:18px;
     --mono: ui-monospace, Menlo, Consolas, "SF Mono", monospace;
@@ -32,7 +32,7 @@
     overflow:hidden;
   }
 
-  /* subtle CRT overlay (whole page) */
+  /* subtle CRT overlay */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 3px 6px);
@@ -52,7 +52,7 @@
   }
 
   .stage{
-    height:100vh;
+    height:100svh; /* better on mobile than 100vh */
     width:100%;
     display:flex;
     align-items:stretch;
@@ -62,8 +62,9 @@
     z-index:5;
   }
 
+  /* cabinet */
   .frame{
-    width:min(1080px, 100%);
+    width:min(1560px, 96vw);
     height:100%;
     display:flex;
     flex-direction:column;
@@ -137,6 +138,7 @@
     flex:1;min-height:0;display:grid;grid-template-columns: 1.2fr .8fr;
     gap:12px;overflow:hidden;
   }
+
   .card{
     background:rgba(0,0,0,.22);
     border:1px solid var(--line);
@@ -221,13 +223,11 @@
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-  /* INSERT = bright green */
   .btn.insert{
     background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
     border-color:rgba(45,255,106,.55);
     box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(45,255,106,.14);
   }
-  /* DEGEN = bright yellow */
   .btn.degenBtn{
     background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
     border-color:rgba(200,255,47,.55);
@@ -238,17 +238,10 @@
     border-color:rgba(255,77,109,.28);
   }
 
-  .icoEmoji{
-    font-size:18px;
-    line-height:1;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,.12));
-  }
+  .icoEmoji{font-size:18px;line-height:1;filter: drop-shadow(0 0 10px rgba(255,255,255,.12));}
 
-  /* Insert button pulses always */
-  .btn.pulseAlways{
-    position:relative;
-    animation: insertPulse 1.2s steps(6,end) infinite;
-  }
+  /* Insert button pulse (always) */
+  .btn.pulseAlways{ position:relative; animation: insertPulse 1.2s steps(6,end) infinite; }
   .btn.pulseAlways::after{
     content:"";position:absolute;inset:-8px;border-radius:18px;
     border:2px solid rgba(45,255,106,.35);
@@ -269,6 +262,7 @@
     100%{opacity:0}
   }
 
+  /* Right column */
   .rightStack{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
 
   .terminalBox{
@@ -284,7 +278,6 @@
   .prompt{color:var(--warn); font-weight:1000}
   .dim{color:#94a4c2}
 
-  /* pulsing cursor */
   .cursor{
     display:inline-block;width:8px;height:12px;background:var(--warn); margin-left:6px;
     transform:translateY(2px);
@@ -297,7 +290,7 @@
     100%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
   }
 
-  /* BARON SCENE CARD (MP4) */
+  /* BARON SCENE */
   .sceneCard{
     border-radius:14px;
     border:1px solid var(--line);
@@ -317,47 +310,31 @@
     transform:scale(1);
     transition:transform 240ms ease, filter 240ms ease;
   }
-
-  /* scanlines on video only */
   .sceneCard::before{
     content:"";
     position:absolute; inset:0;
     pointer-events:none;
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.07) 0px,
-        rgba(255,255,255,.07) 1px,
-        rgba(0,0,0,0) 3px,
-        rgba(0,0,0,0) 6px
-      );
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,0) 3px 6px);
     opacity:.10;
     mix-blend-mode:overlay;
     z-index:2;
   }
-
-  /* glow overlay */
   .sceneCard::after{
     content:"";
     position:absolute; inset:0;
     pointer-events:none;
-    background: radial-gradient(120% 85% at 50% 45%, rgba(200,255,47,.45), rgba(0,0,0,.72) 72%);
+    background:radial-gradient(120% 85% at 50% 45%, rgba(200,255,47,.45), rgba(0,0,0,.72) 72%);
     opacity:0;
     transition:opacity .25s ease;
     mix-blend-mode:screen;
     z-index:3;
   }
   .sceneCard.glow::after{opacity:.85;}
+  .sceneCard.zoom .sceneVid{transform:scale(1.08);filter:brightness(1.03) contrast(1.08);}
 
-  /* degen zoom */
-  .sceneCard.zoom .sceneVid{
-    transform:scale(1.08);
-    filter:brightness(1.03) contrast(1.08);
-  }
-
-  /* rug flicker red */
+  /* Rug flicker */
   .sceneCard.rugFlicker::after{
-    background: radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.55), rgba(0,0,0,.78) 72%);
+    background:radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.55), rgba(0,0,0,.78) 72%);
     opacity:.95;
     animation:rugFlicker 420ms steps(6,end) 1;
   }
@@ -371,17 +348,12 @@
     100%{opacity:.0; filter:brightness(1)}
   }
 
-  /* video glitch overlay (during rug) */
+  /* Video glitch overlay */
   .glitchOverlay{
     position:absolute;inset:-20px;
     pointer-events:none;
     opacity:0;
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.16) 0 1px,
-        rgba(0,0,0,0) 2px 6px
-      );
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.16) 0 1px, rgba(0,0,0,0) 2px 6px);
     mix-blend-mode:overlay;
     filter:contrast(1.2);
     transform:translateZ(0);
@@ -412,7 +384,7 @@
     100%{transform:translateY(0); opacity:0}
   }
 
-  /* pump.fun button */
+  /* Pump button */
   .pumpBtn{
     display:flex;align-items:center;justify-content:center;gap:12px;
     border-radius:14px;border:1px solid var(--line);
@@ -427,44 +399,13 @@
   }
   .pumpBtn:active{transform:translateY(1px) scale(.99)}
   .pumpBtn .ico{
-    width:30px;height:30px; /* BIGGER THAN TEXT */
+    width:28px;height:28px;
     image-rendering:pixelated;
     filter: drop-shadow(0 0 12px rgba(255,255,255,.12));
     flex:0 0 auto;
   }
 
-  /* links row */
-  .linkRow{display:flex;gap:10px;flex-wrap:wrap}
-  .linkBtn{
-    flex:1;min-width:140px;
-    display:flex;align-items:center;justify-content:center;gap:12px;
-    border-radius:14px;border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    padding:11px 12px;
-    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
-    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
-    text-decoration:none;color:#fff;
-    position:relative;
-    overflow:visible;
-    isolation:isolate;
-  }
-  .linkBtn:active{transform:translateY(1px) scale(.99)}
-  .linkBtn .ico{
-    width:28px;height:28px; /* BIGGER THAN TEXT */
-    image-rendering:pixelated;
-    filter: drop-shadow(0 0 12px rgba(255,255,255,.12));
-    flex:0 0 auto;
-  }
-  .linkBtn.dex{
-    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.72));
-    border-color:rgba(45,255,106,.55);
-  }
-  .linkBtn.tw{
-    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
-    border-color:rgba(200,255,47,.55);
-  }
-
-  /* ACTIVITY LOG */
+  /* Activity log */
   .logWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
   .logHead{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -506,7 +447,6 @@
   }
   .caBtn:active{transform:translateY(1px) scale(.995)}
   .caBtn:focus-visible{outline:2px solid rgba(200,255,47,.55); outline-offset:2px}
-
   .caTop{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     font-family:var(--mono);font-weight:1000;letter-spacing:.7px;font-size:11px;text-transform:uppercase;
@@ -539,114 +479,73 @@
   }
   .caToast.show{opacity:1; transform:translateY(0)}
 
-  /* Rank text colors */
+  /* Rank colors */
   .rank-white{color:#fff}
   .rank-yellow{color:var(--warn)}
   .rank-green{color:var(--good)}
   .rank-red{color:var(--bad)}
 
-  /* GUARANTEED pulse + glow */
-  .pulse{
-    animation:pulsePop .9s ease-in-out infinite !important;
-    transform-origin:center;
+  /* LEFT-BOTTOM: How to buy section */
+  .buyPanel{
+    margin-top:10px;
+    border-top:1px solid var(--line);
+    background:
+      radial-gradient(900px 260px at 20% 30%, rgba(200,255,47,.12), transparent 55%),
+      radial-gradient(700px 240px at 90% 70%, rgba(45,255,106,.08), transparent 55%),
+      rgba(0,0,0,.12);
+    padding:12px;
   }
-  @keyframes pulsePop{
-    0%   { transform:scale(1); }
-    45%  { transform:scale(1.06); }
-    100% { transform:scale(1); }
+  .buyTitle{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:var(--mono);font-weight:1000;letter-spacing:.8px;
+    font-size:12px;text-transform:uppercase;color:rgba(255,255,255,.75);
+    margin-bottom:10px;
+  }
+  .buySteps{
+    display:grid;gap:6px;
+    font-family:var(--mono);
+    font-size:12px;color:#a8b6d6;
+    margin-bottom:10px;
+  }
+  .buySteps b{color:var(--text)}
+  .buyGrid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+  .buyBtn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    border-radius:14px;border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    padding:12px;
+    text-decoration:none;color:#fff;
+    font-weight:1000;letter-spacing:.35px;text-transform:uppercase;
+    user-select:none;-webkit-tap-highlight-color:transparent;
+    position:relative;isolation:isolate;overflow:visible;
+  }
+  .buyBtn:active{transform:translateY(1px) scale(.99)}
+  .buyIco{
+    width:28px;height:28px;border-radius:10px;
+    display:grid;place-items:center;
+    font-family:var(--mono);font-weight:1000;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.25);
+    box-shadow:0 0 16px rgba(255,255,255,.08);
+  }
+  .buyBtn.axiom{background:linear-gradient(135deg, rgba(200,255,47,.95), rgba(200,255,47,.70)); border-color:rgba(200,255,47,.55); color:#0b111c}
+  .buyBtn.raydium{background:linear-gradient(135deg, rgba(45,255,106,.95), rgba(45,255,106,.68)); border-color:rgba(45,255,106,.55); color:#0b111c}
+  .buyBtn.orca{background:linear-gradient(135deg, rgba(110,231,255,.22), rgba(167,139,250,.18));}
+  .buyBtn.tt{background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10)); border-color:rgba(255,77,109,.28);}
+
+  .buyNote{
+    margin-top:10px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.35;
   }
 
-  .glow{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.35) inset,
-      0 0 0 3px rgba(200,255,47,.55),
-      0 0 28px rgba(200,255,47,.55),
-      0 0 64px rgba(200,255,47,.35) !important;
-    filter:brightness(1.15);
-  }
-  .glow-green{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.35) inset,
-      0 0 0 3px rgba(45,255,106,.65),
-      0 0 28px rgba(45,255,106,.55),
-      0 0 64px rgba(45,255,106,.35) !important;
-    filter:brightness(1.15);
-  }
-  .glow-yellow{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.35) inset,
-      0 0 0 3px rgba(200,255,47,.70),
-      0 0 28px rgba(200,255,47,.60),
-      0 0 64px rgba(200,255,47,.35) !important;
-    filter:brightness(1.15);
-  }
-  .glow-red{
-    box-shadow:
-      0 0 0 2px rgba(0,0,0,.35) inset,
-      0 0 0 3px rgba(255,77,109,.70),
-      0 0 28px rgba(255,77,109,.55),
-      0 0 64px rgba(255,77,109,.32) !important;
-    filter:brightness(1.12);
-  }
-
-  /* Jackpot visuals */
-  .coin-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
-  .coin{
-    position:absolute;top:-18px;width:12px;height:12px;border:2px solid rgba(0,0,0,.65);
-    background:var(--warn);
-    box-shadow:2px 2px 0 rgba(0,0,0,.65), 0 0 10px rgba(200,255,47,.18);
-    image-rendering:pixelated;opacity:0;will-change:transform, opacity;
-  }
-  .coin::after{content:"";position:absolute;inset:2px;border:1px solid rgba(0,0,0,.25)}
-  .jackpot{
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    pointer-events:none;opacity:0;z-index:9999;
-  }
-  .jackpot.show{opacity:1; animation:jackFlash 1200ms steps(6,end) 1;}
-  .jackpot::before{
-    content:"";position:absolute;inset:0;
-    background:radial-gradient(circle at 50% 45%, rgba(200,255,47,.22) 0%, rgba(45,255,106,.12) 35%, rgba(0,0,0,.0) 70%);
-    opacity:0;animation:jackGlow 1200ms steps(6,end) 1;
-  }
-  @keyframes jackFlash{
-    0%{filter:brightness(1); transform:translate(0,0)}
-    10%{filter:brightness(1.9); transform:translate(-1px,-1px)}
-    20%{filter:brightness(1.1); transform:translate(0,0)}
-    30%{filter:brightness(2.2); transform:translate(-2px,0)}
-    45%{filter:brightness(1.0); transform:translate(0,0)}
-    60%{filter:brightness(2.4); transform:translate(1px,-1px)}
-    75%{filter:brightness(1.05); transform:translate(0,0)}
-    100%{filter:brightness(1); transform:translate(0,0)}
-  }
-  @keyframes jackGlow{
-    0%{opacity:0}
-    18%{opacity:1}
-    40%{opacity:.15}
-    60%{opacity:.85}
-    85%{opacity:.08}
-    100%{opacity:0}
-  }
-  .jackpot-inner{
-    position:relative;padding:18px 22px;
-    border:1px solid rgba(200,255,47,.28);
-    box-shadow:0 0 0 1px rgba(0,0,0,.45) inset, 0 0 48px rgba(200,255,47,.18);
-    background:rgba(0,0,0,.55);
-    text-align:center;border-radius:18px;overflow:hidden;backdrop-filter: blur(6px);
-  }
-  .jackpot-nums{
-    font-family:var(--mono);font-weight:1000;font-size:64px;letter-spacing:6px;
-    color:var(--warn);text-shadow:0 0 14px rgba(200,255,47,.35), 0 0 34px rgba(200,255,47,.18);
-    line-height:1;
-  }
-  .jackpot-text{
-    margin-top:6px;font-family:var(--mono);font-weight:1000;letter-spacing:2px;text-transform:uppercase;
-    color:#eaeaea;font-size:13px;
-  }
-  .jackpot-sub{
-    margin-top:6px;font-family:var(--mono);font-weight:1000;letter-spacing:1px;text-transform:uppercase;
-    color:var(--warn);font-size:12px;opacity:.92;
-  }
-
+  /* Shake */
   .shake{ animation: shake .32s linear 1; }
   @keyframes shake{
     0%{transform:translate(0,0)}
@@ -657,9 +556,20 @@
     100%{transform:translate(0,0)}
   }
 
+  /* MOBILE: keep full screen, allow internal scroll only */
+  @media (max-width: 980px){
+    body{overflow:hidden;}
+    .stage{height:100svh; padding:10px;}
+    .frame{width:96vw; height:100%; padding:10px;}
+    .content{grid-template-columns:1fr;}
+    .heroRow{grid-template-columns: 120px 1fr;}
+    .heroLogo{width:120px;height:120px;}
+    .heroText h1{font-size:26px}
+  }
+
   @media (prefers-reduced-motion: reduce){
     body::after{animation:none !important;}
-    .btn.pulseAlways, .pulse, .cursor{animation:none !important;}
+    .btn.pulseAlways, .cursor{animation:none !important;}
     .sceneVid{transition:none !important;}
     .sceneCard.rugFlicker::after{animation:none !important; opacity:.0;}
     .sceneCard.glitch .sceneVid{animation:none !important;}
@@ -669,16 +579,6 @@
 </head>
 
 <body>
-  <!-- Jackpot FX layers -->
-  <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
-  <div class="jackpot" id="jackpot" aria-hidden="true">
-    <div class="jackpot-inner">
-      <div class="jackpot-nums">777</div>
-      <div class="jackpot-text">GBARON JACKPOT</div>
-      <div class="jackpot-sub" id="jackpotSub">YOU WON: 777 $GBARON</div>
-    </div>
-  </div>
-
   <div class="stage">
     <div class="frame" id="frame">
       <header>
@@ -762,24 +662,58 @@
                 💀 RUG PULL
               </button>
             </div>
-          </div>
 
-          <div class="caCard">
-            <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
-              <span class="caToast" id="caToast">THE BARON APPROVES • SEE YOU AT ATH!</span>
-              <div class="caTop">
-                <span>CA</span>
-                <span style="color:var(--warn)">$GBARON</span>
+            <!-- CA -->
+            <div class="caCard">
+              <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
+                <span class="caToast" id="caToast">THE BARON APPROVES • SEE YOU AT ATH!</span>
+                <div class="caTop">
+                  <span>CA</span>
+                  <span style="color:var(--warn)">$GBARON</span>
+                </div>
+                <div class="caBig" id="caText"></div>
+              </button>
+              <div class="tapHint">Tap to copy</div>
+
+              <!-- HOW TO BUY (axiom/raydium/orca/tradingterminal) -->
+              <div class="buyPanel" aria-label="How to buy section">
+                <div class="buyTitle">
+                  <span>🕹 HOW TO BUY $GBARON</span>
+                  <span style="color:rgba(255,255,255,.45)">ARCADE MODE</span>
+                </div>
+
+                <div class="buySteps">
+                  <div><b>&gt;</b> Copy CA (above)</div>
+                  <div><b>&gt;</b> Open a terminal</div>
+                  <div><b>&gt;</b> Swap like a villain</div>
+                </div>
+
+                <div class="buyGrid">
+                  <a class="buyBtn axiom" id="buyAxiom" target="_blank" rel="noopener noreferrer">
+                    <span class="buyIco">AX</span> AXIOM
+                  </a>
+                  <a class="buyBtn raydium" id="buyRaydium" target="_blank" rel="noopener noreferrer">
+                    <span class="buyIco">RY</span> RAYDIUM
+                  </a>
+                  <a class="buyBtn orca" id="buyOrca" target="_blank" rel="noopener noreferrer">
+                    <span class="buyIco">OR</span> ORCA
+                  </a>
+                  <a class="buyBtn tt" id="buyTT" target="_blank" rel="noopener noreferrer">
+                    <span class="buyIco">TT</span> TRADINGTERMINAL
+                  </a>
+                </div>
+
+                <div class="buyNote">
+                  Tip: hit <b>ACTIVATE DEGEN</b> before swapping for max chaos. ☠️
+                </div>
               </div>
-              <div class="caBig" id="caText"></div>
-            </button>
-            <div class="tapHint">Tap to copy</div>
+            </div>
           </div>
         </section>
 
         <!-- RIGHT -->
         <aside class="card" aria-label="Terminal / Links">
-          <h2>Terminal / Links <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
+          <h2>Terminal <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
 
           <div class="rightStack">
             <div class="terminalBox" aria-label="Terminal">
@@ -795,21 +729,11 @@
               <div class="glitchOverlay" aria-hidden="true"></div>
             </div>
 
+            <!-- keep your single pump.fun link (not in the buy panel) -->
             <a class="pumpBtn" id="pumpBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Open pump.fun">
               <img class="ico" src="pump.png" alt="" aria-hidden="true">
               PUMP.FUN
             </a>
-
-            <div class="linkRow" aria-label="Links">
-              <a class="linkBtn dex" id="dexBtn" href="https://dexscreener.com" target="_blank" rel="noopener noreferrer">
-                <img class="ico" src="dex.png" alt="" aria-hidden="true">
-                DEXSCREENER
-              </a>
-              <a class="linkBtn tw" id="xBtn" href="https://x.com/" target="_blank" rel="noopener noreferrer">
-                <img class="ico" src="x.png" alt="" aria-hidden="true">
-                TWITTER
-              </a>
-            </div>
 
             <div class="logWrap" aria-label="Activity terminal">
               <div class="logHead">
@@ -818,7 +742,7 @@
               </div>
               <div class="log" id="log" aria-live="polite"></div>
               <div style="font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.35;">
-                Tip: spam <b>INSERT COINS</b> to pump the chart. Hit <b>RUG PULL</b> for the villain arc. ☠️
+                Tip: spam <b>INSERT COINS</b> to pump. Hit <b>RUG PULL</b> for the villain arc. ☠️
               </div>
             </div>
           </div>
@@ -832,11 +756,12 @@
  * CONFIG
  * ========================= */
 const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-const PUMP_URL = "https://pump.fun";
-const DEX_URL  = "https://dexscreener.com";
-const X_URL    = "https://x.com/";
-const TICKER   = "$GBARON";
-const JACKPOT_CHANCE = 0.02;
+const TICKER = "$GBARON";
+
+const AXIOM_URL   = "https://axiom.trade/";
+const RAYDIUM_URL = "https://raydium.io/swap/";
+const ORCA_URL    = "https://www.orca.so/";
+const TT_URL      = "https://tradingterminal.com/";
 
 /** =========================
  * ELEMENTS
@@ -856,24 +781,21 @@ const btnInsert = document.getElementById("btnInsert");
 const btnDegen  = document.getElementById("btnDegen");
 const btnRug    = document.getElementById("btnRug");
 
-const dexBtn = document.getElementById("dexBtn");
-const xBtn   = document.getElementById("xBtn");
-const pumpBtn = document.getElementById("pumpBtn");
-
 const elCA   = document.getElementById("caText");
 const caBtn  = document.getElementById("caBtn");
 const caToast= document.getElementById("caToast");
 
 const frame  = document.getElementById("frame");
 
-/* video scene */
-const sceneCard = document.getElementById("sceneCard");
-const baronScene = document.getElementById("baronScene");
+/* buy links */
+const buyAxiom   = document.getElementById("buyAxiom");
+const buyRaydium = document.getElementById("buyRaydium");
+const buyOrca    = document.getElementById("buyOrca");
+const buyTT      = document.getElementById("buyTT");
 
-/* FX layers */
-const jackpotEl = document.getElementById("jackpot");
-const jackpotSub= document.getElementById("jackpotSub");
-const coinRain  = document.getElementById("coinRain");
+/* video scene */
+const sceneCard  = document.getElementById("sceneCard");
+const baronScene = document.getElementById("baronScene");
 
 /* sound */
 const soundToggle = document.getElementById("soundToggle");
@@ -901,592 +823,368 @@ const seriesLen = 34;
 let ath = Number(sessionStorage.getItem("gbaron_ath") || String(price));
 if (!Number.isFinite(ath) || ath <= 0) ath = price;
 
-/* CA glow tier by rank */
-let currentRankGlow = "glow-yellow";
+let degen = (sessionStorage.getItem("gbaron_degen") || "0") === "1";
 
 /** =========================
- * SOUND
+ * AUDIO (no external files)
  * ========================= */
-let isMuted = (localStorage.getItem("gbaron_muted") === "1");
-
-function renderSoundUI(){
-  soundState.textContent = isMuted ? "off" : "on";
-  soundToggle.classList.toggle("on", !isMuted);
-  soundToggle.setAttribute("aria-checked", String(!isMuted));
-}
-renderSoundUI();
-
-soundToggle.addEventListener("click", ()=>{
-  isMuted = !isMuted;
-  localStorage.setItem("gbaron_muted", isMuted ? "1" : "0");
-  renderSoundUI();
-});
-soundToggle.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    soundToggle.click();
-  }
-});
-
-const CLICK_POOL_SIZE = 6;
-const clickPool = [];
-let clickIdx = 0;
-
-let baronAudio = null;
-const laughPool = [];
-let laughIdx = 0;
-const jackpotPool = [];
-
-function initClickPool(){
-  if(clickPool.length) return;
-  for(let i=0;i<CLICK_POOL_SIZE;i++){
-    const a = new Audio("arcade.mp3");
-    a.preload = "auto";
-    a.volume = 0.85;
-    clickPool.push(a);
-  }
-}
-function initLaughPool(){
-  if(laughPool.length) return;
-  for(let i=0;i<2;i++){
-    const a = new Audio("laugh.mp3");
-    a.preload = "auto";
-    a.volume = 0.9;
-    laughPool.push(a);
-  }
-}
-function initJackpotPool(){
-  if(jackpotPool.length) return;
-  for(let i=0;i<2;i++){
-    const a = new Audio("jackpot.mp3");
-    a.preload = "auto";
-    a.volume = 0.95;
-    jackpotPool.push(a);
-  }
-}
-
-let audioUnlocked = false;
-let audioCtx = null;
+let audioEnabled = true;
+let ac = null;
 
 function unlockAudio(){
-  if(audioUnlocked) return;
-  audioUnlocked = true;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-  }catch(e){}
-  initClickPool();
-  initLaughPool();
-  initJackpotPool();
-}
-window.addEventListener("pointerdown", unlockAudio, {once:true, passive:true, capture:true});
-
-function stopBaron(){
-  try{ if(baronAudio){ baronAudio.pause(); baronAudio.currentTime = 0; } }catch(e){}
-}
-function stopLaugh(){
-  try{ laughPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){}
-}
-function stopJackpot(){
-  try{ jackpotPool.forEach(a=>{ a.pause(); a.currentTime=0; }); }catch(e){}
-}
-
-function beepFallback(){
-  if(isMuted) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = "square";
-    o.frequency.value = 740;
-    g.gain.value = 0.05;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    setTimeout(()=>{ try{o.stop();}catch(e){} }, 70);
-  }catch(e){}
-}
-
-function playClick(){
-  if(isMuted) return;
-  unlockAudio();
-  stopLaugh(); stopBaron(); stopJackpot();
-  try{
-    initClickPool();
-    const a = clickPool[clickIdx % clickPool.length];
-    clickIdx++;
-    a.pause(); a.currentTime = 0;
-    const p = a.play();
-    if(p && p.catch) p.catch(()=>beepFallback());
-  }catch(e){
-    beepFallback();
+  if(!audioEnabled) return;
+  if(!ac){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    ac = new Ctx();
   }
+  if(ac.state === "suspended") ac.resume().catch(()=>{});
 }
 
-function playBaronPromise(){
-  return new Promise((resolve)=>{
-    if(isMuted){ resolve(); return; }
-    unlockAudio();
-    stopLaugh(); stopJackpot();
-    try{
-      stopBaron();
-      baronAudio = new Audio("baron.mp3");
-      baronAudio.preload = "auto";
-      baronAudio.volume = 0.75;
-      baronAudio.onended = () => resolve();
-      baronAudio.onerror = () => resolve();
-      const p = baronAudio.play();
-      if(p && p.catch) p.catch(()=>resolve());
-    }catch(e){
-      resolve();
-    }
-  });
-}
-
-function playLaughAfter(ms){
-  if(isMuted) return;
+function blip(freq=520, dur=0.04, type="square", gain=0.07){
+  if(!audioEnabled) return;
   unlockAudio();
-  setTimeout(()=>{
-    if(isMuted) return;
-    stopBaron(); stopJackpot();
-    try{
-      initLaughPool();
-      const a = laughPool[laughIdx % laughPool.length];
-      laughIdx++;
-      a.pause(); a.currentTime = 0;
-      const p = a.play();
-      if(p && p.catch) p.catch(()=>{});
-    }catch(e){}
-  }, ms);
+  if(!ac) return;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = gain;
+  o.connect(g); g.connect(ac.destination);
+  o.start();
+  o.stop(ac.currentTime + dur);
 }
+
+function playClick(){ blip(620, 0.03, "square", 0.06); }
+function playCoin(){ blip(420, 0.05, "square", 0.07); setTimeout(()=>blip(840, 0.03, "square", 0.05), 55); }
+function playDegen(){ blip(220, 0.05, "sawtooth", 0.06); setTimeout(()=>blip(880, 0.06, "square", 0.06), 70); }
+function playRug(){ blip(160, 0.09, "sawtooth", 0.07); setTimeout(()=>blip(90, 0.12, "triangle", 0.07), 90); }
 
 /** =========================
- * UI helpers
+ * UTIL
  * ========================= */
-function fmtPrice(n){
-  if (n < 0.01) return "$" + n.toFixed(6);
-  if (n < 1) return "$" + n.toFixed(4);
-  return "$" + n.toFixed(2);
+function fmtUSD(x){
+  if (x >= 1) return "$" + x.toFixed(2);
+  if (x >= 0.01) return "$" + x.toFixed(4);
+  return "$" + x.toFixed(6);
+}
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+function nowStamp(){
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  const ss = String(d.getSeconds()).padStart(2,"0");
+  return `${hh}:${mm}:${ss}`;
 }
 
-function ensureSeries(){
-  if(series.length === 0){
-    for(let i=0;i<seriesLen;i++) series.push(price);
-  }
-  while(series.length > seriesLen) series.shift();
-  while(series.length < seriesLen) series.unshift(price);
-}
-
-function sparkPath(values){
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = (max - min) || 1;
-  const pts = values.map((v, i) => {
-    const x = (i/(values.length-1))*100;
-    const y = 100 - ((v - min)/span)*92 - 4;
-    return [x,y];
-  });
-  const d = pts.map((p,i)=> (i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ");
-  const dFill = d + " L 100 100 L 0 100 Z";
-  return {d,dFill};
-}
-
-/* FIXED: valid JS template string */
-function addLog(msgHtml){
+function addLog(html){
   const p = document.createElement("p");
-  const t = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"});
-  p.innerHTML = `<b>[${t}]</b> ${msgHtml}`;
+  p.innerHTML = `<b>[${nowStamp()}]</b> ${html}`;
   elLog.prepend(p);
-  elLogCount.textContent = String(Number(elLogCount.textContent || "0") + 1);
+  const count = elLog.querySelectorAll("p").length;
+  elLogCount.textContent = String(count);
 }
 
-/* Rank + CA glow tier */
-function updateRank(c){
-  let cls = "rank-white";
-  let name = "paperhands";
-  currentRankGlow = "glow-green";
-
-  if(c >= 10){ cls = "rank-yellow"; name = "hopium addict"; currentRankGlow = "glow-yellow"; }
-  if(c >= 25){ cls = "rank-yellow"; name = "bagholder";     currentRankGlow = "glow-yellow"; }
-  if(c >= 35){ cls = "rank-green";  name = "diamondhands";  currentRankGlow = "glow-green";  }
-  if(c >= 55){ cls = "rank-green";  name = "terminally online"; currentRankGlow = "glow-green"; }
-  if(c >= 80){ cls = "rank-red";    name = "exit liquidity"; currentRankGlow = "glow-red"; }
-
-  elRank.className = cls;
-  elRank.textContent = name;
+function bumpScene(mode="glow", ms=380){
+  if(!sceneCard) return;
+  sceneCard.classList.add(mode);
+  setTimeout(()=>sceneCard.classList.remove(mode), ms);
 }
 
-function updateUI(){
-  elCoins.textContent = String(coinsInserted);
-  updateRank(coinsInserted);
+function glitch(ms=520){
+  if(!sceneCard) return;
+  sceneCard.classList.add("glitch");
+  setTimeout(()=>sceneCard.classList.remove("glitch"), ms);
+}
 
-  elPrice.textContent = fmtPrice(price);
-
-  const pct = ((price - lastPrice) / (lastPrice || price)) * 100;
-  const pctText = (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%";
-  elPct.textContent = pctText;
-
-  if (pct >= 0){
-    elPct.style.background = "rgba(45,255,106,.10)";
-    elPct.style.color = "var(--good)";
-  } else {
-    elPct.style.background = "rgba(255,77,109,.12)";
-    elPct.style.color = "var(--bad)";
-  }
-
-  ath = Math.max(ath, price);
-  elPriceNote.textContent = `ATH: ${fmtPrice(ath)} • Liquidity: imaginary`;
-
-  ensureSeries();
-  const paths = sparkPath(series);
-  elLine.setAttribute("d", paths.d);
-  elFill.setAttribute("d", paths.dFill);
+function rugFlicker(){
+  if(!sceneCard) return;
+  sceneCard.classList.add("rugFlicker");
+  setTimeout(()=>sceneCard.classList.remove("rugFlicker"), 450);
 }
 
 /** =========================
- * Pulse + glow helper
+ * RANKS
  * ========================= */
-function pulseGlow(el, ms = 1800, glowClass = "glow"){
-  if(!el) return;
-  el.classList.add("pulse");
-  el.classList.add(glowClass);
-  clearTimeout(el._pulseT);
-  el._pulseT = setTimeout(()=>{
-    el.classList.remove("pulse");
-    el.classList.remove(glowClass);
-  }, ms);
-}
-
-/** =========================
- * CA + links
- * ========================= */
-elCA.textContent = CA;
-pumpBtn.href = PUMP_URL;
-dexBtn.href  = DEX_URL;
-xBtn.href    = X_URL;
-
-/** =========================
- * Jackpot visuals
- * ========================= */
-let jackpotTimer = null;
-
-function spawnCoinRain(count = 38){
-  coinRain.innerHTML = "";
-  const W = window.innerWidth || 520;
-  const H = window.innerHeight || 700;
-
-  for(let i=0;i<count;i++){
-    const c = document.createElement("span");
-    c.className = "coin";
-    const left = Math.random() * W;
-    const size = 8 + Math.random() * 10;
-    const dur  = 900 + Math.random() * 900;
-    const delay= Math.random() * 240;
-    const rot  = 240 + Math.random() * 360;
-
-    c.style.left = left + "px";
-    c.style.width = size + "px";
-    c.style.height = size + "px";
-    coinRain.appendChild(c);
-
-    c.animate(
-      [
-        { transform: "translateY(-30px) rotate(0deg)", opacity: 0 },
-        { opacity: 1, offset: 0.12 },
-        { transform: `translateY(${H + 80}px) rotate(${rot}deg)`, opacity: 0 }
-      ],
-      { duration: dur, delay, easing: "linear", fill: "forwards" }
-    );
-  }
-  setTimeout(()=>{ coinRain.innerHTML = ""; }, 2600);
-}
-
-function triggerJackpotVisualOnly(){
-  jackpotSub.textContent = `YOU WON: 777 ${TICKER}`;
-  spawnCoinRain(44);
-
-  jackpotEl.classList.remove("show");
-  void jackpotEl.offsetWidth;
-  jackpotEl.classList.add("show");
-
-  clearTimeout(jackpotTimer);
-  jackpotTimer = setTimeout(()=> jackpotEl.classList.remove("show"), 2100);
-
-  addLog(`<span style="color:var(--warn);font-weight:1000;">JACKPOT</span> — 777 ${TICKER} (fake)`);
-}
-
-/** =========================
- * TERMINAL ticker + events
- * ========================= */
-const BASE_LINE_1 = "INITIALIZING TERMINAL ON SOLANA NETWORK";
-const BASE_LINE_3 = "READY FOR COINS... INSERT TO BEGIN";
-
-const STATUS_LINES = [
-  "CONNECTING RPC",
-  "SYNCING BLOCKHASH",
-  "CHECKING MEMPOOL",
-  "SCANNING LIQUIDITY ROUTES",
-  "VERIFYING SIGNATURES",
-  "PINGING VALIDATORS"
+const ranks = [
+  { min:0,   name:"paperhands", cls:"rank-white" },
+  { min:10,  name:"hodler",     cls:"rank-yellow" },
+  { min:25,  name:"diamondhands", cls:"rank-green" },
+  { min:45,  name:"degen",      cls:"rank-yellow" },
+  { min:70,  name:"baron’s henchman", cls:"rank-green" },
+  { min:100, name:"the baron",  cls:"rank-yellow" },
 ];
 
-let statusIdx = 0;
-let dotCount = 0;
-let terminalLock = false;
-let termTicker = null;
-
-function startTerminalTicker(){
-  if(termTicker) return;
-  termTicker = setInterval(()=>{
-    if(terminalLock) return;
-
-    dotCount = (dotCount + 1) % 4;
-    const d = ".".repeat(dotCount);
-
-    term1.textContent = `${BASE_LINE_1}${d}`;
-    term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]}${d} — OK`;
-    term3.textContent = `${BASE_LINE_3}${d}`;
-
-    if(dotCount === 0) statusIdx++;
-  }, 180);
+function getRank(coins){
+  let r = ranks[0];
+  for(const x of ranks){
+    if(coins >= x.min) r = x;
+  }
+  return r;
 }
 
-function terminalEvent(lines, holdMs = 2400){
-  terminalLock = true;
-  term1.textContent = lines[0] || "";
-  term2.textContent = lines[1] || "";
-  term3.textContent = lines[2] || "";
-  setTimeout(()=> terminalLock = false, holdMs);
+function setRankUI(){
+  const r = getRank(coinsInserted);
+  elRank.textContent = r.name;
+  elRank.classList.remove("rank-white","rank-yellow","rank-green","rank-red");
+  elRank.classList.add(r.cls);
 }
-
-function setDegenTerminal(){
-  terminalLock = true;
-  term1.textContent = "THE BARON ALWAYS EXITS FIRST";
-  term2.textContent = "DEGEN OVERRIDE ACTIVATED";
-  term3.textContent = "MAX VOLATILITY MODE: ENGAGED";
-}
-function releaseTerminal(){ terminalLock = false; }
 
 /** =========================
- * Persist
+ * SPARKLINE
  * ========================= */
-function persist(){
-  sessionStorage.setItem("gbaron_coins", String(coinsInserted));
+function seedSeries(){
+  series = [];
+  let v = price;
+  for(let i=0;i<seriesLen;i++){
+    v *= (1 + (Math.random()-0.5)*0.04);
+    series.push(v);
+  }
+}
+
+function drawSpark(){
+  if(series.length < 2) return;
+  const minV = Math.min(...series);
+  const maxV = Math.max(...series);
+  const span = (maxV - minV) || 1e-9;
+
+  let d = "";
+  let df = "M 0 100 ";
+  for(let i=0;i<series.length;i++){
+    const x = (i/(series.length-1))*100;
+    const y = 100 - ((series[i]-minV)/span)*92 - 4; // padding
+    d += (i===0 ? "M " : " L ") + x.toFixed(2) + " " + y.toFixed(2);
+    df += " L " + x.toFixed(2) + " " + y.toFixed(2);
+  }
+  df += " L 100 100 L 0 100 Z";
+
+  elLine.setAttribute("d", d);
+  elFill.setAttribute("d", df);
+}
+
+/** =========================
+ * PRICE MECHANICS
+ * ========================= */
+function pump(mult=1){
+  // base pump + degen multiplier + randomness
+  const base = 0.012 * mult;
+  const chaos = (Math.random()*0.012);
+  const degenBoost = degen ? 0.020 : 0;
+  const pct = base + chaos + degenBoost;
+  lastPrice = price;
+  price = price * (1 + pct);
+  ath = Math.max(ath, price);
+
+  series.push(price);
+  while(series.length > seriesLen) series.shift();
+
+  const pctShow = ((price/lastPrice)-1)*100;
+  elPrice.textContent = fmtUSD(price);
+  elPct.textContent = (pctShow>=0?"+":"") + pctShow.toFixed(2) + "%";
+  elPct.style.color = pctShow>=0 ? "var(--good)" : "var(--bad)";
+  elPct.style.background = pctShow>=0 ? "rgba(45,255,106,.10)" : "rgba(255,77,109,.10)";
+
+  if(price >= ath * 0.999) elPriceNote.textContent = "ATH sniff detected…";
+  else elPriceNote.textContent = "Totally organic growth (trust me bro)";
+
+  drawSpark();
+
   sessionStorage.setItem("gbaron_price", String(price));
   sessionStorage.setItem("gbaron_ath", String(ath));
 }
 
 /** =========================
- * Gameplay
+ * COPY CA
  * ========================= */
-function pumpFromInsert(){
-  coinsInserted += 1;
-  lastPrice = price;
-
-  const base = 0.003;
-  const vol  = 0.018;
-  const jitter = (Math.random() * vol) - (vol * 0.22);
-  const pctMove = base + jitter;
-
-  price = Math.max(0.000001, price * (1 + pctMove));
-  series.push(price);
-  if(series.length > seriesLen) series.shift();
-
-  addLog(`<span style="color:var(--good);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
-
-  /* CA pulses by rank tier (green/yellow/red) */
-  pulseGlow(caBtn, 1800, currentRankGlow);
-
-  persist();
-  updateUI();
+async function copyCA(){
+  const text = CA;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast();
+    addLog(`<span style="color:var(--warn);font-weight:1000;">COPIED</span> — CA copied. The Baron approves.`);
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); showToast(); }catch(_){}
+    document.body.removeChild(ta);
+    addLog(`<span style="color:var(--warn);font-weight:1000;">COPIED</span> — CA copied (fallback).`);
+  }
 }
 
-/* DEGEN locks until baron finishes */
-let degenBusy = false;
-async function degenActivateLocked(){
-  if(degenBusy) return;
-  degenBusy = true;
-
-  const prevLabel = btnDegen.innerHTML;
-  btnDegen.innerHTML = "ACTIVATED";
-  btnDegen.disabled = true;
-  btnDegen.style.opacity = "0.88";
-  btnDegen.style.cursor = "not-allowed";
-
-  setDegenTerminal();
-  addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN OVERRIDE</span> — CAPS LOCK ENGAGED`);
-
-  /* PUMP.FUN pulses (yellow ring) */
-  pulseGlow(pumpBtn, 2200, "glow-yellow");
-
-  /* video glow + lean forward */
-  sceneCard.classList.add("glow", "zoom");
-
-  lastPrice = price;
-  const base = 0.007;
-  const vol  = 0.040;
-  const jitter = (Math.random() * vol) - (vol * 0.25);
-  const pctMove = base + jitter;
-
-  price = Math.max(0.000001, price * (1 + pctMove));
-  series.push(price);
-  if(series.length > seriesLen) series.shift();
-
-  addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN</span> — volatility injected <b>${(pctMove*100).toFixed(2)}%</b>`);
-
-  if(Math.random() < JACKPOT_CHANCE){
-    triggerJackpotVisualOnly();
-  }
-
-  persist();
-  updateUI();
-
-  /* only baron.mp3 */
-  await playBaronPromise();
-
-  /* reset visuals */
-  sceneCard.classList.remove("zoom","glow");
-  releaseTerminal();
-
-  btnDegen.disabled = false;
-  btnDegen.style.opacity = "";
-  btnDegen.style.cursor = "";
-  btnDegen.innerHTML = prevLabel;
-
-  degenBusy = false;
+function showToast(){
+  caToast.classList.add("show");
+  setTimeout(()=>caToast.classList.remove("show"), 1200);
 }
 
-function rugPull(){
-  terminalEvent([
-    "RUG SEQUENCE INITIATED",
-    "LIQUIDITY HAS LEFT THE CHAT",
-    "THE BARON SENDS HIS REGARDS"
-  ], 2600);
+/** =========================
+ * WIRES
+ * ========================= */
+function wireLink(el, url, name){
+  if(!el) return;
+  el.href = url;
+  el.addEventListener("click", ()=>{
+    try{ unlockAudio(); playClick(); }catch(e){}
+    addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — ${name}`);
+  });
+}
 
-  /* reset coins + rank + price + series */
-  coinsInserted = 0;
-  lastPrice = price;
-  price = basePrice;
-  series = [];
-  ensureSeries();
+/** =========================
+ * SOUND TOGGLE
+ * ========================= */
+function setSoundUI(){
+  soundToggle.classList.toggle("on", audioEnabled);
+  soundToggle.setAttribute("aria-checked", audioEnabled ? "true" : "false");
+  soundState.textContent = audioEnabled ? "on" : "off";
+}
 
-  sessionStorage.setItem("gbaron_coins","0");
-  sessionStorage.setItem("gbaron_price",String(price));
-  sessionStorage.setItem("gbaron_ath",String(Math.max(ath, price)));
+function toggleSound(){
+  audioEnabled = !audioEnabled;
+  sessionStorage.setItem("gbaron_sound", audioEnabled ? "1" : "0");
+  setSoundUI();
+  addLog(`Sound ${audioEnabled ? "<b>ON</b>" : "<b>OFF</b>"} — ${audioEnabled ? "arcade mode engaged" : "silent villain mode"}`);
+  if(audioEnabled) { unlockAudio(); playClick(); }
+}
 
-  /* pause + glitch + red flicker */
-  try{ baronScene.pause(); }catch(e){}
-  sceneCard.classList.remove("zoom","glow","rugFlicker","glitch");
-  void sceneCard.offsetWidth;
-  sceneCard.classList.add("rugFlicker","glitch");
-
-  /* chart nuke look */
-  for(let i=0;i<6;i++){
-    series.push(price * (0.92 - Math.random()*0.10));
-  }
-  while(series.length > seriesLen) series.shift();
-
-  frame.classList.remove("shake");
-  void frame.offsetWidth;
+/** =========================
+ * RUG PULL
+ * ========================= */
+function doRugPull(){
+  unlockAudio();
+  playRug();
+  rugFlicker();
+  glitch();
   frame.classList.add("shake");
   setTimeout(()=>frame.classList.remove("shake"), 360);
 
-  addLog(`<span style="color:var(--bad);font-weight:1000;">RUG PULL</span> — funds relocated ☠️`);
+  addLog(`<span style="color:var(--bad);font-weight:1000;">RUG PULL</span> — liquidity evaporated. villain laugh.wav`);
+  addLog(`<span style="color:var(--bad);font-weight:1000;">RESET</span> — coins & rank rekt.`);
 
-  persist();
-  updateUI();
+  coinsInserted = 0;
+  price = basePrice;
+  lastPrice = price;
+  ath = price;
+  degen = false;
 
-  playLaughAfter(180);
+  sessionStorage.setItem("gbaron_coins", "0");
+  sessionStorage.setItem("gbaron_price", String(price));
+  sessionStorage.setItem("gbaron_ath", String(ath));
+  sessionStorage.setItem("gbaron_degen", "0");
 
-  setTimeout(()=>{
-    sceneCard.classList.remove("glitch","rugFlicker");
-    try{ baronScene.play(); }catch(e){}
-  }, 700);
+  updateUI(true);
 }
 
 /** =========================
- * CA copy
+ * UI UPDATE
  * ========================= */
-function showCaToast(){
-  caToast.classList.add("show");
-  clearTimeout(showCaToast._t);
-  showCaToast._t = setTimeout(()=>caToast.classList.remove("show"), 1100);
-}
+function updateUI(reset=false){
+  elCoins.textContent = String(coinsInserted);
+  setRankUI();
 
-const canClipboard = !!(navigator.clipboard && window.isSecureContext);
-async function copyCA(){
-  try{
-    if(canClipboard){
-      await navigator.clipboard.writeText(CA);
-    }else{
-      throw new Error("clipboard not available");
-    }
-  }catch{
-    try{
-      const t=document.createElement("textarea");
-      t.value=CA;
-      document.body.appendChild(t);
-      t.select();
-      document.execCommand("copy");
-      document.body.removeChild(t);
-    }catch{
-      window.prompt("Copy CA:", CA);
-    }
+  if(reset){
+    seedSeries();
+  }else{
+    // keep series if already running
+    if(series.length === 0) seedSeries();
   }
-  showCaToast();
-  addLog(`<span style="color:var(--warn);font-weight:1000;">CA</span> — copied`);
+
+  elPrice.textContent = fmtUSD(price);
+  elPct.textContent = "+0.00%";
+  elPct.style.color = "var(--good)";
+  elPct.style.background = "rgba(45,255,106,.10)";
+  elPriceNote.textContent = degen ? "DEGEN MODE: engaged." : "Totally organic growth (trust me bro)";
+
+  drawSpark();
+
+  term1.textContent = degen ? "NODE STATUS: OVERCLOCKED (DEGEN)" : "NODE STATUS: STABLE";
+  term2.textContent = "CA LOADED. READY TO EXECUTE SWAP…";
+  term3.textContent = coinsInserted > 0 ? "COINS DETECTED… PUMP SEQUENCE ARMED" : "READY FOR COINS... INSERT TO BEGIN";
 }
 
 /** =========================
- * Wiring
+ * INIT
  * ========================= */
-function withClick(fn){
-  return ()=>{
+(function init(){
+  // restore sound pref
+  const savedSound = sessionStorage.getItem("gbaron_sound");
+  if(savedSound === "0") audioEnabled = false;
+  setSoundUI();
+
+  // CA text
+  elCA.textContent = CA;
+
+  // seed chart
+  seedSeries();
+  updateUI(false);
+
+  // buy links
+  wireLink(buyAxiom, AXIOM_URL, "axiom.trade");
+  wireLink(buyRaydium, RAYDIUM_URL, "raydium.io");
+  wireLink(buyOrca, ORCA_URL, "orca.so");
+  wireLink(buyTT, TT_URL, "tradingterminal.com");
+
+  // interactions
+  btnInsert.addEventListener("click", ()=>{
+    unlockAudio();
+    playCoin();
+
+    coinsInserted += 1;
+    sessionStorage.setItem("gbaron_coins", String(coinsInserted));
+    elCoins.textContent = String(coinsInserted);
+    setRankUI();
+
+    pump(1);
+    addLog(`<span style="color:var(--good);font-weight:1000;">COIN</span> — inserted. chart pumped.`);
+    bumpScene("glow", 280);
+  });
+
+  btnDegen.addEventListener("click", ()=>{
+    unlockAudio();
+    playDegen();
+
+    degen = !degen;
+    sessionStorage.setItem("gbaron_degen", degen ? "1" : "0");
+
+    addLog(`${degen ? "<span style='color:var(--warn);font-weight:1000;'>DEGEN</span> — activated" : "<span style='color:#fff;font-weight:1000;'>DEGEN</span> — disengaged"}`);
+    bumpScene("zoom", 420);
+    glitch(520);
+    updateUI(false);
+  });
+
+  btnRug.addEventListener("click", doRugPull);
+
+  caBtn.addEventListener("click", ()=>{
     unlockAudio();
     playClick();
-    fn && fn();
-  };
-}
+    copyCA();
+  });
 
-/* INSERT: arcade click only */
-btnInsert.addEventListener("click", withClick(()=> pumpFromInsert()));
+  // sound switch
+  soundToggle.addEventListener("click", toggleSound);
+  soundToggle.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      toggleSound();
+    }
+  });
 
-/* DEGEN: only baron.mp3 (no arcade click) */
-btnDegen.addEventListener("click", ()=>{
-  unlockAudio();
-  stopLaugh(); stopJackpot();
-  degenActivateLocked();
-});
+  // log opening pump fun (kept as single link)
+  const pumpBtn = document.getElementById("pumpBtn");
+  pumpBtn.addEventListener("click", ()=>{
+    try{ unlockAudio(); playClick(); }catch(e){}
+    addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — pump.fun`);
+  });
 
-btnRug.addEventListener("click", withClick(()=> rugPull()));
+  // autoplay resilience
+  if(baronScene){
+    baronScene.play().catch(()=>{ /* autoplay may be blocked, ok */ });
+  }
 
-dexBtn.addEventListener("click", ()=>{
-  unlockAudio(); playClick();
-  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — dexscreener`);
-});
-xBtn.addEventListener("click", ()=>{
-  unlockAudio(); playClick();
-  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — twitter`);
-});
-pumpBtn.addEventListener("click", ()=>{
-  unlockAudio(); playClick();
-  addLog(`<span style="color:#fff;font-weight:1000;">OPEN</span> — pump.fun`);
-});
-caBtn.addEventListener("click", withClick(()=> copyCA()));
-
-/** =========================
- * Init
- * ========================= */
-ensureSeries();
-updateUI();
-startTerminalTicker();
-addLog(`Booted terminal — <b>SOLANA</b>`);
-
-/* if autoplay blocks until interaction */
-window.addEventListener("pointerdown", ()=>{
-  try{ baronScene.play(); }catch(e){}
-}, {once:true, passive:true});
+  addLog(`<span style="color:var(--warn);font-weight:1000;">BOOT</span> — The Baron is watching.`);
+})();
 </script>
-
 </body>
 </html>
