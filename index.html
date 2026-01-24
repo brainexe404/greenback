@@ -1,4 +1,6 @@
-<!doctype html>
+from pathlib import Path
+
+html = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -92,6 +94,13 @@
     min-height:60px;
   }
   .leftHead{display:flex;align-items:center;gap:12px;min-width:0}
+  .logoLink{
+    display:flex;align-items:center;gap:12px;min-width:0;
+    text-decoration:none;color:inherit;
+    border-radius:14px;
+    padding:4px 6px;
+  }
+  .logoLink:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
   .avatar{
     width:44px;height:44px;border-radius:12px;
     border:1px solid var(--line);
@@ -348,34 +357,36 @@
     position:absolute;inset:-20px;
     pointer-events:none;
     opacity:0;
-    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.16) 0 1px, rgba(0,0,0,0) 2px 6px);
+    background:
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.16) 0 1px, rgba(0,0,0,0) 2px 6px),
+      radial-gradient(800px 420px at 70% 35%, rgba(110,231,255,.12), transparent 60%);
     mix-blend-mode:overlay;
-    filter:contrast(1.2);
+    filter:contrast(1.25);
     transform:translateZ(0);
     z-index:4;
   }
   .sceneCard.glitch .glitchOverlay{
-    opacity:.55;
-    animation:glitchLines 650ms steps(10,end) 1;
+    opacity:.75;
+    animation:glitchLines 740ms steps(12,end) 1;
   }
   .sceneCard.glitch .sceneVid{
-    animation:glitchShift 650ms steps(10,end) 1;
+    animation:glitchShift 740ms steps(12,end) 1;
   }
   @keyframes glitchShift{
     0%{transform:translate(0,0) scale(1); filter:brightness(.95) contrast(1.05)}
-    10%{transform:translate(-4px,1px) scale(1.01); filter:hue-rotate(18deg) saturate(1.2)}
-    20%{transform:translate(6px,-2px) scale(1.02); filter:hue-rotate(-20deg) saturate(1.25)}
-    35%{transform:translate(-8px,0) scale(1.03); filter:contrast(1.25) brightness(1.06)}
-    55%{transform:translate(8px,2px) scale(1.03); filter:hue-rotate(25deg) saturate(1.2)}
-    75%{transform:translate(-3px,-3px) scale(1.01); filter:contrast(1.15)}
+    12%{transform:translate(-6px,2px) scale(1.02); filter:hue-rotate(25deg) saturate(1.3)}
+    24%{transform:translate(8px,-3px) scale(1.03); filter:hue-rotate(-30deg) saturate(1.35)}
+    38%{transform:translate(-10px,0) scale(1.04); filter:contrast(1.35) brightness(1.08)}
+    56%{transform:translate(10px,3px) scale(1.04); filter:hue-rotate(35deg) saturate(1.25)}
+    78%{transform:translate(-4px,-4px) scale(1.02); filter:contrast(1.2)}
     100%{transform:translate(0,0) scale(1); filter:brightness(.95) contrast(1.05)}
   }
   @keyframes glitchLines{
-    0%{transform:translateY(0); opacity:.15}
-    20%{transform:translateY(12px); opacity:.65}
-    40%{transform:translateY(-10px); opacity:.35}
-    60%{transform:translateY(16px); opacity:.7}
-    80%{transform:translateY(-8px); opacity:.45}
+    0%{transform:translateY(0); opacity:.20}
+    20%{transform:translateY(14px); opacity:.85}
+    40%{transform:translateY(-12px); opacity:.40}
+    60%{transform:translateY(18px); opacity:.95}
+    80%{transform:translateY(-10px); opacity:.55}
     100%{transform:translateY(0); opacity:0}
   }
 
@@ -384,19 +395,19 @@
     content:"";
     position:absolute; inset:0;
     pointer-events:none;
-    background:radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.55), rgba(0,0,0,.78) 72%);
+    background:radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.62), rgba(0,0,0,.82) 72%);
     opacity:.0;
     mix-blend-mode:screen;
     z-index:3;
-    animation:rugFlicker 520ms steps(8,end) 1;
+    animation:rugFlicker 720ms steps(10,end) 1;
   }
   @keyframes rugFlicker{
-    0%{opacity:.15; filter:brightness(1)}
-    15%{opacity:.95; filter:brightness(1.5)}
-    30%{opacity:.25; filter:brightness(1.1)}
-    45%{opacity:.9;  filter:brightness(1.6)}
-    60%{opacity:.35; filter:brightness(1.2)}
-    75%{opacity:.85; filter:brightness(1.55)}
+    0%{opacity:.10; filter:brightness(1)}
+    12%{opacity:.95; filter:brightness(1.7)}
+    28%{opacity:.20; filter:brightness(1.15)}
+    44%{opacity:.92; filter:brightness(1.75)}
+    64%{opacity:.35; filter:brightness(1.25)}
+    80%{opacity:.88; filter:brightness(1.6)}
     100%{opacity:.0; filter:brightness(1)}
   }
 
@@ -488,10 +499,19 @@
     cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
     color:var(--text);
     position:relative;overflow:visible;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 24px rgba(200,255,47,.14);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 24px rgba(200,255,47,.10);
     text-align:left;
     isolation:isolate;
   }
+  /* Subtle idle pulse only */
+  .caBtn.idlePulse{
+    animation: caIdle 2.8s ease-in-out infinite;
+  }
+  @keyframes caIdle{
+    0%,100%{box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 18px rgba(200,255,47,.08)}
+    50%{box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 28px rgba(200,255,47,.16)}
+  }
+
   .caBtn:active{transform:translateY(1px) scale(.995)}
   .caBtn:focus-visible{outline:2px solid rgba(200,255,47,.55); outline-offset:2px}
   .caTop{
@@ -622,6 +642,7 @@
     .sceneCard.rugFlicker::after{animation:none !important; opacity:0 !important;}
     .sceneCard.glitch .sceneVid{animation:none !important;}
     .sceneCard.glitch .glitchOverlay{animation:none !important;}
+    .caBtn.idlePulse{animation:none !important;}
   }
 </style>
 </head>
@@ -631,13 +652,15 @@
     <div class="frame" id="frame">
       <header>
         <div class="leftHead">
-          <div class="avatar" aria-hidden="true">
-            <img src="logo.png" alt="">
-          </div>
-          <div class="brand">
-            <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
-            <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
-          </div>
+          <a class="logoLink" id="topPumpLink" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Open pump.fun">
+            <div class="avatar" aria-hidden="true">
+              <img src="logo.png" alt="">
+            </div>
+            <div class="brand">
+              <div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
+              <div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
+            </div>
+          </a>
         </div>
 
         <div class="stats">
@@ -660,7 +683,6 @@
       </header>
 
       <div class="content">
-        <!-- LEFT -->
         <section class="card" aria-label="Fake chart that pumps on clicks">
           <h2>📉 Fake Chart (Pumps on Clicks)</h2>
 
@@ -711,7 +733,6 @@
               </button>
             </div>
 
-            <!-- HOW TO BUY -->
             <div class="buyPanel" aria-label="How to buy section">
               <div class="buyTitle">
                 <span>🕹 HOW TO BUY $GBARON</span>
@@ -743,9 +764,8 @@
                 </a>
               </div>
 
-              <!-- CA moved here -->
               <div class="caWrap">
-                <button class="caBtn" id="caBtn" type="button" aria-label="Copy contract address">
+                <button class="caBtn idlePulse" id="caBtn" type="button" aria-label="Copy contract address">
                   <span class="caToast" id="caToast">THE BARON APPROVES • SEE YOU AT ATH!</span>
                   <div class="caTop">
                     <span>CA</span>
@@ -760,7 +780,6 @@
           </div>
         </section>
 
-        <!-- RIGHT -->
         <aside class="card" aria-label="Terminal / Links">
           <h2>TERMINAL / LINKS <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
 
@@ -811,24 +830,15 @@
   </div>
 
 <script>
-/** =========================
- * CONFIG
- * ========================= */
 const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
-
-/* BUY LINKS */
 const AXIOM_URL    = "https://axiom.trade/";
 const RAYDIUM_URL  = "https://raydium.io/swap/";
 const ORCA_URL     = "https://www.orca.so/";
 const TERMINAL_URL = "https://trade.padre.gg/";
 
-/* AUDIO FILES (local) */
-const DEGEN_FILES = ["baron.mp3", "baron.mps"]; // tries mp3, then your .mps if you insist
+const DEGEN_FILES = ["baron.mp3", "baron.mps"];
 const LAUGH_FILE  = "laugh.mp3";
 
-/** =========================
- * ELEMENTS
- * ========================= */
 const elCoins = document.getElementById("coinsInserted");
 const elRank  = document.getElementById("rank");
 const elPrice = document.getElementById("price");
@@ -848,6 +858,7 @@ const degenLabel= document.getElementById("degenLabel");
 const dexBtn  = document.getElementById("dexBtn");
 const xBtn    = document.getElementById("xBtn");
 const pumpBtn = document.getElementById("pumpBtn");
+const topPumpLink = document.getElementById("topPumpLink");
 
 const elCA   = document.getElementById("caText");
 const caBtn  = document.getElementById("caBtn");
@@ -855,28 +866,21 @@ const caToast= document.getElementById("caToast");
 
 const frame  = document.getElementById("frame");
 
-/* buy links */
 const buyAxiom    = document.getElementById("buyAxiom");
 const buyRaydium  = document.getElementById("buyRaydium");
 const buyOrca     = document.getElementById("buyOrca");
 const buyTerminal = document.getElementById("buyTerminal");
 
-/* video scene */
 const sceneCard  = document.getElementById("sceneCard");
 const baronScene = document.getElementById("baronScene");
 
-/* sound */
 const soundToggle = document.getElementById("soundToggle");
 const soundState  = document.getElementById("soundState");
 
-/* terminal lines */
 const term1 = document.getElementById("term1");
 const term2 = document.getElementById("term2");
 const term3 = document.getElementById("term3");
 
-/** =========================
- * STATE
- * ========================= */
 let coinsInserted = Number(sessionStorage.getItem("gbaron_coins") || "0");
 if (!Number.isFinite(coinsInserted) || coinsInserted < 0) coinsInserted = 0;
 
@@ -891,15 +895,9 @@ const seriesLen = 34;
 let ath = Number(sessionStorage.getItem("gbaron_ath") || String(price));
 if (!Number.isFinite(ath) || ath <= 0) ath = price;
 
-/* DEGEN is active ONLY while the track plays */
 let degenActive = false;
-
-/* sound enabled */
 let audioEnabled = (sessionStorage.getItem("gbaron_sound") || "1") === "1";
 
-/** =========================
- * TERMINAL FLOW (typing queue)
- * ========================= */
 const termQueue = [];
 let termBusy = false;
 
@@ -907,18 +905,14 @@ function enqueueTerm(lines){
   for(const l of lines) termQueue.push(l);
   if(!termBusy) pumpTerminal();
 }
-
 function pumpTerminal(){
   if(termQueue.length === 0){ termBusy = false; return; }
   termBusy = true;
   const next = termQueue.shift();
-
   term1.textContent = term2.textContent;
   term2.textContent = term3.textContent;
-
   typeInto(term3, next, 18, () => setTimeout(pumpTerminal, 160));
 }
-
 function typeInto(el, text, cps, done){
   el.textContent = "";
   let i = 0;
@@ -933,9 +927,6 @@ function typeInto(el, text, cps, done){
   }, stepMs);
 }
 
-/** =========================
- * LOG
- * ========================= */
 function nowStamp(){
   const d = new Date();
   const hh = String(d.getHours()).padStart(2,"0");
@@ -943,7 +934,6 @@ function nowStamp(){
   const ss = String(d.getSeconds()).padStart(2,"0");
   return `${hh}:${mm}:${ss}`;
 }
-
 function addLog(html){
   const p = document.createElement("p");
   p.innerHTML = `<b>[${nowStamp()}]</b> ${html}`;
@@ -951,9 +941,6 @@ function addLog(html){
   elLogCount.textContent = String(elLog.querySelectorAll("p").length);
 }
 
-/** =========================
- * UI FX HELPERS
- * ========================= */
 function flash(el, color){
   if(!el) return;
   el.style.setProperty("--flash", color);
@@ -962,30 +949,35 @@ function flash(el, color){
   el.classList.add("flashGlow");
   setTimeout(()=>el.classList.remove("flashGlow"), 700);
 }
-
-function glitch(ms=650){
+function flashTimes(el, color, times=4, gap=220){
+  let i = 0;
+  const tick = () => {
+    i++;
+    flash(el, color);
+    if(i < times) setTimeout(tick, gap);
+  };
+  tick();
+}
+function glitch(ms=740){
   if(!sceneCard) return;
+  sceneCard.classList.remove("glitch");
+  void sceneCard.offsetWidth;
   sceneCard.classList.add("glitch");
   setTimeout(()=>sceneCard.classList.remove("glitch"), ms);
 }
-
 function rugFlicker(){
   if(!sceneCard) return;
   sceneCard.classList.remove("rugFlicker");
   void sceneCard.offsetWidth;
   sceneCard.classList.add("rugFlicker");
-  setTimeout(()=>sceneCard.classList.remove("rugFlicker"), 800);
+  setTimeout(()=>sceneCard.classList.remove("rugFlicker"), 820);
 }
-
 function shakeFrame(){
   if(!frame) return;
   frame.classList.add("shake");
   setTimeout(()=>frame.classList.remove("shake"), 360);
 }
 
-/** =========================
- * RANKS
- * ========================= */
 const ranks = [
   { min:0,   name:"paperhands", cls:"rank-white" },
   { min:10,  name:"hodler", cls:"rank-yellow" },
@@ -994,15 +986,11 @@ const ranks = [
   { min:70,  name:"baron’s henchman", cls:"rank-green" },
   { min:100, name:"the baron", cls:"rank-yellow" },
 ];
-
 function getRank(coins){
   let r = ranks[0];
-  for(const x of ranks){
-    if(coins >= x.min) r = x;
-  }
+  for(const x of ranks){ if(coins >= x.min) r = x; }
   return r;
 }
-
 function setRankUI(){
   const r = getRank(coinsInserted);
   elRank.textContent = r.name;
@@ -1010,9 +998,6 @@ function setRankUI(){
   elRank.classList.add(r.cls);
 }
 
-/** =========================
- * SPARKLINE
- * ========================= */
 function seedSeries(){
   series = [];
   let v = price;
@@ -1021,7 +1006,6 @@ function seedSeries(){
     series.push(v);
   }
 }
-
 function drawSpark(){
   if(series.length < 2) return;
   const minV = Math.min(...series);
@@ -1041,16 +1025,12 @@ function drawSpark(){
   elLine.setAttribute("d", d);
   elFill.setAttribute("d", df);
 }
-
 function fmtUSD(x){
   if (x >= 1) return "$" + x.toFixed(2);
   if (x >= 0.01) return "$" + x.toFixed(4);
   return "$" + x.toFixed(6);
 }
 
-/** =========================
- * PRICE MECHANICS
- * ========================= */
 function pumpChart(mult=1){
   const chaos = degenActive ? 0.20 : 0.02;
   const base  = degenActive ? 0.14 : 0.012;
@@ -1070,22 +1050,19 @@ function pumpChart(mult=1){
   elPct.style.background = pctShow>=0 ? "rgba(45,255,106,.10)" : "rgba(255,77,109,.10)";
 
   elPriceNote.textContent = degenActive ? "DEGEN: chart instability at MAX." : "Totally organic growth (trust me bro)";
-
   drawSpark();
 
   sessionStorage.setItem("gbaron_price", String(price));
   sessionStorage.setItem("gbaron_ath", String(ath));
 }
 
-/** =========================
- * COPY CA
- * ========================= */
 async function copyCA(){
   const text = CA;
   try{
     await navigator.clipboard.writeText(text);
     showToast();
     addLog(`<span class="yy">COPIED</span> — CA copied. The Baron approves.`);
+    enqueueTerm(["CLIPBOARD: WRITE_OK","CA COPIED // VILLAIN APPROVES","NEXT: PASTE INTO SWAP"]);
   }catch(e){
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -1094,18 +1071,15 @@ async function copyCA(){
     try{ document.execCommand("copy"); showToast(); }catch(_){}
     document.body.removeChild(ta);
     addLog(`<span class="yy">COPIED</span> — CA copied (fallback).`);
+    enqueueTerm(["CLIPBOARD: FALLBACK_COPY()","CA COPIED (LEGACY MODE)","PROCEED."]);
   }
 }
-
 function showToast(){
   caToast.classList.add("show");
   setTimeout(()=>caToast.classList.remove("show"), 1200);
 }
 
-/** =========================
- * SOUND: WebAudio SFX + local audio tracks
- * - NO overlap: while DEGEN track plays, SFX are muted (and we refuse to play new blips)
- * ========================= */
+/* SOUND: WebAudio SFX + local tracks (no overlap with DEGEN) */
 let ac = null;
 let sfxGain = null;
 
@@ -1119,20 +1093,16 @@ function ensureAC(){
     sfxGain.gain.value = 0.9;
     sfxGain.connect(ac.destination);
   }
-  if(ac.state === "suspended"){
-    ac.resume().catch(()=>{});
-  }
+  if(ac.state === "suspended"){ ac.resume().catch(()=>{}); }
   return ac;
 }
-
 function setSfxDucked(ducked){
   if(!sfxGain) return;
   sfxGain.gain.value = ducked ? 0.0 : 0.9;
 }
-
 function blip(freq=680, dur=0.035, type="square", gain=0.10){
   if(!audioEnabled) return;
-  if(degenActive) return; // hard stop: no overlap
+  if(degenActive) return;
   const ctx = ensureAC();
   if(!ctx || !sfxGain) return;
 
@@ -1150,7 +1120,6 @@ function blip(freq=680, dur=0.035, type="square", gain=0.10){
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
-
 function sfxClick(){ blip(720, 0.035, "square", 0.11); }
 function sfxOpen(){  blip(520, 0.05,  "sawtooth", 0.09); }
 function sfxBad(){   blip(180, 0.10,  "square", 0.12); }
@@ -1161,7 +1130,6 @@ function makeAudio(file){
   a.loop = false;
   return a;
 }
-
 let degenAudio = makeAudio(DEGEN_FILES[0]);
 const laughAudio = makeAudio(LAUGH_FILE);
 
@@ -1173,71 +1141,57 @@ function safePlay(audioEl, onBlocked){
     p.catch(() => {
       onBlocked && onBlocked();
       addLog(`<span class="rr">AUDIO</span> — blocked by browser until you click once.`);
+      enqueueTerm(["AUDIO: BLOCKED_BY_BROWSER","CLICK ONCE TO UNLOCK","READY."]);
     });
   }
 }
-
 function stopAudio(audioEl){
   try{ audioEl.pause(); audioEl.currentTime = 0; }catch(e){}
 }
-
 function tryFallbackDegen(){
   if(degenAudio && degenAudio.src && degenAudio.src.includes(DEGEN_FILES[1])) return;
   degenAudio = makeAudio(DEGEN_FILES[1]);
   addLog(`<span class="yy">DEGEN</span> — trying fallback: <b>${DEGEN_FILES[1]}</b>`);
 }
 
-/** =========================
- * SOUND TOGGLE
- * ========================= */
 function setSoundUI(){
   soundToggle.classList.toggle("on", audioEnabled);
   soundToggle.setAttribute("aria-checked", audioEnabled ? "true" : "false");
   soundState.textContent = audioEnabled ? "on" : "off";
 }
-
 function toggleSound(){
   audioEnabled = !audioEnabled;
   sessionStorage.setItem("gbaron_sound", audioEnabled ? "1" : "0");
   setSoundUI();
   addLog(`Sound ${audioEnabled ? "<b>ON</b>" : "<b>OFF</b>"} — ${audioEnabled ? "arcade mode engaged" : "silent villain mode"}`);
+  enqueueTerm([`SOUND: ${audioEnabled ? "ON" : "OFF"}`, audioEnabled ? "ARCADE MODE: ENGAGED" : "MODE: SILENT VILLAIN", "READY."]);
 }
 
-/** =========================
- * LINK WIRING
- * ========================= */
 function wireLink(el, url, name){
   if(!el) return;
   el.href = url;
   el.addEventListener("click", ()=>{
     sfxOpen();
     addLog(`<span class="ok">OPEN</span> — ${name}`);
+    enqueueTerm([`NAVIGATE: ${name.toUpperCase()}`,"LINK: OPEN_IN_NEW_TAB","STATUS: OK"]);
     flash(el, "rgba(200,255,47,.75)");
   });
 }
 
-/** =========================
- * DEGEN LOGIC
- * ========================= */
 function startDegen(){
   if(degenActive) return;
-
   stopAudio(laughAudio);
 
   degenActive = true;
   degenLabel.textContent = "DEGEN ACTIVATED";
   btnDegen.disabled = true;
 
-  setSfxDucked(true); // no overlap
+  setSfxDucked(true);
 
   addLog(`<span class="yy">DEGEN</span> — power surge detected.`);
-  enqueueTerm([
-    "DEGEN MODE: ARMING VOLTAGE RAILS…",
-    "OVERCLOCK: ON // SLIPPAGE: WHATEVER",
-    "ROUTE: CHAOS ENGINE v1.0 (APPROVED)"
-  ]);
+  enqueueTerm(["DEGEN MODE: ARMING VOLTAGE RAILS…","OVERCLOCK: ON // SLIPPAGE: WHATEVER","ROUTE: CHAOS ENGINE v1.0 (APPROVED)"]);
 
-  flash(pumpBtn, "rgba(200,255,47,.85)");
+  flashTimes(pumpBtn, "rgba(200,255,47,.90)", 6, 190);
 
   const onErr = () => {
     degenAudio.removeEventListener("error", onErr);
@@ -1254,25 +1208,15 @@ function startDegen(){
   };
   degenAudio.addEventListener("ended", end);
 }
-
 function stopDegen(){
   degenActive = false;
   degenLabel.textContent = "ACTIVATE DEGEN";
   btnDegen.disabled = false;
-
   setSfxDucked(false);
-
   addLog(`<span class="ok">DEGEN</span> — cooldown complete.`);
-  enqueueTerm([
-    "DEGEN MODE: OFF",
-    "NODE: STABLE (BORING)",
-    "READY."
-  ]);
+  enqueueTerm(["DEGEN MODE: OFF","NODE: STABLE (BORING)","READY."]);
 }
 
-/** =========================
- * RUG PULL
- * ========================= */
 function doRugPull(){
   stopAudio(degenAudio);
   if(degenActive) stopDegen();
@@ -1281,14 +1225,11 @@ function doRugPull(){
   safePlay(laughAudio);
 
   addLog(`<span class="rr">RUG PULL</span> — liquidity evaporated.`);
-  enqueueTerm([
-    "WARNING: LP DRAIN INITIATED",
-    "BARON LAUGH.wav PLAYING…",
-    "EXIT: THE BARON ALWAYS EXITS FIRST"
-  ]);
+  enqueueTerm(["WARNING: LP DRAIN INITIATED","GLITCH: VIDEO_DESYNC()","EXIT: THE BARON ALWAYS EXITS FIRST"]);
 
   rugFlicker();
-  glitch(700);
+  glitch(740);
+  setTimeout(()=>glitch(520), 90);
   shakeFrame();
 
   coinsInserted = 0;
@@ -1303,13 +1244,9 @@ function doRugPull(){
   updateUI(true);
 }
 
-/** =========================
- * UI UPDATE
- * ========================= */
 function updateUI(reset=false){
   elCoins.textContent = String(coinsInserted);
   setRankUI();
-
   if(reset) seedSeries();
   if(series.length === 0) seedSeries();
 
@@ -1318,13 +1255,9 @@ function updateUI(reset=false){
   elPct.style.color = "var(--good)";
   elPct.style.background = "rgba(45,255,106,.10)";
   elPriceNote.textContent = degenActive ? "DEGEN: chart instability at MAX." : "Totally organic growth (trust me bro)";
-
   drawSpark();
 }
 
-/** =========================
- * INIT
- * ========================= */
 (function init(){
   setSoundUI();
   elCA.textContent = CA;
@@ -1340,15 +1273,12 @@ function updateUI(reset=false){
   wireLink(pumpBtn, "https://pump.fun", "pump.fun");
   wireLink(dexBtn, "https://dexscreener.com", "dexscreener");
   wireLink(xBtn, "https://x.com/", "twitter / x");
+  wireLink(topPumpLink, "https://pump.fun", "pump.fun (top)");
 
-  enqueueTerm([
-    "INITIALIZING TERMINAL ON SOLANA…",
-    "THE BARON ALWAYS EXITS FIRST",
-    "READY FOR COINS… INSERT TO BEGIN"
-  ]);
+  enqueueTerm(["INITIALIZING TERMINAL ON SOLANA…","THE BARON ALWAYS EXITS FIRST","READY FOR COINS… INSERT TO BEGIN"]);
 
   btnInsert.addEventListener("click", ()=>{
-    ensureAC(); // unlock audio ctx on first interaction
+    ensureAC();
     sfxClick();
 
     coinsInserted += 1;
@@ -1356,17 +1286,10 @@ function updateUI(reset=false){
     elCoins.textContent = String(coinsInserted);
     setRankUI();
 
-    flash(caBtn, "rgba(45,255,106,.75)");
-
     addLog(`<span class="ok">COIN</span> — inserted. chart pumped.`);
-    enqueueTerm([
-      `COIN ACCEPTED // COUNT: ${coinsInserted}`,
-      degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP",
-      "EXECUTE: CHART_UP()"
-    ]);
+    enqueueTerm([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: CHART_UP()"]);
 
     pumpChart(1);
-
     if(degenActive){
       pumpChart(0.6);
       pumpChart(0.45);
@@ -1400,12 +1323,14 @@ function updateUI(reset=false){
     }
   });
 
-  if(baronScene){
-    baronScene.play().catch(()=>{});
-  }
-
+  if(baronScene){ baronScene.play().catch(()=>{}); }
   addLog(`<span class="yy">BOOT</span> — The Baron is watching.`);
 })();
 </script>
 </body>
 </html>
+"""
+
+out_path = Path("/mnt/data/index.html")
+out_path.write_text(html, encoding="utf-8")
+out_path
