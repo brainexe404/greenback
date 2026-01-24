@@ -14,7 +14,7 @@
     --line:rgba(255,255,255,.10);
     --good:#2dff6a;   /* bright green */
     --warn:#c8ff2f;   /* bright yellow */
-    --bad:#ff4d6d;
+    --bad:#ff4d6d;    /* red */
     --shadow: 0 14px 40px rgba(0,0,0,.55);
     --r:18px;
     --mono: ui-monospace, Menlo, Consolas, "SF Mono", monospace;
@@ -32,7 +32,7 @@
     overflow:hidden;
   }
 
-  /* subtle CRT overlay */
+  /* subtle CRT overlay (whole page) */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 3px 6px);
@@ -207,7 +207,6 @@
     background:rgba(255,255,255,.02);
   }
   .btnRow{display:flex;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
-
   .btn{
     appearance:none;border:none;border-radius:14px;padding:12px 14px;
     font-weight:1000;letter-spacing:.3px;cursor:pointer;
@@ -222,14 +221,13 @@
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
 
-  /* ✅ SWITCHED COLORS:
-     INSERT = BRIGHT GREEN
-     DEGEN  = BRIGHT YELLOW */
+  /* INSERT = bright green */
   .btn.insert{
     background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
     border-color:rgba(45,255,106,.55);
     box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(45,255,106,.14);
   }
+  /* DEGEN = bright yellow */
   .btn.degenBtn{
     background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
     border-color:rgba(200,255,47,.55);
@@ -246,7 +244,7 @@
     filter: drop-shadow(0 0 10px rgba(255,255,255,.12));
   }
 
-  /* insert pulse always */
+  /* Insert button pulses always */
   .btn.pulseAlways{
     position:relative;
     animation: insertPulse 1.2s steps(6,end) infinite;
@@ -299,6 +297,81 @@
     100%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
   }
 
+  /* BARON SCENE CARD (MP4) */
+  .sceneCard{
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+    overflow:hidden;
+    position:relative;
+    aspect-ratio:16/9;
+    box-shadow:0 0 0 1px rgba(0,0,0,.45) inset;
+    transform:translateZ(0);
+  }
+  .sceneVid{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    filter:brightness(.95) contrast(1.05);
+    transform:scale(1);
+    transition:transform 240ms ease, filter 240ms ease;
+  }
+
+  /* subtle CRT scanlines on video ONLY */
+  .sceneCard::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.07) 0px,
+        rgba(255,255,255,.07) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+    opacity:.10;
+    mix-blend-mode:overlay;
+  }
+
+  /* glow overlay (off by default) */
+  .sceneCard::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(120% 85% at 50% 45%, rgba(200,255,47,.45), rgba(0,0,0,.72) 72%);
+    opacity:0;
+    transition:opacity .25s ease;
+    mix-blend-mode:screen;
+  }
+  .sceneCard.glow::after{opacity:.85;}
+
+  /* Baron leans forward on DEGEN */
+  .sceneCard.zoom .sceneVid{
+    transform:scale(1.08);
+    filter:brightness(1.03) contrast(1.08);
+  }
+
+  /* Scene flickers red on RUG */
+  .sceneCard.rugFlicker::after{
+    background:
+      radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.55), rgba(0,0,0,.78) 72%);
+    opacity:.95;
+    animation:rugFlicker 420ms steps(6,end) 1;
+  }
+  @keyframes rugFlicker{
+    0%{opacity:.15; filter:brightness(1)}
+    15%{opacity:.95; filter:brightness(1.5)}
+    30%{opacity:.25; filter:brightness(1.1)}
+    45%{opacity:.9;  filter:brightness(1.6)}
+    60%{opacity:.35; filter:brightness(1.2)}
+    75%{opacity:.85; filter:brightness(1.55)}
+    100%{opacity:.0; filter:brightness(1)}
+  }
+
+  /* pump.fun long button */
   .pumpBtn{
     display:flex;align-items:center;justify-content:center;gap:10px;
     border-radius:14px;border:1px solid var(--line);
@@ -307,16 +380,13 @@
     font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
     cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
     text-decoration:none;color:#fff;width:100%;
+    position:relative;
+    overflow:hidden;
   }
   .pumpBtn:active{transform:translateY(1px) scale(.99)}
   .pumpBtn .ico{width:20px;height:20px;image-rendering:pixelated;filter: drop-shadow(0 0 10px rgba(255,255,255,.10))}
-  .pumpBtn.pulse{animation:hotPulse 1s steps(6,end) infinite; box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 26px rgba(110,231,255,.14)}
-  @keyframes hotPulse{
-    0%{filter:brightness(1)}
-    50%{filter:brightness(1.28)}
-    100%{filter:brightness(1)}
-  }
 
+  /* links row */
   .linkRow{display:flex;gap:10px;flex-wrap:wrap}
   .linkBtn{
     flex:1;min-width:140px;
@@ -339,6 +409,7 @@
     border-color:rgba(200,255,47,.55);
   }
 
+  /* ACTIVITY LOG */
   .logWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
   .logHead{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -356,6 +427,7 @@
   .log::-webkit-scrollbar{width:10px}
   .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
 
+  /* CA area */
   .caCard{
     padding:12px;border-top:1px solid var(--line);
     background:rgba(255,255,255,.02);
@@ -410,10 +482,26 @@
   }
   .caToast.show{opacity:1; transform:translateY(0)}
 
-  /* pulse targets */
-  .caBtn.pulse{animation:hotPulse 1s steps(6,end) infinite;}
+  /* Rank color progression */
+  .rank-white{color:#fff}
+  .rank-yellow{color:var(--warn)}
+  .rank-green{color:var(--good)}
+  .rank-red{color:var(--bad)}
 
-  /* Jackpot visuals (kept) */
+  /* Generic pulse + light */
+  .pulse{
+    animation:hotPulse 1s steps(6,end) infinite;
+  }
+  .glow{
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 28px rgba(200,255,47,.18);
+  }
+  @keyframes hotPulse{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(1.28)}
+    100%{filter:brightness(1)}
+  }
+
+  /* Jackpot visuals (kept, surprise only; no jackpot.mp3) */
   .coin-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9998}
   .coin{
     position:absolute;top:-18px;width:12px;height:12px;border:2px solid rgba(0,0,0,.65);
@@ -480,10 +568,18 @@
     80%{transform:translate(5px, 1px)}
     100%{transform:translate(0,0)}
   }
+
+  @media (prefers-reduced-motion: reduce){
+    body::after{animation:none !important;}
+    .btn.pulseAlways, .pulse, .cursor{animation:none !important;}
+    .sceneVid{transition:none !important;}
+    .sceneCard.rugFlicker::after{animation:none !important; opacity:.0;}
+  }
 </style>
 </head>
 
 <body>
+  <!-- Jackpot FX layers -->
   <div class="coin-rain" id="coinRain" aria-hidden="true"></div>
   <div class="jackpot" id="jackpot" aria-hidden="true">
     <div class="jackpot-inner">
@@ -513,7 +609,7 @@
           </div>
           <div class="pill" aria-label="Rank">
             <div class="k">RANK</div>
-            <div class="v"><span id="rank">paperhands</span></div>
+            <div class="v"><span id="rank" class="rank-white">paperhands</span></div>
           </div>
           <div class="pill soundPill" aria-label="Sound">
             <div class="k">SOUND</div>
@@ -526,6 +622,7 @@
       </header>
 
       <div class="content">
+        <!-- LEFT -->
         <section class="card" aria-label="Fake chart that pumps on clicks">
           <h2>📉 Fake Chart (Pumps on Clicks)</h2>
 
@@ -590,6 +687,7 @@
           </div>
         </section>
 
+        <!-- RIGHT -->
         <aside class="card" aria-label="Terminal / Links">
           <h2>Terminal / Links <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
 
@@ -598,6 +696,13 @@
               <div><span class="prompt">&gt;</span> <span class="dim" id="term1">INITIALIZING TERMINAL ON SOLANA NETWORK...</span></div>
               <div><span class="prompt">&gt;</span> <span class="dim" id="term2">BOOTING NODE...</span></div>
               <div><span class="prompt">&gt;</span> <span class="dim" id="term3">READY FOR COINS... INSERT TO BEGIN</span><span class="cursor"></span></div>
+            </div>
+
+            <!-- BARON SCENE (MP4 in repo: baron-scene.mp4) -->
+            <div class="sceneCard" id="sceneCard" aria-label="Baron scene">
+              <video id="baronScene" class="sceneVid" autoplay muted loop playsinline preload="metadata">
+                <source src="baron-scene.mp4" type="video/mp4">
+              </video>
             </div>
 
             <a class="pumpBtn" id="pumpBtn" href="https://pump.fun" target="_blank" rel="noopener noreferrer" aria-label="Open pump.fun">
@@ -642,19 +747,8 @@ const DEX_URL  = "https://dexscreener.com";
 const X_URL    = "https://x.com/";
 const TICKER   = "$GBARON";
 
-/* jackpot surprise visuals only (no jackpot.mp3 on degen) */
+/* jackpot surprise visuals only (no jackpot.mp3) */
 const JACKPOT_CHANCE = 0.02;
-
-/* rank titles */
-const RANKS = [
-  {at:0,  name:"paperhands"},
-  {at:5,  name:"bagholder"},
-  {at:12, name:"hopium addict"},
-  {at:21, name:"diamondhands"},
-  {at:35, name:"terminally online"},
-  {at:55, name:"exit liquidity"},
-  {at:80, name:"the baron"}
-];
 
 /** =========================
  * ELEMENTS
@@ -683,6 +777,10 @@ const caBtn  = document.getElementById("caBtn");
 const caToast= document.getElementById("caToast");
 
 const frame  = document.getElementById("frame");
+
+/* video scene */
+const sceneCard = document.getElementById("sceneCard");
+const baronScene = document.getElementById("baronScene");
 
 /* FX layers */
 const jackpotEl = document.getElementById("jackpot");
@@ -894,13 +992,6 @@ function fmtPrice(n){
   if (n < 1) return "$" + n.toFixed(4);
   return "$" + n.toFixed(2);
 }
-function getRankName(c){
-  let name = RANKS[0].name;
-  for(const r of RANKS){
-    if(c >= r.at) name = r.name;
-  }
-  return name;
-}
 function ensureSeries(){
   if(series.length === 0){
     for(let i=0;i<seriesLen;i++) series.push(price);
@@ -930,9 +1021,24 @@ function addLog(msgHtml){
   elLogCount.textContent = String(Number(elLogCount.textContent || "0") + 1);
 }
 
+/* Rank colors: white -> yellow -> green -> red */
+function updateRank(c){
+  let cls = "rank-white";
+  let name = "paperhands";
+
+  if(c >= 10){ cls = "rank-yellow"; name = "hopium addict"; }
+  if(c >= 25){ cls = "rank-yellow"; name = "bagholder"; }
+  if(c >= 35){ cls = "rank-green";  name = "diamondhands"; }
+  if(c >= 55){ cls = "rank-green";  name = "terminally online"; }
+  if(c >= 80){ cls = "rank-red";    name = "exit liquidity"; }
+
+  elRank.className = cls;
+  elRank.textContent = name;
+}
+
 function updateUI(){
   elCoins.textContent = String(coinsInserted);
-  elRank.textContent  = getRankName(coinsInserted);
+  updateRank(coinsInserted);
 
   elPrice.textContent = fmtPrice(price);
 
@@ -958,6 +1064,19 @@ function updateUI(){
 }
 
 /** =========================
+ * Pulse + glow helper
+ * ========================= */
+function pulseGlow(el, ms = 1500){
+  el.classList.add("pulse");
+  el.classList.add("glow");
+  clearTimeout(el._pgT);
+  el._pgT = setTimeout(()=>{
+    el.classList.remove("pulse");
+    el.classList.remove("glow");
+  }, ms);
+}
+
+/** =========================
  * CA + links
  * ========================= */
 elCA.textContent = CA;
@@ -966,7 +1085,7 @@ dexBtn.href  = DEX_URL;
 xBtn.href    = X_URL;
 
 /** =========================
- * FX visuals (no audio)
+ * Jackpot visuals (surprise only)
  * ========================= */
 let jackpotTimer = null;
 
@@ -1016,18 +1135,9 @@ function triggerJackpotVisualOnly(){
 }
 
 /** =========================
- * Pulse targets
- * ========================= */
-function pulseEl(el, ms=1600){
-  el.classList.add("pulse");
-  clearTimeout(el._pulseT);
-  el._pulseT = setTimeout(()=> el.classList.remove("pulse"), ms);
-}
-
-/** =========================
- * TERMINAL: always moving text (no dormancy)
- * - default state: SOLANA init + rotating status + animated dots
- * - on DEGEN: show "THE BARON ALWAYS EXITS FIRST" + override lines (only while baron is playing)
+ * TERMINAL: always moving text
+ * - default: solana init + rotating status + dots
+ * - only on DEGEN: show "THE BARON ALWAYS EXITS FIRST"
  * ========================= */
 const BASE_LINE_1 = "INITIALIZING TERMINAL ON SOLANA NETWORK";
 const BASE_LINE_3 = "READY FOR COINS... INSERT TO BEGIN";
@@ -1043,12 +1153,8 @@ const STATUS_LINES = [
 
 let statusIdx = 0;
 let dotCount = 0;
-let terminalLock = false;        // when true, the live ticker stops (during degen)
+let terminalLock = false;
 let termTicker = null;
-
-function dots(n){
-  return ".".repeat(n);
-}
 
 function startTerminalTicker(){
   if(termTicker) return;
@@ -1056,13 +1162,12 @@ function startTerminalTicker(){
     if(terminalLock) return;
 
     dotCount = (dotCount + 1) % 4;
-    const d = dots(dotCount);
+    const d = ".".repeat(dotCount);
 
     term1.textContent = `${BASE_LINE_1}${d}`;
     term2.textContent = `${STATUS_LINES[statusIdx % STATUS_LINES.length]}${d} — OK`;
     term3.textContent = `${BASE_LINE_3}${d}`;
 
-    // advance slower than dots so it feels alive
     if(dotCount === 0) statusIdx++;
   }, 180);
 }
@@ -1073,7 +1178,6 @@ function setDegenTerminal(){
   term2.textContent = "DEGEN OVERRIDE ACTIVATED";
   term3.textContent = "MAX VOLATILITY MODE: ENGAGED";
 }
-
 function releaseTerminal(){
   terminalLock = false;
 }
@@ -1102,14 +1206,14 @@ function pumpFromInsert(){
 
   addLog(`<span style="color:var(--good);font-weight:1000;">INSERT COINS</span> — chart pumped <b>${(pctMove*100).toFixed(2)}%</b>`);
 
-  /* ✅ ONLY pulse CA on insert (NO baron.mp3 here) */
-  pulseEl(caBtn, 1800);
+  /* INSERT COINS => CA pulses + lights */
+  pulseGlow(caBtn, 1600);
 
   persist();
   updateUI();
 }
 
-/* ✅ DEGEN locks until baron finishes; terminal shows BARON line ONLY here */
+/* DEGEN locks until baron finishes; pump button pulses; video glows + zoom */
 let degenBusy = false;
 async function degenActivateLocked(){
   if(degenBusy) return;
@@ -1123,7 +1227,13 @@ async function degenActivateLocked(){
 
   setDegenTerminal();
   addLog(`<span style="color:var(--warn);font-weight:1000;">DEGEN OVERRIDE ACTIVATED</span> — CAPS LOCK ENGAGED`);
-  pulseEl(pumpBtn, 1800);
+
+  /* ACTIVATE DEGEN => PUMP.FUN pulses + lights */
+  pulseGlow(pumpBtn, 1600);
+
+  /* video glow + lean forward */
+  sceneCard.classList.add("glow");
+  sceneCard.classList.add("zoom");
 
   lastPrice = price;
   const base = 0.007;
@@ -1144,9 +1254,12 @@ async function degenActivateLocked(){
   persist();
   updateUI();
 
-  /* ✅ ONLY baron.mp3 plays for DEGEN */
+  /* ONLY baron.mp3 plays for DEGEN */
   await playBaronPromise();
 
+  /* reset visuals after baron finishes */
+  sceneCard.classList.remove("zoom");
+  sceneCard.classList.remove("glow");
   releaseTerminal();
 
   btnDegen.disabled = false;
@@ -1158,6 +1271,14 @@ async function degenActivateLocked(){
 }
 
 function rugPull(){
+  /* pause scene + flicker red */
+  try{ baronScene.pause(); }catch(e){}
+  sceneCard.classList.remove("glow");
+  sceneCard.classList.remove("zoom");
+  sceneCard.classList.remove("rugFlicker");
+  void sceneCard.offsetWidth;
+  sceneCard.classList.add("rugFlicker");
+
   lastPrice = price;
   const nuked = Math.max(basePrice * 0.25, price * (0.06 + Math.random()*0.05));
   price = nuked;
@@ -1178,6 +1299,9 @@ function rugPull(){
   updateUI();
 
   playLaughAfter(160);
+
+  /* resume scene after the chaos */
+  setTimeout(()=>{ try{ baronScene.play(); }catch(e){} }, 650);
 }
 
 /** =========================
@@ -1224,13 +1348,13 @@ function withClick(fn){
   };
 }
 
-/* ✅ INSERT: arcade click ONLY (no baron.mp3) */
+/* INSERT: arcade click ONLY (NO baron.mp3) */
 btnInsert.addEventListener("click", withClick(()=> pumpFromInsert()));
 
-/* ✅ DEGEN: no arcade beep, only baron.mp3 */
+/* DEGEN: no arcade beep, only baron.mp3 */
 btnDegen.addEventListener("click", ()=>{
   unlockAudio();
-  stopLaugh(); stopJackpot(); // keep only baron
+  stopLaugh(); stopJackpot();
   degenActivateLocked();
 });
 
@@ -1253,13 +1377,15 @@ caBtn.addEventListener("click", withClick(()=> copyCA()));
 /** =========================
  * Init
  * ========================= */
-function persistInit(){
-  ensureSeries();
-  updateUI();
-  addLog(`Booted terminal — <b>SOLANA</b>`);
-}
+ensureSeries();
+updateUI();
 startTerminalTicker();
-persistInit();
+addLog(`Booted terminal — <b>SOLANA</b>`);
+
+/* If browser blocks autoplay until interaction, this makes the MP4 start on first click */
+window.addEventListener("pointerdown", ()=>{
+  try{ baronScene.play(); }catch(e){}
+}, {once:true, passive:true});
 </script>
 
 </body>
