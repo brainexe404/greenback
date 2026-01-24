@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Baron Greenback ($GBARON)</title>
 
-  <!-- Prevent aggressive caching during iteration (GitHub Pages/CDN may still cache some) -->
+  <!-- Prevent aggressive caching during iteration -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -21,30 +21,42 @@
 
   <script>
     (function () {
-      // Tune this breakpoint to your taste.
-      // 900 is a good "mobile + small tablet" cutoff for your kind of layout.
       var MOBILE_MAX = 900;
 
-      function go(url){
-        // Avoid redirect loops
-        if (!location.pathname.endsWith(url)) location.replace(url);
-      }
-
-      function route(){
-        // Prefer CSS px width, but include touch-capable heuristics.
+      function isMobileNow(){
         var w = Math.min(window.innerWidth || 9999, screen.width || 9999);
-        var isMobile = w <= MOBILE_MAX;
-
-        if (isMobile) go("mobile.html");
-        else go("desktop.html"); // <-- rename your current big desktop page to desktop.html
+        return w <= MOBILE_MAX || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       }
 
-      route();
+      function pickTarget(){
+        return isMobileNow() ? "mobile.html" : "desktop.html";
+      }
 
-      // If someone resizes (rare on mobile), re-route.
+      function swapIn(target){
+        fetch(target, { cache: "no-store" })
+          .then(function(r){
+            if(!r.ok) throw new Error("Fetch failed: " + r.status);
+            return r.text();
+          })
+          .then(function(html){
+            document.open();
+            document.write(html);
+            document.close();
+          })
+          .catch(function(){
+            // fallback (URL will show /mobile.html or /desktop.html if fetch is blocked)
+            location.replace(target);
+          });
+      }
+
+      swapIn(pickTarget());
+
+      var t = null;
       window.addEventListener("resize", function(){
-        clearTimeout(window.__rto);
-        window.__rto = setTimeout(route, 120);
+        clearTimeout(t);
+        t = setTimeout(function(){
+          swapIn(pickTarget());
+        }, 200);
       });
     })();
   </script>
