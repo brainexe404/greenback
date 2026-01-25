@@ -6,60 +6,20 @@
   <title>Baron Greenback ($GBARON)</title>
 
   <meta name="theme-color" content="#070b10" />
-
-  <!-- discourage caching (CDNs may still cache, SW below fixes that) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
   <style>
-    html,body{
-      height:100%;
-      margin:0;
-      background:#070b10;
-      color:#eaf2ff;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    }
-    .wrap{
-      min-height:100%;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      text-align:center;
-    }
-    .card{
-      width:min(520px,92vw);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:18px;
-      background:rgba(255,255,255,.04);
-      padding:18px;
-    }
-    .title{
-      font-weight:900;
-      font-size:18px;
-      letter-spacing:.2px;
-      margin-bottom:6px;
-    }
-    .muted{
-      color:#93a4c7;
-      font-size:14px;
-      line-height:1.4;
-    }
-    a{
-      color:#c8ff2f;
-      font-weight:800;
-      text-decoration:none;
-    }
-    a:hover{text-decoration:underline}
+    html,body{height:100%;margin:0;background:#070b10}
   </style>
 
   <script>
     (function () {
-      // bump this number when you deploy changes
-      // (also bump CACHE_VERSION in sw.js to match)
-      var BUILD = "1000";
+      // If you want a stable "version", set BUILD to "1001" etc.
+      // If you want "always latest no matter what", keep Date.now().
+      var BUILD = String(Date.now());
 
-      // Adjust cutoff if you want
       var MOBILE_MAX = 900;
 
       function isMobile(){
@@ -74,39 +34,57 @@
         return isMobile() ? "mobile.html" : "desktop.html";
       }
 
-      // Register service worker to force fresh loads for mobile/desktop
-      // This fixes the "mobile.html works only with ?v=999" caching issue.
-      function registerSW(){
-        if (!("serviceWorker" in navigator)) return Promise.resolve();
-        return navigator.serviceWorker.register("sw.js?v=" + encodeURIComponent(BUILD)).catch(function(){});
+      // --- One-time hard purge of SW + caches to stop "stuck" builds ---
+      // Runs once per device, then never again (unless you clear site data).
+      async function oneTimePurge(){
+        try{
+          var key = "gbaron_purged_v1";
+          if (sessionStorage.getItem(key) === "1") return;
+
+          // Unregister service workers
+          if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations){
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function(r){ return r.unregister(); }));
+          }
+
+          // Clear Cache Storage
+          if (window.caches && caches.keys){
+            var names = await caches.keys();
+            await Promise.all(names.map(function(n){ return caches.delete(n); }));
+          }
+
+          sessionStorage.setItem(key, "1");
+        }catch(e){
+          // ignore
+        }
       }
 
-      // Use iframe so URL stays "/"
-      function mount(page){
+      function mount(){
         var f = document.getElementById("app");
-        // cache-bust the iframe src for stubborn CDNs
-        f.src = page + "?v=" + encodeURIComponent(BUILD);
+        if (!f) return;
+        // Cache-bust the page itself (mobile/desktop). URL stays clean because it's inside iframe.
+        f.src = targetPage() + "?v=" + encodeURIComponent(BUILD);
       }
 
       // Boot
-      registerSW().finally(function(){
-        mount(targetPage());
-      });
+      (async function(){
+        // Purge once to kill the “mobile.html only works with ?v=999” issue
+        await oneTimePurge();
+        mount();
 
-      // Optional: re-route on resize/orientation change
-      var rt = null;
-      window.addEventListener("resize", function(){
-        clearTimeout(rt);
-        rt = setTimeout(function(){
-          mount(targetPage());
-        }, 250);
-      });
+        // Optional: re-route on resize/orientation change
+        var rt = null;
+        window.addEventListener("resize", function(){
+          clearTimeout(rt);
+          rt = setTimeout(mount, 250);
+        });
+      })();
     })();
   </script>
 </head>
 
 <body>
-  <!-- Keeping URL clean: load pages inside an iframe -->
+  <!-- URL stays "greenback.wtf" because we mount the real page in an iframe -->
   <iframe
     id="app"
     title="Baron Greenback"
@@ -114,15 +92,14 @@
     referrerpolicy="no-referrer"
   ></iframe>
 
-  <!-- Fallback UI if iframe fails / JS fails -->
   <noscript>
-    <div class="wrap">
-      <div class="card">
-        <div class="title">JavaScript disabled</div>
-        <div class="muted">
+    <div style="min-height:100%;display:grid;place-items:center;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:24px;text-align:center">
+      <div style="width:min(520px,92vw);border:1px solid rgba(255,255,255,.10);border-radius:18px;background:rgba(255,255,255,.04);padding:18px">
+        <div style="font-weight:900;font-size:18px;letter-spacing:.2px;margin-bottom:6px">JavaScript disabled</div>
+        <div style="color:#93a4c7;font-size:14px;line-height:1.4">
           Open manually:<br>
-          <a href="mobile.html?v=1000">mobile</a> ·
-          <a href="desktop.html?v=1000">desktop</a>
+          <a href="mobile.html" style="color:#c8ff2f;font-weight:800;text-decoration:none">mobile</a> ·
+          <a href="desktop.html" style="color:#c8ff2f;font-weight:800;text-decoration:none">desktop</a>
         </div>
       </div>
     </div>
