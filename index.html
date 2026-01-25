@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Baron Greenback ($GBARON)</title>
 
-  <!-- Minimal styling: this page is only a router -->
   <meta name="theme-color" content="#070b10" />
+
+  <!-- discourage caching (CDNs may still cache, SW below fixes that) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -54,7 +55,11 @@
 
   <script>
     (function () {
-      // Adjust if you want a different cutoff
+      // bump this number when you deploy changes
+      // (also bump CACHE_VERSION in sw.js to match)
+      var BUILD = "1000";
+
+      // Adjust cutoff if you want
       var MOBILE_MAX = 900;
 
       function isMobile(){
@@ -69,63 +74,55 @@
         return isMobile() ? "mobile.html" : "desktop.html";
       }
 
-      function swapIn(page){
-        // Load the page content but KEEP the URL as "/"
-        fetch(page, { cache: "no-store" })
-          .then(function(res){
-            if(!res.ok) throw new Error("Fetch failed");
-            return res.text();
-          })
-          .then(function(html){
-            document.open();
-            document.write(html);
-            document.close();
-          })
-          .catch(function(){
-            // Absolute fallback (URL will change, but page still works)
-            location.replace(page);
-          });
+      // Register service worker to force fresh loads for mobile/desktop
+      // This fixes the "mobile.html works only with ?v=999" caching issue.
+      function registerSW(){
+        if (!("serviceWorker" in navigator)) return Promise.resolve();
+        return navigator.serviceWorker.register("sw.js?v=" + encodeURIComponent(BUILD)).catch(function(){});
       }
 
-      // Initial load
-      swapIn(targetPage());
+      // Use iframe so URL stays "/"
+      function mount(page){
+        var f = document.getElementById("app");
+        // cache-bust the iframe src for stubborn CDNs
+        f.src = page + "?v=" + encodeURIComponent(BUILD);
+      }
+
+      // Boot
+      registerSW().finally(function(){
+        mount(targetPage());
+      });
 
       // Optional: re-route on resize/orientation change
       var rt = null;
       window.addEventListener("resize", function(){
         clearTimeout(rt);
         rt = setTimeout(function(){
-          swapIn(targetPage());
-        }, 200);
+          mount(targetPage());
+        }, 250);
       });
     })();
   </script>
 </head>
 
 <body>
-  <!-- Fallback UI only visible for a split second or if JS fails -->
-  <div class="wrap">
-    <div class="card">
-      <div class="title">Loading $GBARON…</div>
-      <div class="muted">
-        Routing you to the correct arcade cabinet.<br><br>
-        If this doesn’t work:
-        <div style="margin-top:10px;">
-          <a href="mobile.html">mobile.html</a> ·
-          <a href="desktop.html">desktop.html</a>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Keeping URL clean: load pages inside an iframe -->
+  <iframe
+    id="app"
+    title="Baron Greenback"
+    style="position:fixed;inset:0;width:100%;height:100%;border:0;background:#070b10"
+    referrerpolicy="no-referrer"
+  ></iframe>
 
+  <!-- Fallback UI if iframe fails / JS fails -->
   <noscript>
     <div class="wrap">
       <div class="card">
         <div class="title">JavaScript disabled</div>
         <div class="muted">
           Open manually:<br>
-          <a href="mobile.html">mobile.html</a> ·
-          <a href="desktop.html">desktop.html</a>
+          <a href="mobile.html?v=1000">mobile</a> ·
+          <a href="desktop.html?v=1000">desktop</a>
         </div>
       </div>
     </div>
