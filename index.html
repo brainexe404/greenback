@@ -32,24 +32,42 @@
         return (w <= MOBILE_MAX) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       }
 
-      // ✅ Force overrides:
-      // /?desktop=1  -> desktop.html
-      // /?mobile=1   -> mobile.html
+      // /?desktop=1  -> force desktop
+      // /?mobile=1   -> force mobile
       function pick(){
         if (qs("desktop") === "1") return "desktop.html";
         if (qs("mobile") === "1")  return "mobile.html";
         return isMobile() ? "mobile.html" : "desktop.html";
       }
 
-      // ✅ Most reliable: real redirect (prevents “black screen” swap issues)
-      function go(page){
-        // Preserve cache-buster if user provides ?v=...
+      async function loadPage(page){
+        // keep URL clean (no /mobile.html or /desktop.html)
+        try { history.replaceState(null, "", "/"); } catch(e){}
+
+        // preserve ?v= cachebuster if you use it
         var v = qs("v");
         var url = page + (v ? ("?v=" + encodeURIComponent(v)) : "");
-        if (!location.pathname.endsWith("/" + page)) location.replace(url);
+
+        try{
+          var res = await fetch(url, { cache: "no-store" });
+          if(!res.ok) throw new Error("HTTP " + res.status);
+          var html = await res.text();
+
+          // Replace the whole document with the fetched HTML
+          document.open();
+          document.write(html);
+          document.close();
+        }catch(err){
+          console.error(err);
+          // If fetch fails, fall back to showing helpful links
+          document.addEventListener("DOMContentLoaded", function(){
+            var el = document.getElementById("err");
+            if(el) el.textContent = "Could not load " + page + " (" + String(err) + ")";
+          });
+        }
       }
 
-      go(pick());
+      loadPage(pick());
     })();
   </script>
 </head>
@@ -58,11 +76,9 @@
   <div class="wrap">
     <div class="card">
       <div style="font-weight:900;letter-spacing:.2px;font-size:18px;margin-bottom:6px;">Loading $GBARON…</div>
-      <div class="muted">
+      <div class="muted" id="err">
         If you aren’t redirected, open:
         <div style="margin-top:10px;">
-          <a href="mobile.html">mobile.html</a> · <a href="desktop.html">desktop.html</a><br><br>
-          Force:
           <a href="/?mobile=1">/?mobile=1</a> · <a href="/?desktop=1">/?desktop=1</a>
         </div>
       </div>
