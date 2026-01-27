@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>Baron Greenback ($GBARON)</title>
+<meta content="#070b10" name="theme-color"/>
+<link href="/favicon.png" rel="icon" type="image/png"/>
+<link href="/favicon.png" rel="apple-touch-icon"/>
+<style>
+
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --bg:#070b10;
+    --panel:#0d1320;
+    --panel2:#0b111c;
+    --text:#eaf2ff;
+    --muted:#93a4c7;
+    --line:rgba(255,255,255,.10);
+    --good:#2dff6a;
+    --warn:#c8ff2f;
+    --bad:#ff4d6d;
+    --shadow: 0 14px 40px rgba(0,0,0,.55);
+    --r:18px;
+    --mono: ui-monospace, Menlo, Consolas, "SF Mono", monospace;
+  }
+
+  html,body{height:100%; margin:0}
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(110,231,255,.18), transparent 55%),
+      radial-gradient(900px 500px at 85% 10%, rgba(167,139,250,.18), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, rgba(45,255,106,.10), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+
+  /* subtle CRT overlay */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,0) 3px 6px);
+    opacity:.08;mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:rgba(255,255,255,.02);opacity:0;
+    animation:crtFlicker 7s steps(1,end) infinite;
+  }
+  @keyframes crtFlicker{
+    0%,52%,100%{opacity:0}
+    53%{opacity:.05}
+    54%{opacity:0}
+    78%{opacity:.03}
+    79%{opacity:0}
+  }
+
+  .stage{
+    height:100vh;
+    width:100%;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    padding:12px;
+    position:relative;
+    z-index:5;
+  }
+
+  .frame{
+    width:min(1560px, 96vw);
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow: var(--shadow);
+    padding:12px;
+    overflow:hidden;
+    min-height:0;
+    transform:translateZ(0);
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 12px;
+    background:rgba(0,0,0,.22);
+    border:1px solid var(--line);
+    border-radius:18px;
+    min-height:60px;
+  }
+  .leftHead{display:flex;align-items:center;gap:12px;min-width:0}
+  .logoLink{
+    display:flex;align-items:center;gap:12px;min-width:0;
+    text-decoration:none;color:inherit;
+    border-radius:14px;
+    padding:4px 6px;
+  }
+  .logoLink:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
+  .avatar{
+    width:44px;height:44px;border-radius:12px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    overflow:hidden;flex:0 0 auto;
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .brand .title{
+    font-weight:900; letter-spacing:.3px; font-size:20px; line-height:1.1;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .brand .sub{
+    font-size:13px; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .stats{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .pill{
+    display:flex;flex-direction:column;justify-content:center;gap:2px;
+    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.04);
+    border:1px solid var(--line);min-width:136px;
+  }
+  .pill .k{font-size:11px;color:var(--muted);letter-spacing:.25px}
+  .pill .v{
+    font-size:18px;font-weight:900;line-height:1.1;display:flex;align-items:baseline;gap:6px;
+    white-space:nowrap;font-family:var(--mono);
+  }
+  .pill .v small{font-size:11px;color:var(--muted);font-weight:800;font-family:inherit}
+  .pill.soundPill{min-width:170px}
+
+  .soundRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .soundToggle{
+    height:34px;width:52px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(0,0,0,.20);position:relative;cursor:pointer;user-select:none;
+  }
+  .soundToggle::after{
+    content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:999px;
+    background:rgba(255,255,255,.10);border:1px solid var(--line);
+    transition:transform .16s ease, background .16s ease;
+  }
+  .soundToggle.on::after{transform:translateX(18px); background:rgba(45,255,106,.18)}
+  .soundLabel{font-family:var(--mono);font-weight:900;letter-spacing:.2px;color:var(--muted);font-size:11px}
+
+  .content{
+    flex:1;min-height:0;display:grid;grid-template-columns: 1.2fr .8fr;
+    gap:12px;overflow:hidden;
+  }
+
+  .card{
+    background:rgba(0,0,0,.22);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .card h2{
+    margin:0;
+    padding:10px 12px;
+    font-size:13px;
+    letter-spacing:.25px;
+    color:var(--muted);
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.03);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .chartWrap{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+  .heroRow{display:grid;grid-template-columns: 148px 1fr;gap:12px;align-items:start}
+  .heroLogo{
+    width:148px;height:148px;border-radius:16px;border:1px solid var(--line);
+    background:rgba(0,0,0,.18);overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
+  }
+  .heroLogo img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;background:#0b111c}
+  .heroText h1{margin:2px 0 4px;font-weight:1000;letter-spacing:.2px;font-size:34px;line-height:1.05}
+  .heroText p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+
+  .chartTop{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .price{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .price .big{
+    font-weight:1000;font-size:34px;line-height:1;display:flex;align-items:baseline;gap:8px;
+    white-space:nowrap;font-family:var(--mono);
+  }
+  .price .big .pct{
+    font-size:12px;font-weight:900;padding:4px 8px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(45,255,106,.10);color:var(--good);font-family:var(--mono);
+  }
+  .price .small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .sparkBox{
+    flex:1;min-width:220px;max-width:520px;height:200px;border-radius:14px;border:1px solid rgba(255,255,255,.10);
+    background:linear-gradient(to bottom, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    overflow:hidden;position:relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,.45) inset;
+  }
+  /* Terminal grid overlay */
+  .sparkBox::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.28;
+    background-image:
+      linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 26px 26px, 44px 44px;
+    mix-blend-mode: overlay;
+    z-index:2;
+  }
+  /* Terminal scanlines */
+  .sparkBox::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.10;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 3px,
+      rgba(0,0,0,.22) 4px
+    );
+    z-index:2;
+  }
+  .sparkBox svg{width:100%;height:100%;position:relative;z-index:1}
+  .sparkGlow{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(320px 160px at 85% 35%, rgba(110,231,255,.22), transparent 60%);
+    opacity:.42;mix-blend-mode:screen;
+    z-index:2;
+  }
+  .sparkLabel{
+    position:absolute;
+    top:10px; right:12px;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color: rgba(147,164,199,.75);
+    user-select:none;
+    z-index:3;
+  }
+
+  .actions{
+    margin-top:auto;
+    padding:12px;
+    border-top:1px solid var(--line);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:stretch;
+    justify-content:space-between;
+    background:rgba(255,255,255,.02);
+  }
+  .btnRow{display:flex;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+  .btn{
+    appearance:none;border:none;border-radius:14px;padding:12px 14px;
+    font-weight:1000;letter-spacing:.3px;cursor:pointer;
+    color:#fff;
+    border:1px solid var(--line);
+    transition:transform .06s ease, filter .2s ease, background .2s ease, opacity .2s ease;
+    user-select:none;-webkit-tap-highlight-color: transparent;
+    flex:1;min-width:170px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    background:rgba(255,255,255,.06);
+  }
+  .btn:active{transform:translateY(1px) scale(.99)}
+  .btn:focus-visible{outline:2px solid rgba(110,231,255,.65); outline-offset:2px}
+
+  .btn.insert{
+    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.74));
+    border-color:rgba(45,255,106,.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(45,255,106,.14);
+  }
+  .btn.degenBtn{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
+    border-color:rgba(200,255,47,.55);
+    box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 22px rgba(200,255,47,.18);
+  }
+  .btn.danger{
+    background:linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,176,0,.10));
+    border-color:rgba(255,77,109,.28);
+  }
+
+  .icoEmoji{font-size:18px;line-height:1;filter: drop-shadow(0 0 10px rgba(255,255,255,.12));}
+
+  /* Insert button always pulses */
+  .btn.pulseAlways{ position:relative; animation: insertPulse 1.2s steps(6,end) infinite; }
+  .btn.pulseAlways::after{
+    content:"";position:absolute;inset:-8px;border-radius:18px;
+    border:2px solid rgba(45,255,106,.35);
+    opacity:.0;animation: insertHalo 1.2s steps(6,end) infinite;
+    pointer-events:none;
+  }
+  @keyframes insertPulse{
+    0%{filter:brightness(1); transform:translateY(0)}
+    25%{filter:brightness(1.10)}
+    50%{filter:brightness(1.22)}
+    75%{filter:brightness(1.08)}
+    100%{filter:brightness(1)}
+  }
+  @keyframes insertHalo{
+    0%{opacity:0}
+    35%{opacity:.85}
+    65%{opacity:.12}
+    100%{opacity:0}
+  }
+
+  /* Flash-glow helper */
+  .flashGlow{ position:relative; isolation:isolate; }
+  .flashGlow::after{
+    content:"";
+    position:absolute; inset:-10px;
+    border-radius:18px;
+    pointer-events:none;
+    border:3px solid var(--flash, rgba(200,255,47,.75));
+    box-shadow:
+      0 0 0 2px rgba(0,0,0,.55) inset,
+      0 0 28px var(--flash, rgba(200,255,47,.55)),
+      0 0 70px var(--flash, rgba(200,255,47,.35));
+    opacity:.0;
+    transform:scale(.98);
+    animation:flashPop 520ms ease-out 1;
+  }
+  @keyframes flashPop{
+    0%{opacity:0; transform:scale(.98)}
+    35%{opacity:1; transform:scale(1.03)}
+    100%{opacity:0; transform:scale(1)}
+  }
+
+  .rightStack{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+
+  .terminalBox{
+    border-radius:14px;border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+    padding:10px 10px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:#cfd7ea;
+    line-height:1.45;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  .prompt{color:var(--warn); font-weight:1000}
+  .dim{color:#94a4c2}
+
+  .cursor{
+    display:inline-block;width:8px;height:12px;background:var(--warn); margin-left:6px;
+    transform:translateY(2px);
+    animation:cursorPulse .75s steps(2,end) infinite;
+    box-shadow:0 0 10px rgba(200,255,47,.18);
+  }
+  @keyframes cursorPulse{
+    0%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
+    50%{opacity:.22; filter:brightness(1.7); transform:translateY(2px) scaleX(1.12)}
+    100%{opacity:1; filter:brightness(1); transform:translateY(2px) scaleX(1)}
+  }
+
+  /* BARON SCENE */
+  .sceneCard{
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.22);
+    overflow:hidden;
+    position:relative;
+    aspect-ratio:16/9;
+    box-shadow:0 0 0 1px rgba(0,0,0,.45) inset;
+    transform:translateZ(0);
+  }
+  .sceneVid{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    filter:brightness(.95) contrast(1.05);
+    transform:translateZ(0);
+    will-change:transform, filter;
+  }
+  .sceneCard::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,0) 3px 6px);
+    opacity:.10;
+    mix-blend-mode:overlay;
+    z-index:2;
+  }
+
+  /* Glitch overlay */
+  .glitchOverlay{
+    position:absolute;inset:-20px;
+    pointer-events:none;
+    opacity:0;
+    background:
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.16) 0 1px, rgba(0,0,0,0) 2px 6px),
+      radial-gradient(800px 420px at 70% 35%, rgba(110,231,255,.12), transparent 60%);
+    mix-blend-mode:overlay;
+    filter:contrast(1.25);
+    transform:translateZ(0);
+    z-index:4;
+  }
+  .sceneCard.glitch .glitchOverlay{
+    opacity:.75;
+    animation:glitchLines 740ms steps(12,end) 1;
+  }
+  .sceneCard.glitch .sceneVid{
+    animation:glitchShift 740ms steps(12,end) 1;
+  }
+  @keyframes glitchShift{
+    0%{transform:translate(0,0) scale(1); filter:brightness(.95) contrast(1.05)}
+    12%{transform:translate(-6px,2px) scale(1.02); filter:hue-rotate(25deg) saturate(1.3)}
+    24%{transform:translate(8px,-3px) scale(1.03); filter:hue-rotate(-30deg) saturate(1.35)}
+    38%{transform:translate(-10px,0) scale(1.04); filter:contrast(1.35) brightness(1.08)}
+    56%{transform:translate(10px,3px) scale(1.04); filter:hue-rotate(35deg) saturate(1.25)}
+    78%{transform:translate(-4px,-4px) scale(1.02); filter:contrast(1.2)}
+    100%{transform:translate(0,0) scale(1); filter:brightness(.95) contrast(1.05)}
+  }
+  @keyframes glitchLines{
+    0%{transform:translateY(0); opacity:.20}
+    20%{transform:translateY(14px); opacity:.85}
+    40%{transform:translateY(-12px); opacity:.40}
+    60%{transform:translateY(18px); opacity:.95}
+    80%{transform:translateY(-10px); opacity:.55}
+    100%{transform:translateY(0); opacity:0}
+  }
+
+  /* Rug flare */
+  .sceneCard.rugFlicker::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:radial-gradient(120% 85% at 50% 45%, rgba(255,77,109,.62), rgba(0,0,0,.82) 72%);
+    opacity:.0;
+    mix-blend-mode:screen;
+    z-index:3;
+    animation:rugFlicker 720ms steps(10,end) 1;
+  }
+  @keyframes rugFlicker{
+    0%{opacity:.10; filter:brightness(1)}
+    12%{opacity:.95; filter:brightness(1.7)}
+    28%{opacity:.20; filter:brightness(1.15)}
+    44%{opacity:.92; filter:brightness(1.75)}
+    64%{opacity:.35; filter:brightness(1.25)}
+    80%{opacity:.88; filter:brightness(1.6)}
+    100%{opacity:.0; filter:brightness(1)}
+  }
+
+  /* Pump button */
+  .pumpBtn{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    border-radius:14px;
+    border:1px solid rgba(120,255,180,.75);
+    background:linear-gradient(180deg, rgba(30,180,90,.28), rgba(10,70,40,.45));
+    padding:12px 12px;
+    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
+    text-decoration:none;color:#fff;width:100%;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.45),
+      0 0 0 1px rgba(80,255,160,.18) inset,
+      0 0 34px rgba(80,255,160,.38);
+  }
+  .pumpBtn:active{transform:translateY(1px) scale(.99)}
+  .pumpBtn .ico{
+    width:28px;height:28px;
+    image-rendering:pixelated;
+    filter: drop-shadow(0 0 12px rgba(255,255,255,.12));
+    flex:0 0 auto;
+  }
+
+  /* X stays punchy */
+
+  /* Link buttons */
+  .linkRow{display:flex;gap:10px;flex-wrap:wrap}
+  .linkBtn{
+    flex:1;min-width:140px;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    border-radius:14px;border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    padding:11px 12px;
+    font-weight:1000;letter-spacing:.3px;text-transform:uppercase;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
+    text-decoration:none;color:#fff;
+    position:relative;
+    overflow:visible;
+    isolation:isolate;
+  }
+  .linkBtn:active{transform:translateY(1px) scale(.99)}
+  .linkBtn .ico{
+    width:26px;height:26px;
+    image-rendering:pixelated;
+    filter: drop-shadow(0 0 12px rgba(255,255,255,.12));
+    flex:0 0 auto;
+  }
+  .linkBtn.dex{
+    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.72));
+    border-color:rgba(45,255,106,.55);
+  }
+  .linkBtn.tw{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.78));
+    border-color:rgba(200,255,47,.55);
+  }
+
+  /* Activity log */
+  .logWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+  .logHead{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    color:var(--muted);font-size:11px;font-family:var(--mono);
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  .log{
+    flex:1;min-height:0;overflow:auto;
+    border-radius:14px;border:1px solid var(--line);
+    background:rgba(0,0,0,.18);
+    padding:10px;font-family:var(--mono);
+  }
+  .log p{margin:0 0 8px 0;font-size:12px;color:#a8b6d6;line-height:1.35}
+  .log p b{color:var(--text)}
+  .log p .ok{color:var(--good);font-weight:1000}
+  .log p .yy{color:var(--warn);font-weight:1000}
+  .log p .rr{color:var(--bad);font-weight:1000}
+  .log::-webkit-scrollbar{width:10px}
+  .log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:999px}
+  .logTip{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.35;}
+
+  /* CA area */
+  .caWrap{margin-top:10px; display:flex; flex-direction:column; gap:8px;}
+  .caBtn{
+    width:100%;
+    border-radius:16px;
+    border:1px solid rgba(200,255,47,.32);
+    background:
+      radial-gradient(800px 220px at 10% 30%, rgba(200,255,47,.18), transparent 45%),
+      radial-gradient(700px 220px at 90% 60%, rgba(45,255,106,.10), transparent 45%),
+      rgba(255,255,255,.04);
+    padding:14px 14px;
+    cursor:pointer;user-select:none;-webkit-tap-highlight-color: transparent;
+    color:var(--text);
+    position:relative;overflow:visible;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 28px rgba(200,255,47,.18), 0 0 90px rgba(45,255,106,.10);
+    text-align:left;
+    isolation:isolate;
+  }
+  /* Subtle idle pulse only */
+  .caBtn.idlePulse{
+    animation: caIdle 2.8s ease-in-out infinite;
+  }
+  @keyframes caIdle{
+    0%,100%{box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 18px rgba(200,255,47,.08)}
+    50%{box-shadow:0 0 0 1px rgba(0,0,0,.25) inset, 0 0 28px rgba(200,255,47,.16)}
+  }
+
+  .caBtn:active{transform:translateY(1px) scale(.995)}
+  .caBtn:focus-visible{outline:2px solid rgba(200,255,47,.55); outline-offset:2px}
+  .caTop{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:var(--mono);font-weight:1000;letter-spacing:.7px;font-size:11px;text-transform:uppercase;
+    color:rgba(255,255,255,.78);
+    margin-bottom:8px;
+  }
+  .caBig{
+    font-family:var(--mono);
+    font-weight:1000;
+    font-size:18px;
+    letter-spacing:.25px;
+    line-height:1.22;
+    overflow-wrap:anywhere;
+  }
+  .tapHint{
+    font-family:var(--mono);
+    font-size:11px;
+    color:rgba(200,255,47,.88);
+    letter-spacing:.35px;
+    text-transform:uppercase;
+    margin-top:6px;
+    opacity:.88;
+    transition:opacity .15s ease, transform .15s ease, filter .2s ease;
+  }
+  .caBtn:hover + .tapHint,
+  .caBtn:focus-visible + .tapHint{
+    opacity:1;
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+  }
+  .tapHint.pulseOnce{
+    animation: tapPulseOnce 1.25s ease-out 1;
+  }
+  @keyframes tapPulseOnce{
+    0%{opacity:.25; transform:translateY(0); filter:brightness(1)}
+    35%{opacity:1; transform:translateY(-1px); filter:brightness(1.20)}
+    70%{opacity:.95; transform:translateY(0); filter:brightness(1.05)}
+    100%{opacity:.88; transform:translateY(0); filter:brightness(1)}
+  }
+  .caToast{
+    position:absolute;top:10px;right:10px;
+    font-family:var(--mono);font-weight:1000;font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+    background:rgba(0,0,0,.68);border:1px solid var(--line);padding:6px 8px;border-radius:999px;
+    opacity:0;transform:translateY(-4px);
+    transition:opacity .14s ease, transform .14s ease;
+    pointer-events:none;color:var(--warn);
+    z-index:6;
+  }
+  .caToast.show{opacity:1; transform:translateY(0)}
+
+  /* Rank colors */
+  .rank-white{color:#fff}
+  .rank-yellow{color:var(--warn)}
+  .rank-green{color:var(--good)}
+  .rank-red{color:var(--bad)}
+
+  /* HOW TO BUY section */
+  .buyPanel{
+    margin-top:10px;
+    border-top:1px solid var(--line);
+    background:
+      radial-gradient(900px 260px at 20% 30%, rgba(200,255,47,.12), transparent 55%),
+      radial-gradient(700px 240px at 90% 70%, rgba(45,255,106,.08), transparent 55%),
+      rgba(0,0,0,.12);
+    padding:12px;
+  }
+  .buyTitle{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:var(--mono);font-weight:1000;letter-spacing:.8px;
+    font-size:12px;text-transform:uppercase;color:rgba(255,255,255,.75);
+    margin-bottom:10px;
+  }
+  .buySteps{
+    display:grid;gap:6px;
+    font-family:var(--mono);
+    font-size:12px;color:#a8b6d6;
+    margin-bottom:10px;
+  }
+  .buySteps b{color:var(--text)}
+  .buyGrid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+  .buyBtn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    border-radius:14px;border:1px solid var(--line);
+    padding:12px;
+    text-decoration:none;
+    font-weight:1000;letter-spacing:.35px;text-transform:uppercase;
+    user-select:none;-webkit-tap-highlight-color:transparent;
+    position:relative;isolation:isolate;overflow:hidden;
+    color:#fff;
+  }
+  .buyBtn::before{
+    content:"";
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.28);
+    opacity:.28;
+    pointer-events:none;
+  }
+  .buyBtn .label{position:relative; z-index:2}
+  .buyIcon{
+    width:30px;height:30px; flex:0 0 auto;
+    image-rendering:pixelated;
+    filter: drop-shadow(0 0 12px rgba(255,255,255,.18));
+    position:relative; z-index:2;
+  }
+  .buyBtn.yellow{
+    background:linear-gradient(135deg, rgba(200,255,47,1), rgba(200,255,47,.70));
+    border-color:rgba(200,255,47,.55);
+  }
+  .buyBtn.green{
+    background:linear-gradient(135deg, rgba(45,255,106,1), rgba(45,255,106,.70));
+    border-color:rgba(45,255,106,.55);
+  }
+  .buyBtn:active{transform:translateY(1px) scale(.99)}
+
+  /* Shake */
+  .shake{ animation: shake .32s linear 1; }
+  @keyframes shake{
+    0%{transform:translate(0,0)}
+    20%{transform:translate(-6px, 2px)}
+    40%{transform:translate(6px, -2px)}
+    60%{transform:translate(-5px, -1px)}
+    80%{transform:translate(5px, 1px)}
+    100%{transform:translate(0,0)}
+  }
+
+  @media (max-width: 980px){
+    body{overflow:auto;}
+    .stage{height:auto; min-height:100vh; align-items:stretch;}
+    .frame{height:auto; min-height:calc(100vh - 24px);}
+    .content{grid-template-columns:1fr; overflow:visible;}
+    .heroRow{grid-template-columns: 120px 1fr;}
+    .heroLogo{width:120px;height:120px}
+    .sparkBox{max-width:100%; min-width:0;}
+    .btn{min-width:140px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    body::after{animation:none !important;}
+    .btn.pulseAlways, .cursor{animation:none !important;}
+    .sceneCard.rugFlicker::after{animation:none !important; opacity:0 !important;}
+    .sceneCard.glitch .sceneVid{animation:none !important;}
+    .sceneCard.glitch .glitchOverlay{animation:none !important;}
+    .caBtn.idlePulse{animation:none !important;}
+  }
+
+  .caBtn:hover{
+    filter:brightness(1.04);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset, 0 0 44px rgba(200,255,47,.26), 0 0 120px rgba(45,255,106,.14);
+  }
+
+
+  /* Video: ensure no scrollbars */
+  .sceneCard{overflow:hidden;}
+  .sceneCard > *{overflow:hidden;}
+  .sceneCard video{overflow:hidden;}
+
+
+  /* Tiny green scanline sweep (video overlay) */
+  .sceneCard::after{
+    content:"";
+    position:absolute;
+    left:0; right:0;
+    top:-40%;
+    height:38%;
+    pointer-events:none;
+    opacity:0;
+    background:linear-gradient(to bottom,
+      rgba(45,255,106,0) 0%,
+      rgba(45,255,106,.18) 30%,
+      rgba(45,255,106,.45) 50%,
+      rgba(45,255,106,.18) 70%,
+      rgba(45,255,106,0) 100%);
+    mix-blend-mode:screen;
+    filter:blur(.2px);
+    z-index:3;
+  }
+  .sceneCard.scanSweep::after{
+    animation: scanSweep 900ms ease-out 1;
+  }
+  @keyframes scanSweep{
+    0%{opacity:0; transform:translateY(0)}
+    15%{opacity:.9}
+    100%{opacity:0; transform:translateY(180%)}
+  }
+
+
+  /* One-time subtle glow for pump.fun on DEGEN */
+  .pumpGlowOnce{
+    animation: pumpGlowOnce 900ms ease-out 1;
+  }
+  @keyframes pumpGlowOnce{
+    0%{box-shadow:0 0 0 rgba(0,0,0,0); filter:brightness(1);}
+    40%{
+      box-shadow:
+        0 0 18px rgba(45,255,106,.35),
+        0 0 48px rgba(45,255,106,.25);
+      filter:brightness(1.08);
+    }
+    100%{box-shadow:0 0 0 rgba(0,0,0,0); filter:brightness(1);}
+  }
+
+
+  /* RUG PULL: turn chart red */
+  body.rug #sparkLine{ stroke: rgba(255,77,109,.95) !important; }
+  body.rug #sparkFill{ fill: rgba(255,77,109,.18) !important; }
+
+
+
+  /* Pump.fun primary emphasis */
+  .pumpBtn::before{
+    content:"";
+    position:absolute;inset:-40% -20%;
+    background:linear-gradient(90deg, transparent, rgba(200,255,47,.18), transparent);
+    transform:translateX(-60%) rotate(8deg);
+    animation:pumpSweep 3.8s ease-in-out infinite;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  @keyframes pumpSweep{
+    0%,55%{transform:translateX(-70%) rotate(8deg);opacity:.0}
+    70%{opacity:.55}
+    100%{transform:translateX(70%) rotate(8deg);opacity:.0}
+  }
+  .pumpBtn:active{ transform: translateY(1px); }
+
+  /* Icon scale fix v2 */
+  .pumpBtn .ico{ width:40px; height:40px; }
+  .linkBtn .ico{ width:36px; height:36px; }
+  .linkBtn.tw .ico{ width:28px; height:28px; } /* X stays punchy */
+
+/* ===== PATCH: TERMINAL TYPEWRITER FLOW + BLINK CURSOR ===== */
+.terminal, #terminal, .activity-terminal{
+  position: relative;
+  overflow: hidden;
+}
+/* Cursor */
+.term-cursor{
+  display:inline-block;
+  width: 0.7ch;
+  margin-left: .15ch;
+  transform: translateY(1px);
+  opacity: 1;
+  animation: termBlink 0.9s steps(1,end) infinite;
+}
+@keyframes termBlink{
+  0%,49%{opacity:1}
+  50%,100%{opacity:0}
+}
+/* Subtle line spacing to keep it readable while fast */
+.terminal .term-line, #terminal .term-line, .activity-terminal .term-line{
+  line-height: 1.25;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+</style>
+</head>
+<body>
+<pre id="errText" style="white-space:pre-wrap;margin:0;line-height:1.35"></pre>
+
+<div class="stage">
+<div class="frame" id="frame">
+<header>
+<div class="leftHead">
+<a aria-label="Open pump.fun" class="logoLink" href="https://pump.fun" id="topPumpLink" rel="noopener noreferrer" target="_blank">
+<div aria-hidden="true" class="avatar">
+<img alt="" src="logo.png"/>
+</div>
+<div class="brand">
+<div class="title">Baron Greenback <span style="opacity:.85">($GBARON)</span></div>
+<div class="sub">Insert coins • pump the chart • don’t get rugged 💀</div>
+</div>
+</a>
+</div>
+<div class="stats">
+<div aria-label="Coins inserted" class="pill">
+<div class="k">COINS INSERTED</div>
+<div class="v"><span id="coinsInserted">0</span> <small>clicks</small></div>
+</div>
+<div aria-label="Rank" class="pill">
+<div class="k">RANK</div>
+<div class="v"><span class="rank-white" id="rank">paperhands</span></div>
+</div>
+<div aria-label="Sound" class="pill soundPill">
+<div class="k">SOUND</div>
+<div class="soundRow">
+<div class="soundLabel"><span id="soundState">on</span></div>
+<div aria-checked="true" class="soundToggle on" id="soundToggle" role="switch" tabindex="0"></div>
+</div>
+</div>
+</div>
+</header>
+<div class="content">
+<section aria-label="Fake chart that pumps on clicks" class="card">
+<h2>📉 Fake Chart (Pumps on Clicks)</h2>
+<div class="chartWrap">
+<div class="heroRow">
+<div class="heroLogo">
+<img alt="Baron logo" src="logo.png"/>
+</div>
+<div class="heroText">
+<h1>THE BARON ALWAYS EXITS FIRST</h1>
+<p>This is a meme landing page. Buttons do funny things. Nothing here is financial advice. Ever.</p>
+</div>
+</div>
+<div class="chartTop">
+<div class="price">
+<div class="big">
+<span id="price">$0.000001</span>
+<span class="pct" id="pct">+0.00%</span>
+</div>
+<div class="small" id="priceNote">Totally organic growth (trust me bro)</div>
+</div>
+<div aria-label="Sparkline chart" class="sparkBox">
+<div class="sparkLabel">SIMULATED</div>
+<div class="sparkGlow"></div>
+<svg aria-label="Price line" preserveaspectratio="none" role="img" viewbox="0 0 100 100">
+<path d="" fill="rgba(110,231,255,.10)" id="sparkFill"></path>
+<path d="" fill="none" id="sparkLine" stroke="rgba(110,231,255,.95)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</div>
+</div>
+<div class="actions">
+<div class="btnRow">
+<button aria-label="Insert coins" class="btn insert pulseAlways" id="btnInsert">
+<span aria-hidden="true" class="icoEmoji">🪙</span>
+                  INSERT COINS
+                </button>
+<button aria-label="Activate degen" class="btn degenBtn" id="btnDegen">
+<span aria-hidden="true" class="icoEmoji">⚡</span>
+<span id="degenLabel">ACTIVATE DEGEN</span>
+</button>
+</div>
+<button aria-label="Rug pull (meme)" class="btn danger" id="btnRug">
+                💀 RUG PULL
+              </button>
+</div>
+<div aria-label="How to buy section" class="buyPanel">
+<div class="buyTitle">
+<span>🕹 HOW TO BUY $GBARON</span>
+<span style="color:rgba(255,255,255,.45)">ARCADE MODE</span>
+</div>
+<div class="buySteps">
+<div><b>&gt;</b> Open a venue</div>
+<div><b>&gt;</b> Paste CA</div>
+<div><b>&gt;</b> Swap like a villain</div>
+</div>
+
+<div class="caWrap">
+<button aria-label="Copy contract address" class="caBtn idlePulse" id="caBtn" type="button">
+<span class="caToast" id="caToast">THE BARON APPROVES • SEE YOU AT ATH!</span>
+<div class="caTop">
+<span>CA</span>
+<span style="color:var(--warn)">$GBARON</span>
+</div>
+<div class="caBig" id="caText"></div>
+</button>
+<div class="tapHint">Tap to copy</div>
+</div>
+</div>
+</div>
+</section>
+<aside aria-label="Terminal / Links" class="card">
+<h2>TERMINAL / LINKS <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">LIVE</span></h2>
+<div class="rightStack">
+<div aria-label="Terminal" class="terminalBox">
+<div><span class="prompt">&gt;</span> <span class="dim" id="term1">INITIALIZING TERMINAL…</span></div>
+<div><span class="prompt">&gt;</span> <span class="dim" id="term2">THE BARON ALWAYS EXITS FIRST</span></div>
+<div><span class="prompt">&gt;</span> <span class="dim" id="term3">READY FOR COINS… INSERT TO BEGIN</span><span class="cursor"></span></div>
+</div>
+<div aria-label="Baron scene" class="sceneCard" id="sceneCard">
+<video autoplay="" class="sceneVid" id="baronScene" loop="" muted="" playsinline="" preload="metadata">
+<source src="baron-scene.mp4" type="video/mp4"/>
+</video>
+<div aria-hidden="true" class="glitchOverlay"></div>
+</div>
+<a aria-label="Open pump.fun" class="pumpBtn" href="https://pump.fun" id="pumpBtn" rel="noopener noreferrer" target="_blank">
+<img alt="" aria-hidden="true" class="ico" src="pump.png"/>
+              PUMP.FUN
+            </a>
+<div aria-label="Links" class="linkRow">
+<a class="linkBtn dex" href="https://dexscreener.com" id="dexBtn" rel="noopener noreferrer" target="_blank">
+<img alt="" aria-hidden="true" class="ico" src="dex.png"/>
+                DEXSCREENER
+              </a>
+<a class="linkBtn tw" href="https://x.com/" id="xBtn" rel="noopener noreferrer" target="_blank">
+<img alt="" aria-hidden="true" class="ico" src="x.png"/>
+                TWITTER
+              </a>
+</div>
+<div aria-label="Activity terminal" class="logWrap">
+<div class="logHead">
+<span>ACTIVITY TERMINAL</span>
+<span><span id="logCount">0</span> logs</span>
+</div>
+<div aria-live="polite" class="log" id="log"></div>
+<div class="logTip">
+                Tip: spam <b>INSERT COINS</b> to pump. Hit <b>RUG PULL</b> for the villain arc. ☠️
+              </div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<script>
+const CA = "AoRGp1U1zkW9rz8f9pJPRhhuhTtG3qDudjdajRaFpump";
+const AXIOM_URL    = "https://axiom.trade/";
+const RAYDIUM_URL  = "https://raydium.io/swap/";
+const ORCA_URL     = "https://www.orca.so/";
+const TERMINAL_URL = "https://trade.padre.gg/";
+
+/* ✅ ONLY baron.mp3 (removed baron.mps fallback) */
+const DEGEN_FILE = "baron.mp3";
+const LAUGH_FILE  = "laugh.mp3";
+
+const elCoins = document.getElementById("coinsInserted");
+const elRank  = document.getElementById("rank");
+const elPrice = document.getElementById("price");
+const elPct   = document.getElementById("pct");
+const elPriceNote = document.getElementById("priceNote");
+const elLine  = document.getElementById("sparkLine");
+const elFill  = document.getElementById("sparkFill");
+
+const elLog = document.getElementById("log");
+const elLogCount = document.getElementById("logCount");
+
+const btnInsert = document.getElementById("btnInsert");
+const btnDegen  = document.getElementById("btnDegen");
+const btnRug    = document.getElementById("btnRug");
+const degenLabel= document.getElementById("degenLabel");
+function setRugState(on){
+  document.body.classList.toggle("rug", !!on);
+}
+
+
+const dexBtn  = document.getElementById("dexBtn");
+const xBtn    = document.getElementById("xBtn");
+const pumpBtn = document.getElementById("pumpBtn");
+const topPumpLink = document.getElementById("topPumpLink");
+
+const elCA   = document.getElementById("caText");
+const caBtn  = document.getElementById("caBtn");
+const caToast= document.getElementById("caToast");
+
+const frame  = document.getElementById("frame");
+
+const buyAxiom    = document.getElementById("buyAxiom");
+const buyRaydium  = document.getElementById("buyRaydium");
+const buyOrca     = document.getElementById("buyOrca");
+const buyTerminal = document.getElementById("buyTerminal");
+
+const sceneCard  = document.getElementById("sceneCard");
+const baronScene = document.getElementById("baronScene");
+
+const soundToggle = document.getElementById("soundToggle");
+const soundState  = document.getElementById("soundState");
+
+const term1 = document.getElementById("term1");
+const term2 = document.getElementById("term2");
+const term3 = document.getElementById("term3");
+
+let coinsInserted = Number(sessionStorage.getItem("gbaron_coins") || "0");
+if (!Number.isFinite(coinsInserted) || coinsInserted < 0) coinsInserted = 0;
+
+const basePrice = 0.000001;
+let price = Number(sessionStorage.getItem("gbaron_price") || String(basePrice));
+if (!Number.isFinite(price) || price <= 0) price = basePrice;
+
+let lastPrice = price;
+let series = [];
+const seriesLen = 34;
+
+let ath = Number(sessionStorage.getItem("gbaron_ath") || String(price));
+if (!Number.isFinite(ath) || ath <= 0) ath = price;
+
+let degenActive = false;
+let audioEnabled = (sessionStorage.getItem("gbaron_sound") || "1") === "1";
+
+/* =========================
+   ✅ TERMINAL: priority + interrupt (fix spam backlog)
+   ========================= */
+const termQueue = [];
+let termBusy = false;
+let termTimer = null;
+
+function termInterrupt(){
+  if(termTimer){
+    clearInterval(termTimer);
+    termTimer = null;
+  }
+  termBusy = false;
+}
+function termClearQueue(){
+  termQueue.length = 0;
+}
+
+/**
+ * enqueueTerm(lines, {priority, flush})
+ * - flush: clears queue + stops current typing immediately
+ * - priority: puts lines at the front (keeps order)
+ */
+function enqueueTerm(lines, opts = {}){
+  const { priority=false, flush=false } = opts;
+
+  if(flush){
+    termClearQueue();
+    termInterrupt();
+  }
+
+  if(priority){
+    // unshift in reverse to preserve order
+    for(let i = lines.length - 1; i >= 0; i--){
+      termQueue.unshift(lines[i]);
+    }
+  }else{
+    for(const l of lines) termQueue.push(l);
+  }
+
+  if(!termBusy) pumpTerminal();
+}
+
+function pumpTerminal(){
+  if(termQueue.length === 0){ termBusy = false; return; }
+  termBusy = true;
+
+  const next = termQueue.shift();
+  term1.textContent = term2.textContent;
+  term2.textContent = term3.textContent;
+
+  typeInto(term3, next, 18, () => setTimeout(pumpTerminal, 160));
+}
+
+function typeInto(el, text, cps, done){
+  if(termTimer){
+    clearInterval(termTimer);
+    termTimer = null;
+  }
+
+  el.textContent = "";
+  let i = 0;
+  const stepMs = Math.max(10, Math.floor(1000 / cps));
+
+  termTimer = setInterval(() => {
+    i++;
+    el.textContent = text.slice(0, i);
+    if(i >= text.length){
+      clearInterval(termTimer);
+      termTimer = null;
+      done && done();
+    }
+  }, stepMs);
+}
+
+function nowStamp(){
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  const ss = String(d.getSeconds()).padStart(2,"0");
+  return `${hh}:${mm}:${ss}`;
+}
+const LOG_MAX = 40;
+function addLog(html){
+  const p = document.createElement("p");
+  p.innerHTML = `<b>[${nowStamp()}]</b> ${html}`;
+  elLog.prepend(p);
+  
+  // trim old logs so it never grows forever
+  while(elLog.querySelectorAll("p").length > LOG_MAX){
+    const last = elLog.querySelector("p:last-child");
+    if(!last) break;
+    last.remove();
+  }
+  elLogCount.textContent = String(elLog.querySelectorAll("p").length);
+}
+
+function flash(el, color){
+  if(!el) return;
+  el.style.setProperty("--flash", color);
+  el.classList.remove("flashGlow");
+  void el.offsetWidth;
+  el.classList.add("flashGlow");
+  setTimeout(()=>el.classList.remove("flashGlow"), 700);
+}
+function flashTimes(el, color, times=4, gap=220){
+  let i = 0;
+  const tick = () => {
+    i++;
+    flash(el, color);
+    if(i < times) setTimeout(tick, gap);
+  };
+  tick();
+}
+function glitch(ms=740){
+  if(!sceneCard) return;
+  sceneCard.classList.remove("glitch");
+  void sceneCard.offsetWidth;
+  sceneCard.classList.add("glitch");
+  setTimeout(()=>sceneCard.classList.remove("glitch"), ms);
+}
+function rugFlicker(){
+  if(!sceneCard) return;
+  sceneCard.classList.remove("rugFlicker");
+  void sceneCard.offsetWidth;
+  sceneCard.classList.add("rugFlicker");
+  setTimeout(()=>sceneCard.classList.remove("rugFlicker"), 820);
+}
+function shakeFrame(){
+  if(!frame) return;
+  frame.classList.add("shake");
+  setTimeout(()=>frame.classList.remove("shake"), 360);
+}
+
+const ranks = [
+  { min:0,   name:"paperhands", cls:"rank-white" },
+  { min:10,  name:"hodler", cls:"rank-yellow" },
+  { min:25,  name:"diamondhands", cls:"rank-green" },
+  { min:45,  name:"degen", cls:"rank-yellow" },
+  { min:70,  name:"baron’s henchman", cls:"rank-green" },
+  { min:100, name:"the baron", cls:"rank-yellow" },
+];
+function getRank(coins){
+  let r = ranks[0];
+  for(const x of ranks){ if(coins >= x.min) r = x; }
+  return r;
+}
+function setRankUI(){
+  const r = getRank(coinsInserted);
+  elRank.textContent = r.name;
+  elRank.classList.remove("rank-white","rank-yellow","rank-green","rank-red");
+  elRank.classList.add(r.cls);
+}
+
+function seedSeries(){
+  series = [];
+  let v = price;
+  for(let i=0;i<seriesLen;i++){
+    v *= (1 + (Math.random()-0.5)*0.04);
+    series.push(v);
+  }
+}
+function drawSpark(){
+  if(series.length < 2) return;
+  const minV = Math.min(...series);
+  const maxV = Math.max(...series);
+  const span = (maxV - minV) || 1e-9;
+
+  let d = "";
+  let df = "M 0 100 ";
+  for(let i=0;i<series.length;i++){
+    const x = (i/(series.length-1))*100;
+    const y = 100 - ((series[i]-minV)/span)*92 - 4;
+    d += (i===0 ? "M " : " L ") + x.toFixed(2) + " " + y.toFixed(2);
+    df += " L " + x.toFixed(2) + " " + y.toFixed(2);
+  }
+  df += " L 100 100 L 0 100 Z";
+
+  elLine.setAttribute("d", d);
+  elFill.setAttribute("d", df);
+}
+function fmtUSD(x){
+  if (x >= 1) return "$" + x.toFixed(2);
+  if (x >= 0.01) return "$" + x.toFixed(4);
+  return "$" + x.toFixed(6);
+}
+
+function pumpChart(mult=1){
+  const chaos = degenActive ? 0.20 : 0.02;
+  const base  = degenActive ? 0.14 : 0.012;
+  const pct = (base*mult) + (Math.random()*chaos);
+
+  lastPrice = price;
+  price = price * (1 + pct);
+  ath = Math.max(ath, price);
+
+  series.push(price);
+  while(series.length > seriesLen) series.shift();
+
+  const pctShow = ((price/lastPrice)-1)*100;
+  elPrice.textContent = fmtUSD(price);
+  elPct.textContent = (pctShow>=0?"+":"") + pctShow.toFixed(2) + "%";
+  elPct.style.color = pctShow>=0 ? "var(--good)" : "var(--bad)";
+  elPct.style.background = pctShow>=0 ? "rgba(45,255,106,.10)" : "rgba(255,77,109,.10)";
+
+  elPriceNote.textContent = degenActive ? "DEGEN: chart instability at MAX." : "Totally organic growth (trust me bro)";
+  drawSpark();
+
+  sessionStorage.setItem("gbaron_price", String(price));
+  sessionStorage.setItem("gbaron_ath", String(ath));
+}
+
+async function copyCA(){
+  const text = CA;
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast();
+    addLog(`<span class="yy">COPIED</span> — CA copied. The Baron approves.`);
+    enqueueTerm(["CLIPBOARD: WRITE_OK","CA COPIED // VILLAIN APPROVES","NEXT: PASTE INTO SWAP"], {priority:true});
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); showToast(); }catch(_){}
+    document.body.removeChild(ta);
+    addLog(`<span class="yy">COPIED</span> — CA copied (fallback).`);
+    enqueueTerm(["CLIPBOARD: FALLBACK_COPY()","CA COPIED (LEGACY MODE)","PROCEED."], {priority:true});
+  }
+}
+function showToast(){
+  caToast.classList.add("show");
+  setTimeout(()=>caToast.classList.remove("show"), 1200);
+}
+
+/* SOUND: WebAudio SFX + local tracks (no overlap with DEGEN) */
+let ac = null;
+let sfxGain = null;
+
+function ensureAC(){
+  if(!audioEnabled) return null;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if(!Ctx) return null;
+  if(!ac){
+    ac = new Ctx();
+    sfxGain = ac.createGain();
+    sfxGain.gain.value = 0.9;
+    sfxGain.connect(ac.destination);
+  }
+  if(ac.state === "suspended"){ ac.resume().catch(()=>{}); }
+  return ac;
+}
+function setSfxDucked(ducked){
+  if(!sfxGain) return;
+  sfxGain.gain.value = ducked ? 0.0 : 0.9;
+}
+function blip(freq=680, dur=0.035, type="square", gain=0.10){
+  if(!audioEnabled) return;
+  if(degenActive) return;
+  const ctx = ensureAC();
+  if(!ctx || !sfxGain) return;
+
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+
+  const t0 = ctx.currentTime;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+  o.connect(g); g.connect(sfxGain);
+  o.start(t0);
+  o.stop(t0 + dur + 0.02);
+}
+function sfxClick(){ blip(720, 0.035, "square", 0.11); }
+function sfxOpen(){  blip(520, 0.05,  "sawtooth", 0.09); }
+function sfxBad(){   blip(180, 0.10,  "square", 0.12); }
+
+function makeAudio(file){
+  const a = new Audio(file);
+  a.preload = "auto";
+  a.loop = false;
+  return a;
+}
+
+let degenAudio = makeAudio(DEGEN_FILE);
+const laughAudio = makeAudio(LAUGH_FILE);
+
+function safePlay(audioEl, onBlocked){
+  if(!audioEnabled) return;
+  try{ audioEl.currentTime = 0; }catch(e){}
+  const p = audioEl.play();
+  if(p && typeof p.catch === "function"){
+    p.catch(() => {
+      onBlocked && onBlocked();
+      addLog(`<span class="rr">AUDIO</span> — blocked by browser until you click once.`);
+      enqueueTerm(["AUDIO: BLOCKED_BY_BROWSER","CLICK ONCE TO UNLOCK","READY."], {priority:true});
+    });
+  }
+}
+function stopAudio(audioEl){
+  try{ audioEl.pause(); audioEl.currentTime = 0; }catch(e){}
+}
+
+function setSoundUI(){
+  soundToggle.classList.toggle("on", audioEnabled);
+  soundToggle.setAttribute("aria-checked", audioEnabled ? "true" : "false");
+  soundState.textContent = audioEnabled ? "on" : "off";
+}
+function toggleSound(){
+  audioEnabled = !audioEnabled;
+  sessionStorage.setItem("gbaron_sound", audioEnabled ? "1" : "0");
+  setSoundUI();
+  addLog(`Sound ${audioEnabled ? "<b>ON</b>" : "<b>OFF</b>"} — ${audioEnabled ? "arcade mode engaged" : "silent villain mode"}`);
+  enqueueTerm([`SOUND: ${audioEnabled ? "ON" : "OFF"}`, audioEnabled ? "ARCADE MODE: ENGAGED" : "MODE: SILENT VILLAIN", "READY."], {priority:true, flush:true});
+}
+
+function wireLink(el, url, name){
+  if(!el) return;
+  el.href = url;
+  el.addEventListener("click", ()=>{
+    sfxOpen();
+    addLog(`<span class="ok">OPEN</span> — ${name}`);
+    enqueueTerm([`NAVIGATE: ${name.toUpperCase()}`,"LINK: OPEN_IN_NEW_TAB","STATUS: OK"], {priority:true});
+    flash(el, "rgba(200,255,47,.75)");
+  });
+}
+
+function startDegen(){
+  if(degenActive) return;
+  stopAudio(laughAudio);
+
+  degenActive = true;
+  degenLabel.textContent = "DEGEN ACTIVATED";
+  btnDegen.disabled = true;
+
+  setSfxDucked(true);
+
+  addLog(`<span class="yy">DEGEN</span> — power surge detected.`);
+  enqueueTerm(
+    ["DEGEN MODE: ARMING VOLTAGE RAILS…","OVERCLOCK: ON // SLIPPAGE: WHATEVER","ROUTE: CHAOS ENGINE v1.0 (APPROVED)"],
+    {priority:true, flush:true}
+  );
+
+  // one-time subtle glow on pump.fun (no flashing spam)
+  if(pumpBtn){
+    pumpBtn.classList.remove("pumpGlowOnce");
+    void pumpBtn.offsetWidth;
+    pumpBtn.classList.add("pumpGlowOnce");
+    setTimeout(()=>pumpBtn.classList.remove("pumpGlowOnce"), 1000);
+  }
+
+
+  safePlay(degenAudio);
+
+  const end = () => {
+    degenAudio.removeEventListener("ended", end);
+    stopDegen();
+  };
+  degenAudio.addEventListener("ended", end);
+}
+function stopDegen(){
+  degenActive = false;
+  degenLabel.textContent = "ACTIVATE DEGEN";
+  btnDegen.disabled = false;
+  setSfxDucked(false);
+  addLog(`<span class="ok">DEGEN</span> — cooldown complete.`);
+  enqueueTerm(["DEGEN MODE: OFF","NODE: STABLE (BORING)","READY."], {priority:true});
+}
+
+function doRugPull(){
+
+  // FORCE chart red on rug pull (direct inline style)
+  document.querySelectorAll('.sparkBox svg path').forEach(p=>{
+    p.style.stroke = 'rgba(255,77,109,.95)';
+    p.style.filter = 'drop-shadow(0 0 6px rgba(255,77,109,.35))';
+  });
+
+  setRugState(true);
+  stopAudio(degenAudio);
+  if(degenActive) stopDegen();
+
+  sfxBad();
+  safePlay(laughAudio);
+
+  addLog(`<span class="rr">RUG PULL</span> — liquidity evaporated.`);
+  enqueueTerm(
+    ["WARNING: LP DRAIN INITIATED","GLITCH: VIDEO_DESYNC()","EXIT: THE BARON ALWAYS EXITS FIRST"],
+    {priority:true, flush:true}
+  );
+
+  rugFlicker();
+  glitch(740);
+  setTimeout(()=>glitch(520), 90);
+  shakeFrame();
+
+  coinsInserted = 0;
+  price = basePrice;
+  lastPrice = price;
+  ath = price;
+
+  sessionStorage.setItem("gbaron_coins", "0");
+  sessionStorage.setItem("gbaron_price", String(price));
+  sessionStorage.setItem("gbaron_ath", String(ath));
+
+  setRugState(false);
+  updateUI(true);
+}
+
+function updateUI(reset=false){
+  elCoins.textContent = String(coinsInserted);
+  setRankUI();
+  if(reset) seedSeries();
+  if(series.length === 0) seedSeries();
+
+  elPrice.textContent = fmtUSD(price);
+  elPct.textContent = "+0.00%";
+  elPct.style.color = "var(--good)";
+  elPct.style.background = "rgba(45,255,106,.10)";
+  elPriceNote.textContent = degenActive ? "DEGEN: chart instability at MAX." : "Totally organic growth (trust me bro)";
+  drawSpark();
+}
+
+(function init(){
+  setSoundUI();
+  elCA.textContent = CA;
+
+  seedSeries();
+  updateUI(false);
+
+  wireLink(buyAxiom, AXIOM_URL, "axiom.trade");
+  wireLink(buyRaydium, RAYDIUM_URL, "raydium.io");
+  wireLink(buyOrca, ORCA_URL, "orca.so");
+  wireLink(buyTerminal, TERMINAL_URL, "trade.padre.gg");
+
+  wireLink(pumpBtn, "https://pump.fun", "pump.fun");
+  wireLink(dexBtn, "https://dexscreener.com", "dexscreener");
+  wireLink(xBtn, "https://x.com/", "twitter / x");
+  wireLink(topPumpLink, "https://pump.fun", "pump.fun (top)");
+
+  enqueueTerm(["INITIALIZING TERMINAL ON SOLANA…","THE BARON ALWAYS EXITS FIRST","READY FOR COINS… INSERT TO BEGIN"]);
+
+  btnInsert.addEventListener("click", ()=>{
+
+  // RESTORE chart color on insert
+  document.querySelectorAll('.sparkBox svg path').forEach(p=>{
+    p.style.stroke = '';
+    p.style.filter = '';
+  });
+
+  setRugState(false);
+ensureAC();
+    sfxClick();
+
+    coinsInserted += 1;
+    sessionStorage.setItem("gbaron_coins", String(coinsInserted));
+    elCoins.textContent = String(coinsInserted);
+    setRankUI();
+
+    addLog(`<span class="ok">COIN</span> — inserted. chart pumped.`);
+    // normal enqueue (spam can backlog; other actions interrupt now)
+    enqueueTerm([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: CHART_UP()"]);
+
+    pumpChart(1);
+    if(degenActive){
+      pumpChart(0.6);
+      pumpChart(0.45);
+      flash(btnInsert, "rgba(45,255,106,.85)");
+      glitch(420);
+    }
+  });
+
+  btnDegen.addEventListener("click", ()=>{
+    ensureAC();
+    startDegen();
+  });
+
+  btnRug.addEventListener("click", doRugPull);
+
+  caBtn.addEventListener("click", ()=>{
+    ensureAC();
+    sfxClick();
+    // CA gets priority but doesn't flush (optional)
+    enqueueTerm(["ACTION: COPY_CA()","STATUS: OK","BARON: APPROVES"], {priority:true});
+    copyCA();
+  });
+
+  soundToggle.addEventListener("click", ()=>{
+    ensureAC();
+    toggleSound();
+  });
+  soundToggle.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      ensureAC();
+      toggleSound();
+    }
+  });
+
+  if(baronScene){ baronScene.play().catch(()=>{}); }
+  
+  // Tap-to-copy hint pulses once on load
+  const tapHintEl = document.querySelector(".tapHint");
+  if(tapHintEl){
+    tapHintEl.classList.add("pulseOnce");
+    setTimeout(()=>tapHintEl.classList.remove("pulseOnce"), 1400);
+  }
+
+  // Tiny green scanline sweep over the video every ~12s
+  if(sceneCard){
+    const runSweep = ()=>{
+      sceneCard.classList.remove("scanSweep");
+      void sceneCard.offsetWidth;
+      sceneCard.classList.add("scanSweep");
+      setTimeout(()=>sceneCard.classList.remove("scanSweep"), 1000);
+    };
+    setTimeout(runSweep, 1200);
+    setInterval(runSweep, 6000);
+  }
+
+
+  addLog(`<span class="yy">BOOT</span> — The Baron is watching.`);
+})();
+
+</script>
+<script>
+/* ===== PATCH: TERMINAL FLOW (FAST TYPEWRITER) + RUG PULL LINES ===== */
+(function(){
+  const term =
+    document.querySelector('#terminal') ||
+    document.querySelector('.activity-terminal') ||
+    document.querySelector('.terminal');
+
+  if(!term) return;
+
+  // Ensure a consistent container
+  term.classList.add('terminal');
+
+  // Create a blinking cursor we can move between lines
+  const cursor = document.createElement('span');
+  cursor.className = 'term-cursor';
+  cursor.textContent = '▌';
+
+  // Queue + typing engine (FAST letter-by-letter)
+  const queue = [];
+  let typing = false;
+
+  const MAX_LINES = 80; // keep it snappy
+  function trim(){
+    const lines = term.querySelectorAll('.term-line');
+    if(lines.length > MAX_LINES){
+      for(let i=0;i<lines.length - MAX_LINES;i++){
+        lines[i].remove();
+      }
+    }
+    term.scrollTop = term.scrollHeight;
+  }
+
+  function toCaps(s){ return String(s || '').toUpperCase(); }
+
+  function enqueueLine(text){
+    queue.push(toCaps(text));
+    pump();
+  }
+
+  function pump(){
+    if(typing) return;
+    const next = queue.shift();
+    if(!next) return;
+    typing = true;
+
+    const line = document.createElement('div');
+    line.className = 'term-line';
+    line.textContent = '';
+    term.appendChild(line);
+    line.appendChild(cursor);
+    trim();
+
+    // Typewriter: fast
+    let i = 0;
+    const speed = 10; // ms per char (FAST)
+    const tick = () => {
+      // Move cursor after the text
+      const chunk = next.charAt(i);
+      if(chunk){
+        // Insert character before cursor
+        cursor.insertAdjacentText('beforebegin', chunk);
+        i++;
+        trim();
+        setTimeout(tick, speed);
+      }else{
+        // Finish line
+        typing = false;
+        trim();
+        // Small pause between lines for cadence
+        setTimeout(pump, 90);
+      }
+    };
+    tick();
+  }
+
+  // Idle stream: constant flow even if user does nothing
+  const idlePool = [
+    'SOLANA NETWORK: OK',
+    'RPC PING: 42MS',
+    'MEMPOOL WATCH: CLEAR',
+    'BARON PROTOCOL: ARMED',
+    'ORDERFLOW: DRIPPING IN',
+    'SCAN: NO PAPERHANDS DETECTED',
+    'STATUS: READY TO COPY',
+    'LIQUIDITY: LOCKED?',
+    'VOLUME: BUILDING',
+    'ALERT: DEGENS APPROACHING'
+  ];
+
+  // Kick off with a few lines immediately
+  enqueueLine('BOOTING ARCADE TERMINAL...');
+  enqueueLine('LINK ESTABLISHED');
+  enqueueLine('THE BARON IS WATCHING');
+
+  // Constant flow timer
+  setInterval(() => {
+    const msg = idlePool[Math.floor(Math.random() * idlePool.length)];
+    enqueueLine(msg);
+  }, 1400); // steady stream
+
+  // Public hooks for buttons
+  window.__BARON_TERM__ = { enqueueLine };
+
+  // Rug pull: add multiple lines in ALL CAPS
+  function rugPullBurst(){
+    enqueueLine('RUG PULL INITIATED');
+    enqueueLine('THE BARON ALWAYS EXITS FIRST');
+    enqueueLine('LIQUIDITY EVAPORATED');
+    enqueueLine('PANIC: MAXIMUM');
+  }
+
+  // Try to wire the Rug Pull button automatically
+  const rugBtn =
+    document.querySelector('#rugPull') ||
+    document.querySelector('[data-action="rugpull"]') ||
+    Array.from(document.querySelectorAll('button, a')).find(el =>
+      /rug\s*pull/i.test(el.textContent || '') ||
+      /rug/i.test(el.id || '') ||
+      /rug/i.test(el.className || '')
+    );
+
+  if(rugBtn){
+    rugBtn.addEventListener('click', () => {
+      rugPullBurst();
+    });
+  }
+
+  // Expose manual call too
+  window.onRugPull = rugPullBurst;
+})();
+</script>
+</body>
+</html>
