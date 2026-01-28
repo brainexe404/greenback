@@ -9,6 +9,6 @@ window.BARON_CONFIG = {
   links: {
     pumpfun: "https://pump.fun",
     dexscreener: "https://dexscreener.com",
-    x: "https://x.com/"
+    x: "https://x.com/GannicusXRP"
   }
 };
