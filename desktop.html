@@ -1631,7 +1631,7 @@ ensureAC();
 
     addLog(`<span class="ok">COIN</span> — inserted. chart pumped.`);
     // normal enqueue (spam can backlog; other actions interrupt now)
-    enqueueTerm([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: CHART_UP()"]);
+    enqueueTerm([`COIN ACCEPTED // COUNT: ${coinsInserted}`, degenActive ? "DEGEN ROUTE: ENABLED // PUMP x10" : "ROUTE: STANDARD PUMP", "EXECUTE: SEND IT"]);
 
     pumpChart(1);
     if(degenActive){
