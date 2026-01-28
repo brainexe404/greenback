@@ -1555,7 +1555,7 @@ function doRugPull(){
 
   addLog(`<span class="rr">RUG PULL</span> — liquidity evaporated.`);
   enqueueTerm(
-    ["WARNING: LP DRAIN INITIATED","GLITCH: VIDEO_DESYNC()","EXIT: THE BARON ALWAYS EXITS FIRST"],
+    ["WARNING: LP DRAIN INITIATED","EXIT: THE BARON ALWAYS EXITS FIRST"],
     {priority:true, flush:true}
   );
 
@@ -1780,8 +1780,6 @@ ensureAC();
       // Activity terminal (left)
       if(isFn(addLog)){
         addLog(`<span class="bad">RUG</span> — THE BARON ALWAYS EXITS FIRST`);
-        addLog(`<span class="bad">RUG</span> — LIQUIDITY EVAPORATED`);
-        addLog(`<span class="bad">RUG</span> — EXIT FILLED`);
       }
       // Live terminal (right)
       if(isFn(enqueueTerm)){
