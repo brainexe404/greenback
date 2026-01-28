@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Baron Greenback ($GBARON)</title>
+  <meta name="theme-color" content="#070b10" />
+
+  <script>
+    (function () {
+      var MOBILE_MAX = 900;
+
+      function qs(name){
+        return new URLSearchParams(location.search).get(name);
+      }
+
+      function isMobile(){
+        var w = Math.min(window.innerWidth || 9999, screen.width || 9999);
+        return (w <= MOBILE_MAX) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      }
+
+      // Prefer these filenames if they exist (lets you force-refresh via new filenames)
+      var DESKTOP_PRIMARY = "desktop_v3.html";
+      var MOBILE_PRIMARY  = "mobile_v3.html";
+      var DESKTOP_FALLBACK = "desktop.html";
+      var MOBILE_FALLBACK  = "mobile.html";
+
+      async function exists(url){
+        try{
+          // HEAD isn't always allowed on GH Pages, so use a tiny GET
+          var res = await fetch(url + "?probe=" + Date.now(), { cache: "no-store" });
+          return res && res.ok;
+        }catch(e){
+          return false;
+        }
+      }
+
+      async function pick(){
+        if (qs("desktop") === "1") return (await exists(DESKTOP_PRIMARY)) ? DESKTOP_PRIMARY : DESKTOP_FALLBACK;
+        if (qs("mobile") === "1")  return (await exists(MOBILE_PRIMARY))  ? MOBILE_PRIMARY  : MOBILE_FALLBACK;
+        if (isMobile()) return (await exists(MOBILE_PRIMARY)) ? MOBILE_PRIMARY : MOBILE_FALLBACK;
+        return (await exists(DESKTOP_PRIMARY)) ? DESKTOP_PRIMARY : DESKTOP_FALLBACK;
+      }
+
+      (async function(){
+        var page = await pick();
+
+        // keep URL clean (no /mobile.html or /desktop.html)
+        try { history.replaceState(null, "", "/"); } catch(e){}
+
+        // Always bust cache on the loaded page (prevents old JS loops from sticking around)
+        var url = page + "?v=" + Date.now();
+
+        try{
+          var res = await fetch(url, { cache: "no-store" });
+          if(!res.ok) throw new Error("HTTP " + res.status);
+          var html = await res.text();
+
+          // Replace the whole document with the fetched HTML
+          document.open();
+          document.write(html);
+          document.close();
+        }catch(err){
+          // If fetch fails, fall back to a hard redirect
+          location.replace(page + "?v=" + Date.now());
+        }
+      })();
+    })();
+  </script>
+</head>
+<body></body>
+</html>
