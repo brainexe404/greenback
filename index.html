@@ -24,37 +24,21 @@
         return (w <= MOBILE_MAX) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       }
 
-      // Prefer these filenames if they exist (lets you force-refresh via new filenames)
-      var DESKTOP_PRIMARY = "desktop_v3.html";
-      var MOBILE_PRIMARY  = "mobile_v3.html";
-      var DESKTOP_FALLBACK = "desktop.html";
-      var MOBILE_FALLBACK  = "mobile.html";
-
-      async function exists(url){
-        try{
-          // HEAD isn't always allowed on GH Pages, so use a tiny GET
-          var res = await fetch(url + "?probe=" + Date.now(), { cache: "no-store" });
-          return res && res.ok;
-        }catch(e){
-          return false;
-        }
-      }
-
-      async function pick(){
-        if (qs("desktop") === "1") return (await exists(DESKTOP_PRIMARY)) ? DESKTOP_PRIMARY : DESKTOP_FALLBACK;
-        if (qs("mobile") === "1")  return (await exists(MOBILE_PRIMARY))  ? MOBILE_PRIMARY  : MOBILE_FALLBACK;
-        if (isMobile()) return (await exists(MOBILE_PRIMARY)) ? MOBILE_PRIMARY : MOBILE_FALLBACK;
-        return (await exists(DESKTOP_PRIMARY)) ? DESKTOP_PRIMARY : DESKTOP_FALLBACK;
+      function pick(){
+        if (qs("desktop") === "1") return "desktop.html";
+        if (qs("mobile") === "1")  return "mobile.html";
+        return isMobile() ? "mobile.html" : "desktop.html";
       }
 
       (async function(){
-        var page = await pick();
+        var page = pick();
 
         // keep URL clean (no /mobile.html or /desktop.html)
         try { history.replaceState(null, "", "/"); } catch(e){}
 
-        // Always bust cache on the loaded page (prevents old JS loops from sticking around)
-        var url = page + "?v=" + Date.now();
+        // preserve ?v= cachebuster if you use it
+        var v = qs("v");
+        var url = page + (v ? ("?v=" + encodeURIComponent(v)) : "");
 
         try{
           var res = await fetch(url, { cache: "no-store" });
@@ -66,8 +50,8 @@
           document.write(html);
           document.close();
         }catch(err){
-          // If fetch fails, fall back to a hard redirect
-          location.replace(page + "?v=" + Date.now());
+          // If fetch fails, fall back to a hard redirect (still no UI flash)
+          location.replace(page);
         }
       })();
     })();
