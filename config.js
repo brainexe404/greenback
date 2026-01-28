@@ -3,7 +3,7 @@
 
 window.BARON_CONFIG = {
   chainId: "solana",
-  tokenMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // DEMO (USDC) — replace with real CA later
+  tokenMint: "E2BLSv4tXo7qA4Pr3nkJqxyn6743peC7x8E9D5s8pump", // DEMO (USDC) — replace with real CA later
   name: "Baron Greenback",
   ticker: "$GBARON",
   links: {
